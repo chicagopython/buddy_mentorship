@@ -19,7 +19,7 @@ Don’t be afraid to ask questions if something is unclear!
 ## Workflow
 
 1. Set up Git and a GitHub account
-2. Buddy Mentorship follows a [forking workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow), so next fork and clone the bulwark repo.
+2. Buddy Mentorship follows a [forking workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow), so next fork and clone the repo.
 3. Set up a development environment.
 4. Create a feature branch.
    Pull requests should be limited to one change only, where possible, and reference an existing issue.
