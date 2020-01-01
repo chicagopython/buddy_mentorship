@@ -75,7 +75,25 @@ Each of these abbreviated workflow steps has additional instructions in sections
 
 ## Set up a Development Environment
 
-TODO: List instructions here
+1. Ensure you you have `pipenv` [installed](https://pipenv.kennethreitz.org/en/latest/#install-pipenv-today)
+2. Install the dependencies
+    ```bash
+        pipenv install --dev
+    ```
+3. Make sure to configure your [editor to use black](https://github.com/psf/black#editor-integration)
+4. Ensure you have a local instance of postgres running that matches the settings in `buddy_mentorship/settings/local.py`.
+  If you have docker, you can achieve this by running
+    ```bash
+        docker run --name postgres -e POSTGRES_USER=buddy_mentorship  -e POSTGRES_DB='buddy_mentorship' -p 5432:5432 -d postgres
+    ```
+5. Run all migrations
+    ```bash
+        python manage.py migrate --settings=buddy_mentorship.settings.local
+    ```
+6. Run the local server
+    ```bash
+        python manage.py runserver --settings=buddy_mentorship.settings.local
+    ```
 
 
 ## Create a Feature Branch
