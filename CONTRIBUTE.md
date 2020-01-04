@@ -6,6 +6,7 @@
 
 - [How to Contribute](#how-to-contribute)
 - [Workflow](#workflow)
+- [Development Practices and Standards](#development-practices-and-standards)
 - [Set up Git and a GitHub Account](#set-up-git-and-a-github-account)
 - [Fork and Clone](#fork-and-clone)
 - [Set up a Development Environment](#set-up-a-development-environment)
@@ -52,6 +53,26 @@ Don’t be afraid to ask questions if something is unclear!
 8. Once you’ve addressed review feedback, make sure to bump the pull request with a short note, so we know you’re done.
 
 Each of these abbreviated workflow steps has additional instructions in sections below.
+
+
+## Development Practices and Standards
+
+- Obey [`black`'s code formatting'](https://black.readthedocs.io/en/stable/the_black_code_style.html) and [Google's docstring format](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
+- Use underscores to separate words in non-class names.
+  E.g. `n_samples` rather than `nsamples`.
+- Don't ever use wildcard imports (`from module import *`).
+  It's considered to be a bad practice by the [official Python recommendations](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
+  The reasons it's undesireable are that it
+  pollutes the namespace,
+  makes it harder to identify the origin of code,
+  and, most importantly, prevents using a static analysis tool like pyflakes to automatically find bugs.
+- Any new module, class, or function requires units tests and a docstring.
+  Test-Driven Development (TDD) is encouraged.
+- Don’t break backward compatibility.
+  In the event that an interface needs redesign to add capability,
+  a deprecation warning should be raised in future minor versions,
+  and the change will only be merged into the next major version release.
+- [Semantic line breaks](https://sembr.org/) are encouraged.
 
 
 ## Set up Git and a GitHub Account
