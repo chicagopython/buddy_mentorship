@@ -153,3 +153,5 @@ with a few additional steps before releasing a new version:
     git tag -a v<#.#.#> <SHA-goes-here> -m "buddy mentorship version <#.#.#>"
     git push origin --tags
 ```
+
+## TODO: Add instructions on creating custom applications
