@@ -1,4 +1,25 @@
-# How to Contribute
+# Contribution Guidelines
+
+#### Table of Contents
+
+<!-- TOC -->
+
+- [How to Contribute](#how-to-contribute)
+- [Workflow](#workflow)
+- [Development Practices and Standards](#development-practices-and-standards)
+- [Set up Git and a GitHub Account](#set-up-git-and-a-github-account)
+- [Fork and Clone](#fork-and-clone)
+- [Set up a Development Environment](#set-up-a-development-environment)
+- [Create a Feature Branch](#create-a-feature-branch)
+- [Rebase on Master and Squash](#rebase-on-master-and-squash)
+- [Create a Pull Request to the master branch](#create-a-pull-request-to-the-master-branch)
+- [For Maintainers](#for-maintainers)
+- [Guides](#guides)
+  - [Creating New Django App](#creating-new-django-app)
+
+<!-- /TOC -->
+
+## How to Contribute
 
 First off, thank you for considering contributing to `Buddy Mentorship`!
 It’s thanks to people like you that we continue to have a high-quality, updated and documented app.
@@ -128,6 +149,7 @@ Tests will be be triggered to run via xxx.
 Check that your PR passes CI,
 since it won't be reviewed for inclusion until it passes all steps.
 
+
 ## For Maintainers
 
 Steps for maintainers are largely the same,
@@ -153,3 +175,17 @@ with a few additional steps before releasing a new version:
     git tag -a v<#.#.#> <SHA-goes-here> -m "buddy mentorship version <#.#.#>"
     git push origin --tags
 ```
+
+
+## Guides
+
+### Creating New Django App
+
+All apps are located in the `apps/` folder. To create a new
+[Django application](https://docs.djangoproject.com/en/3.0/ref/applications/)
+inside this project:
+
+1. Create an `[app_name]` folder in the `apps/` directory for your app
+1. `python manage.py startapp users ./apps/[app_name]`
+1. Add `[app_name]` to the `INSTALLED_APPS` in the the Django settings file,
+  `buddy_mentorship/settings/local.py`
