@@ -14,6 +14,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(_("email address"), unique=True)
     username = models.EmailField(null=True)  # field is required for python social auth
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
 
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

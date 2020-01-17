@@ -11,9 +11,13 @@ class CustomUserManagerTest(TransactionTestCase):
     def test_create_superuser(self):
         params = {
             "email": "test@superuser.com",
-            "password": "test_password"
+            "first_name": "John",
+            "last_name": "Snow",
+            "password": "test_password",
         }
         new_superuser = User.objects.create_superuser(**params)
         user = User.objects.first()
         assert new_superuser == user
         assert user.is_superuser
+        assert user.first_name == "John"
+        assert user.last_name == "Snow"
