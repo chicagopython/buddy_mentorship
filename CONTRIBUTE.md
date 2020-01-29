@@ -101,11 +101,23 @@ Each of these abbreviated workflow steps has additional instructions in sections
     ```bash
         pipenv install --dev
     ```
+    If you run into an error install postgres on Mac, you may need to do one/more of the following:
+      - Confirm you have CommandLineTools installed, or install them with `xcode-select --install`
+      - Reset CommandLineTools' settings with `xcode-select --reset`
+      - run the following command instead of the above one:
+      ```bash
+          env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pipenv install --dev
+      ```
 3. Make sure to configure your [editor to use black](https://github.com/psf/black#editor-integration)
 4. Ensure you have a local instance of postgres running that matches the settings in `buddy_mentorship/settings/local.py`.
   If you have docker, you can achieve this by running
     ```bash
         docker run --name postgres -e POSTGRES_USER=buddy_mentorship  -e POSTGRES_DB='buddy_mentorship' -p 5432:5432 -d postgres
+    ```
+  Optional: You can access the database by running
+    ```bash
+        docker exec -it my-postgres bash
+        psql -U buddy_mentorship
     ```
 5. Run all migrations
     ```bash
@@ -115,7 +127,11 @@ Each of these abbreviated workflow steps has additional instructions in sections
     ```bash
         python manage.py runserver --settings=buddy_mentorship.settings.local
     ```
-
+7. Open `http://127.0.0.1:8000/` in your browser
+8. Optional: Create a local superuser (interactively)
+    ```bash
+        python manage.py createsuperuser --settings=buddy_mentorship.settings.local
+    ```
 
 ## Create a Feature Branch
 
