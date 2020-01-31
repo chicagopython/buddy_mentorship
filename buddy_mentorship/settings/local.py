@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # third-party apps
     # internal
     "apps.users",
+    "buddy_mentorship",
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,6 @@ STATIC_URL = "/static/"
 
 # Custom User Model
 AUTH_USER_MODEL = "users.User"
+
+# Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_REDIRECT_URL = "/"
