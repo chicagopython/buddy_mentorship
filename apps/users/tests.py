@@ -41,7 +41,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         User.objects.create_superuser(
             username="myuser", password="secret", email="myuser@example.com"
         )
-        self.selenium.get("%s%s" % (self.live_server_url, "/users/login/"))
+        self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
         username_input = self.selenium.find_element_by_name("username")
         username_input.send_keys("myuser@example.com")
         password_input = self.selenium.find_element_by_name("password")
@@ -55,7 +55,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         User.objects.create_superuser(
             username="myuser", password="secret", email="myuser@example.com"
         )
-        self.selenium.get("%s%s" % (self.live_server_url, "/users/login/"))
+        self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
         username_input = self.selenium.find_element_by_name("username")
         username_input.send_keys("myuser@example.com")
         password_input = self.selenium.find_element_by_name("password")
@@ -69,7 +69,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         User.objects.create_superuser(
             username="myuser", password="secret", email="myuser@example.com"
         )
-        self.selenium.get("%s%s" % (self.live_server_url, "/users/login/"))
+        self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
         username_input = self.selenium.find_element_by_name("username")
         username_input.send_keys("myuser@example.com")
         password_input = self.selenium.find_element_by_name("password")
@@ -77,7 +77,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         login_button = self.selenium.find_element_by_xpath('//input[@value="login"]')
         login_button.click()
 
-        self.selenium.get("%s%s" % (self.live_server_url, "/users/logout/"))
+        self.selenium.get("%s%s" % (self.live_server_url, "/logout/"))
 
         assert "Logged out!" in self.selenium.page_source
 
