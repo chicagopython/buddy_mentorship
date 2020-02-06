@@ -1,7 +1,18 @@
-Homepage
+{% extends 'buddy_mentorship/base.html' %}
 
-{% if user.is_authenticated %}
-    <p>you are logged in</p>
-{% else %}
-    <p>you are not logged in</p>
-{% endif %}
+{% block title %}
+	Homepage
+{% endblock title %}
+
+{% block content %}
+  <div class="starter-template">
+    Tada! It's the homepage!<br>
+
+    {% if user.is_authenticated %}
+    	<p>you are logged in</p>
+	{% else %}
+	    <p>you are not logged in</p>
+	{% endif %}
+  </div>
+
+{% endblock content %}

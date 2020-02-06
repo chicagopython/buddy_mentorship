@@ -8,6 +8,7 @@ black = "*"
 
 [packages]
 django = "*"
+django-bootstrap4 = "*"
 psycopg2 = "*"
 psycopg2-binary = "*"
 selenium = "*"
