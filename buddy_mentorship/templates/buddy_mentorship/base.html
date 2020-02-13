@@ -1,0 +1,86 @@
+{# Load the tag library #}
+{% load bootstrap4 %}
+
+{# Load CSS #}
+{% bootstrap_css %}
+
+{# Load static files #}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    {# Modifiable Head Elements #}
+    <head>
+        <title>{% block title %}Home {% endblock title %}</title>
+        {% block head_favicon %}
+            <link rel="icon" type="image/png"
+                  href="{% static "images/favicon.ico" %}">
+        {% endblock head_favicon %}
+        {% block head_meta %}
+            {% block head_meta_charset %}
+                <meta http-equiv="Content-Type"
+                      content="text/html; charset=utf-8" />
+            {% endblock head_meta_charset %}
+            {% block head_meta_contentlanguage %}
+                <meta http-equiv="Content-Language" value="en-US" />
+            {% endblock head_meta_contentlanguage %}
+            {% block head_meta_viewport %}
+                <meta name="viewport"
+                      content="width=device-width, initial-scale=1.0">
+            {% endblock head_meta_viewport %}
+        {% endblock head_meta %}
+        {% block head_extra_css %}
+            <link href="{% static "css/app.css" %}"
+                  rel="stylesheet" media="screen">
+        {% endblock head_extra_css %}
+    </head>
+
+    <body>
+      <header>
+        {# Navigation Menu #}
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+          <a class="navbar-brand" href="#">BuddyMentorship</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="{% url 'index' %}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Search</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Requests</a>
+              </li>
+            </ul>
+            <button class="btn btn-link my-2 my-sm-0">
+              {% if user.is_authenticated %}
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              {% else %}
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+            {% endif %}
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {# Document Body #}
+      <main role="main" class="container">
+          {% block content %}
+              if you see this, something is wrong!
+          {% endblock content %}
+      </main>
+
+      {# Footer #}
+      <footer class="footer">
+        <div class="container">
+          <span class="text-muted">base.html footer text</span>
+        </div>
+      </footer>
+
+    </body>
