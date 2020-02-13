@@ -1,0 +1,35 @@
+<h2>
+    Your Requests
+</h2>
+
+<p>
+    Requests you have received:
+</p>
+
+<ul>
+    {% for request in requests_received %}
+
+        <li>
+            <a href="/requests/{{ request.id }}">
+                {{ request.from }} sent you a request with the message {{ request.message }}
+            </a>
+        </li>
+
+    {% endfor %}
+</ul>
+
+<p>
+    Requests you have sent:
+</p>
+
+<ul>
+    {% for request in requests_sent %}
+
+        <li>
+            <a href="/requests/{{ request.id }}">
+                You sent a request to {{ request.to }} the message {{ request.message }}
+            </a>
+        </li>
+
+    {% endfor %}
+</ul>
