@@ -28,3 +28,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+class Profile(models.Model):
+    """
+    A model for storing user profile information
+    """
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    bio = models.CharField(max_length = 620)
+    help_wanted = models.BooleanField(default = False)
+    can_help = models.BooleanField(default = False)
+
+    def __str__ (self):
+        return self.bio
