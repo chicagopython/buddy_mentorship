@@ -11,7 +11,7 @@ class BuddyRequest(models.Model):
     requestor = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="requestor"
     )
-    message = models.CharField(max_length=511)
+    message = models.TextField()
 
     def __str__(self):
         return (
