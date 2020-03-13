@@ -1,3 +1,5 @@
+{% extends 'buddy_mentorship/base.html' %}
+{% block content %}
 <h2>
     Your Requests
 </h2>
@@ -11,7 +13,7 @@
 
         <li>
             <a href="/requests/{{ request.id }}">
-                {{ request.from }} sent you a request with the message {{ request.message }}
+                {{ request.from }} sent you a request with the message "{{ request.message }}"
             </a>
         </li>
 
@@ -27,9 +29,10 @@
 
         <li>
             <a href="/requests/{{ request.id }}">
-                You sent a request to {{ request.to }} the message {{ request.message }}
+                You sent a request to {{ request.to }} with the message "{{ request.message }}"
             </a>
         </li>
 
     {% endfor %}
 </ul>
+{% endblock %}
