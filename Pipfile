@@ -13,6 +13,7 @@ psycopg2 = "*"
 psycopg2-binary = "*"
 selenium = "*"
 bootstrap4 = "*"
+social-auth-app-django = "*"
 
 [requires]
 python_version = "3.7"
