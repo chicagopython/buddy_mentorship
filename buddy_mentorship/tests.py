@@ -5,10 +5,12 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile
+from .views import user_can_access_request, request_detail
+
 from apps.users.models import User
 from .views import can_request, send_request
 
-class BuddyRequestTest(TransactionTestCase):
+class CreateBuddyRequestTest(TransactionTestCase):
     def test_create_buddy_request(self):
         mentee = User.objects.create_user(email="mentee@user.com")
         mentor = User.objects.create_user(email="mentor@user.com")
@@ -116,3 +118,29 @@ class SendRequestTest(TestCase):
         response = c.get(f"/send_request/{mentor.uuid}")
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1
+class UserCanAccessRequestTest(TestCase):
+    su = User.objects.create_superuser(email="su@user.com")
+    requestee = User.objects.create_user(email="requestee@user.com")
+    requestor = User.objects.create_user(email="requestor@user.com")
+    someone = User.objects.create_user(email="someone@user.com")
+    buddy_request = BuddyRequest(
+        requestee=requestee, requestor=requestor, message="test message"
+    )
+    assert user_can_access_request(su, request)
+    assert user_can_access_request(requestee, request)
+    assert user_can_access_request(requestor, request)
+    assert not user_can_access_request(someone, request)
+    su.active = False
+    su.save()
+    requestee.active = False
+    requestee.save()
+    requestor.active = False
+    requestor.save()
+    assert not user_can_access_request(requestee)
+    assert not user_can_access_request(requestor)
+    assert not user_can_access_request(su)
+
+
+class RequestControllerTest(TestCase):
+    def test_invalid_request(self):
+        pass

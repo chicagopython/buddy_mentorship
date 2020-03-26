@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+
+from buddy_mentorship.models import BuddyRequest
 
 
 @login_required(login_url="login")
@@ -30,20 +32,19 @@ def requests_list(request):
 
 @login_required(login_url="login")
 def request_detail(request, request_id: int):
-    if not user_can_access_request(request.user, None):
+    buddy_request = get_object_or_404(BuddyRequest, pk=request_id)
+    if not user_can_access_request(request.user, buddy_request):
         return HttpResponseForbidden("You do not have access to this request")
-    context = {
-        "requestee": "John",
-        "requestor": "Jacob",
-        "message": "I'm learning Python.",
-    }
-    return render(request, "users/request.html", context)
+    return render(
+        request, 
+        "users/request.html", 
+        {'buddy_request': buddy_request}
+    )
 
 
 def user_can_access_request(user, buddy_request) -> bool:
-    # TODO: when we have a request model, remove this escape
-    if buddy_request is None:
-        return True
-    if user.id == buddy_request.requestee or user.id == buddy_request.requestor:
-        return True
-    return False
+    return (
+        user.id == buddy_request.requestee
+        or user.id == buddy_request.requestor
+        or user.is_staff
+    ) and user.is_active
