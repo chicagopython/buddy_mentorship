@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from .models import BuddyRequest, Profile
 from .views import user_can_access_request, request_detail
+from apps.users.models import User
 
 from apps.users.models import User
 from .views import can_request, send_request
@@ -118,6 +119,7 @@ class SendRequestTest(TestCase):
         response = c.get(f"/send_request/{mentor.uuid}")
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1
+        
 class UserCanAccessRequestTest(TestCase):
     su = User.objects.create_superuser(email="su@user.com")
     requestee = User.objects.create_user(email="requestee@user.com")
