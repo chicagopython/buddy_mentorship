@@ -5,11 +5,10 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile
-from .views import user_can_access_request, request_detail
-from apps.users.models import User
-
-from apps.users.models import User
 from .views import can_request, send_request
+
+from apps.users.views import user_can_access_request, request_detail
+from apps.users.models import User
 
 class CreateBuddyRequestTest(TransactionTestCase):
     def test_create_buddy_request(self):
@@ -121,28 +120,47 @@ class SendRequestTest(TestCase):
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1
         
 class UserCanAccessRequestTest(TestCase):
-    su = User.objects.create_superuser(email="su@user.com")
-    requestee = User.objects.create_user(email="requestee@user.com")
-    requestor = User.objects.create_user(email="requestor@user.com")
-    someone = User.objects.create_user(email="someone@user.com")
-    buddy_request = BuddyRequest(
-        requestee=requestee, requestor=requestor, message="test message"
-    )
-    assert user_can_access_request(su, request)
-    assert user_can_access_request(requestee, request)
-    assert user_can_access_request(requestor, request)
-    assert not user_can_access_request(someone, request)
-    su.active = False
-    su.save()
-    requestee.active = False
-    requestee.save()
-    requestor.active = False
-    requestor.save()
-    assert not user_can_access_request(requestee)
-    assert not user_can_access_request(requestor)
-    assert not user_can_access_request(su)
+    def test_user_can_access(self):
+        params = {
+            "email": "test@superuser.com",
+            "first_name": "Sansa",
+            "last_name": "Stark",
+            "password": "test_password",
+        }
+        su = User.objects.create_superuser(**params)
+        requestee = User.objects.create_user(email="requestee@user.com")
+        requestor = User.objects.create_user(email="requestor@user.com")
+        someone = User.objects.create_user(email="someone@user.com")
+        buddy_request = BuddyRequest.objects.create(
+            requestee=requestee, requestor=requestor, message="test message"
+        )
+        assert user_can_access_request(su, buddy_request)
+        assert user_can_access_request(requestee, buddy_request)
+        assert user_can_access_request(requestor, buddy_request)
+        assert not user_can_access_request(someone, buddy_request)
+        
+        su.is_active = False
+        su.save()
+        requestee.is_active = False
+        requestee.save()
+        requestor.is_active = False
+        requestor.save()
+        assert not user_can_access_request(su, buddy_request)
+        assert not user_can_access_request(requestee, buddy_request)
+        assert not user_can_access_request(requestor, buddy_request)
 
 
 class RequestControllerTest(TestCase):
-    def test_invalid_request(self):
+    def setup(self):
+        requestee = User.objects.create_user(email="requestee@user.com")
+        requestor = User.objects.create_user(email="requestor@user.com")
+        someone = User.objects.create_user(email="someone@user.com")
+        buddy_request = BuddyRequest.objects.create(
+            requestee=requestee, requestor=requestor, message="test message"
+        )
+    def invalid_request(self):
+        pass
+    def no_access(self):
+        pass
+    def valid_request(self):
         pass

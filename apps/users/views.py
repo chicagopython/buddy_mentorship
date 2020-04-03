@@ -35,16 +35,12 @@ def request_detail(request, request_id: int):
     buddy_request = get_object_or_404(BuddyRequest, pk=request_id)
     if not user_can_access_request(request.user, buddy_request):
         return HttpResponseForbidden("You do not have access to this request")
-    return render(
-        request, 
-        "users/request.html", 
-        {'buddy_request': buddy_request}
-    )
+    return render(request, "users/request.html", {"buddy_request": buddy_request})
 
 
 def user_can_access_request(user, buddy_request) -> bool:
     return (
-        user.id == buddy_request.requestee
-        or user.id == buddy_request.requestor
+        user == buddy_request.requestee
+        or user == buddy_request.requestor
         or user.is_staff
     ) and user.is_active
