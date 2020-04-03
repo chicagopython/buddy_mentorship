@@ -1,9 +1,11 @@
 import datetime as dt
 
 from django.test import (
+<<<<<<< HEAD
     Client,
     override_settings,
     TestCase,
+    override_settings,
     TransactionTestCase
 )
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
