@@ -1,13 +1,11 @@
 import datetime as dt
 
-from django.test import TransactionTestCase, TestCase, Client
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import TransactionTestCase
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile
 from .views import can_request, send_request
 
-from apps.users.views import user_can_access_request, request_detail
 from apps.users.models import User
 
 class CreateBuddyRequestTest(TransactionTestCase):
@@ -118,69 +116,3 @@ class SendRequestTest(TestCase):
         response = c.get(f"/send_request/{mentor.uuid}")
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1
-        
-class UserCanAccessRequestTest(TestCase):
-    def test_user_can_access(self):
-        params = {
-            "email": "test@superuser.com",
-            "first_name": "Sansa",
-            "last_name": "Stark",
-            "password": "test_password",
-        }
-        su = User.objects.create_superuser(**params)
-        requestee = User.objects.create_user(email="requestee@user.com")
-        requestor = User.objects.create_user(email="requestor@user.com")
-        someone = User.objects.create_user(email="someone@user.com")
-        buddy_request = BuddyRequest.objects.create(
-            requestee=requestee, requestor=requestor, message="test message"
-        )
-        assert user_can_access_request(su, buddy_request)
-        assert user_can_access_request(requestee, buddy_request)
-        assert user_can_access_request(requestor, buddy_request)
-        assert not user_can_access_request(someone, buddy_request)
-
-        su.is_active = False
-        su.save()
-        requestee.is_active = False
-        requestee.save()
-        requestor.is_active = False
-        requestor.save()
-        assert not user_can_access_request(su, buddy_request)
-        assert not user_can_access_request(requestee, buddy_request)
-        assert not user_can_access_request(requestor, buddy_request)
-
-
-class RequestDetailTest(TestCase):
-    def setup(self):
-        requestee = User.objects.create_user(email="requestee@user.com")
-        requestor = User.objects.create_user(email="requestor@user.com")
-        buddy_request = BuddyRequest.objects.create(
-            requestee=requestee, requestor=requestor, message="test message"
-        )
-
-    def invalid_request(self):
-        c = Client()
-        response = c.get("/requests/2/")
-        assert response.status_code == 404
-
-    def no_access(self):
-        someone = User.objects.create_user(email="someone@user.com")
-        c = Client()
-        c.force_login(someone)
-        response = c.get("/requests/1/")
-        assert response.status_code == 403
-
-    def valid_request(self):
-        requestee = User.objects.get(email="requestor@user.com")
-        requestor = User.objects.get(email="requestor@user.com")
-        c = Client()
-        c.force_login(requestor)
-        response = c.get("/requests/1/")
-        assert response.status_code == 200
-        buddy_request = response.context["buddy_request"]
-        assert buddy_request.requestee == requestee
-        assert buddy_request.requestor == requestor
-        assert buddy_request.message == "test message"
-        assert buddy_request.id == 1
-
-

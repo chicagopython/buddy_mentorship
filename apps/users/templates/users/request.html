@@ -1,0 +1,15 @@
+{% extends 'buddy_mentorship/base.html' %}
+{% block title %} Request Detail {% endblock %}
+{% block content %}
+<h2>
+    Request
+</h2>
+
+<p>
+This is a request from {{ buddy_request.requestor.first_name }} {{ buddy_request.requestor.last_name }} to {{ buddy_request.requestee.first_name }} {{ buddy_request.requestee.last_name }}.
+</p>
+
+<p>
+{{ buddy_request.message }}
+</p>
+{% endblock %}
