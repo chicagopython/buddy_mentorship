@@ -171,10 +171,16 @@ class RequestDetailTest(TestCase):
         assert response.status_code == 403
 
     def valid_request(self):
+        requestee = User.objects.get(email="requestor@user.com")
         requestor = User.objects.get(email="requestor@user.com")
         c = Client()
         c.force_login(requestor)
         response = c.get("/requests/1/")
         assert response.status_code == 200
+        buddy_request = response.context["buddy_request"]
+        assert buddy_request.requestee == requestee
+        assert buddy_request.requestor == requestor
+        assert buddy_request.message == "test message"
+        assert buddy_request.id == 1
 
 
