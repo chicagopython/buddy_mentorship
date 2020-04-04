@@ -138,7 +138,7 @@ class UserCanAccessRequestTest(TestCase):
         assert user_can_access_request(requestee, buddy_request)
         assert user_can_access_request(requestor, buddy_request)
         assert not user_can_access_request(someone, buddy_request)
-        
+
         su.is_active = False
         su.save()
         requestee.is_active = False
@@ -150,17 +150,31 @@ class UserCanAccessRequestTest(TestCase):
         assert not user_can_access_request(requestor, buddy_request)
 
 
-class RequestControllerTest(TestCase):
+class RequestDetailTest(TestCase):
     def setup(self):
         requestee = User.objects.create_user(email="requestee@user.com")
         requestor = User.objects.create_user(email="requestor@user.com")
-        someone = User.objects.create_user(email="someone@user.com")
         buddy_request = BuddyRequest.objects.create(
             requestee=requestee, requestor=requestor, message="test message"
         )
+
     def invalid_request(self):
-        pass
+        c = Client()
+        response = c.get("/requests/2/")
+        assert response.status_code == 404
+
     def no_access(self):
-        pass
+        someone = User.objects.create_user(email="someone@user.com")
+        c = Client()
+        c.force_login(someone)
+        response = c.get("/requests/1/")
+        assert response.status_code == 403
+
     def valid_request(self):
-        pass
+        requestor = User.objects.get(email="requestor@user.com")
+        c = Client()
+        c.force_login(requestor)
+        response = c.get("/requests/1/")
+        assert response.status_code == 200
+
+
