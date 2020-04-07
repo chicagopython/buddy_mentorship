@@ -22,5 +22,6 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("admin/", admin.site.urls),
     path("", include("apps.users.urls")),
-    path("profile/", views.profile, name="profile"),
+    path("profile/<uuid:profile_uuid>", views.profile, name="profile"),
+    path("send_request/<uuid:uuid>", views.send_request, name="send_request")
 ]

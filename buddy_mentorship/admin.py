@@ -4,4 +4,4 @@ from .models import BuddyRequest
 
 @admin.register(BuddyRequest)
 class BuddyRequestAdmin(admin.ModelAdmin):
-    fields = ['requestSent', 'requestee', 'requestor', 'message']
+    fields = ['request_sent', 'requestee', 'requestor', 'message']

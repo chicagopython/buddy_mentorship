@@ -102,6 +102,22 @@
                 <div id="mapid"></div>
              </div>
         </div>
+
+        {% comment %} Need to implement profile model {% endcomment %}
+        {% if can_request %}
+        <div class="row mb-2">
+            <div class="col">
+                <div class="send-request card">
+                    <div class="card-body">
+                        <a href="{% url "send_request" profile_uuid %}">
+                            <button type="button" class="btn btn-primary btn-lg btn-block">Request</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
     </div>
   </div>
     {% block map_js %}
@@ -112,4 +128,5 @@
         <script>
         </script>
     {% endblock map_js %}
+
 {% endblock content %}
