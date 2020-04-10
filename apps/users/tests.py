@@ -2,9 +2,11 @@ from django.test import TransactionTestCase
 from django.test import TestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.chrome.options import Options
 from .models import User
 from .models import Profile
 
+import platform
 
 class CustomUserManagerTest(TransactionTestCase):
     def test_create_user(self):
@@ -41,8 +43,16 @@ class UserLoginTest(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = WebDriver()
-        cls.selenium.implicitly_wait(10)
+        chrome_options = Options()
+        # runs headless chrome for wsl environments
+        if (
+            "linux" in platform.uname()[0].lower() 
+            and "microsoft" in platform.uname()[2].lower()
+        ):
+            chrome_options.add_argument('--headless')
+
+        cls.selenium = WebDriver(chrome_options=chrome_options)
+        cls.selenium.implicitly_wait(5)
 
     @classmethod
     def tearDownClass(cls):
