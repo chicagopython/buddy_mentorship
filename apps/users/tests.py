@@ -1,7 +1,9 @@
 from django.test import TransactionTestCase
+from django.test import TestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.chrome.webdriver import WebDriver
 from .models import User
+from .models import Profile
 
 
 class CustomUserManagerTest(TransactionTestCase):
@@ -24,6 +26,16 @@ class CustomUserManagerTest(TransactionTestCase):
         assert user.first_name == "John"
         assert user.last_name == "Snow"
 
+class ProfileTest(TestCase):
+    def test_create_profile(self):
+        new_user = User.objects.create_user(email="testprofile@user.com")
+        user = User.objects.first()
+        Profile.objects.create(user = user, bio="i'm super interested in Python", help_wanted = True, can_help = False)
+        record = Profile.objects.get(id=1)
+        self.assertEqual(record.user, user) 
+        self.assertEqual(record.bio, "i'm super interested in Python")
+        self.assertEqual(record.help_wanted, True)
+        self.assertEqual(record.can_help, False)
 
 class UserLoginTest(StaticLiveServerTestCase):
     @classmethod
