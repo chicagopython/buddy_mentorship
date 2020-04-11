@@ -34,7 +34,7 @@ class Profile(models.Model):
     A model for storing user profile information
     """
     user = models.ForeignKey(User, on_delete = models.CASCADE)
-    bio = models.CharField(max_length = 620)
+    bio = models.TextField()
     help_wanted = models.BooleanField(default = False)
     can_help = models.BooleanField(default = False)
 
