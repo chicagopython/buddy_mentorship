@@ -1,0 +1,115 @@
+{% extends 'buddy_mentorship/base.html' %}
+
+{% load static %}
+
+{% block title %}
+	Mentor Search
+{% endblock title %}
+
+{% block content %}
+  <div class="container">
+    <div class="starter-template">
+        <h1>
+            Find a Mentor
+        </h1>
+        <div class="row mb-2">
+            <div class="col">
+                <div class="bio card">
+                    <div class="card-body">
+                        <div class="card-title h5">
+                            Biography
+                        </div>
+                        <p class="card-text">
+                            I've been working in python for years and love helping others get started.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col">
+                <div class="demographics card">
+                    <div class="card-body">
+                        <div class="card-title h5">
+                            Demographics
+                        </div>
+                        <p class="card-text">
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col">
+                <div class="want-help card">
+                    <div class="card-body">
+                        <div class="card-title h5">
+                            Want Help
+                        </div>
+                        <div class="card-text">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Django
+                                    <span class="badge badge-primary badge-pill">1/5</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Flask
+                                    <span class="badge badge-primary badge-pill">2/5</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    MVC
+                                    <span class="badge badge-primary badge-pill">1/5</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="can-help card">
+                    <div class="card-body">
+                        <div class="card-title h5">
+                            Can Help
+                        </div>
+                        <div class="card-text">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Pandas
+                                    <span class="badge badge-primary badge-pill">4/5</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Tensorflow
+                                    <span class="badge badge-primary badge-pill">4/5</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Jupyter
+                                    <span class="badge badge-primary badge-pill">5/5</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+             <div class="col d-flex justify-content-center">
+                <div id="mapid"></div>
+             </div>
+        </div>
+    </div>
+  </div>
+    {% block map_js %}
+        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+        <script src="{% static "js/map.js" %}" onload="loadMap()"/>
+        <script>
+        </script>
+    {% endblock map_js %}
+{% endblock content %}

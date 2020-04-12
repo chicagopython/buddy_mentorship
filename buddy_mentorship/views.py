@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
+from django.views.generic import ListView
 
 from apps.users.models import User
 
@@ -51,3 +52,11 @@ def can_request(requestor, requestee):
         and requestee.is_active
         and not existing_requests
     )
+
+
+@login_required(login_url="login")
+class Search(ListView):
+    queryset = Profile.objects.filter(can_help=True)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_page': 'search']

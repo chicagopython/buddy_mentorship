@@ -56,8 +56,8 @@
                 <a class="nav-link{% if active_page == "profile"%} active {% endif %}" href="{% url 'your_profile' %}">Profile</a>
 
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Search</a>
+              <li class="nav-item {% if active_page == 'search' %} active {% endif %}">
+                <a class="nav-link" href="{% url 'search' %}">Search</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link{% if active_page == "requests"%} active {% endif %}" href="{% url 'requests' %}">Requests</a>
