@@ -50,17 +50,17 @@
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'index' %}">Home</a>
+                <a class="nav-link {% if active_page == "home"%}active{% endif %}"  href="{% url 'index' %}">Home</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'your_profile' %}">Profile</a>
+                <a class="nav-link{% if active_page == "profile"%} active {% endif %}" href="{% url 'your_profile' %}">Profile</a>
 
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="#">Search</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Requests</a>
+                <a class="nav-link{% if active_page == "requests"%} active {% endif %}" href="{% url 'requests' %}">Requests</a>
               </li>
             </ul>
             <button class="btn btn-link my-2 my-sm-0">

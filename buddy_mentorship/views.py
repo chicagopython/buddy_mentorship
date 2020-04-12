@@ -8,7 +8,7 @@ from .models import BuddyRequest, Profile
 
 
 def index(request):
-    return render(request, "buddy_mentorship/home.html")
+    return render(request, "buddy_mentorship/home.html", {"active_page": "home"})
 
 
 @login_required(login_url="login")
@@ -19,7 +19,8 @@ def profile(request, profile_id=""):
     profile = Profile.objects.get(id=profile_id)
     context = {
         "can_request": can_request(request.user, profile.user),
-        "profile": profile
+        "profile": profile,
+        "active_page": "profile"
     }
     return render(request, "buddy_mentorship/profile.html", context)
 
