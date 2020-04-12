@@ -12,6 +12,7 @@ django-bootstrap4 = "*"
 psycopg2 = "*"
 psycopg2-binary = "*"
 selenium = "*"
+bootstrap4 = "*"
 
 [requires]
 python_version = "3.7"
