@@ -2,9 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 
-from apps.users.models import User, Profile
+from apps.users.models import User
 
-from .models import BuddyRequest  # , Profile
+from .models import BuddyRequest, Profile
 
 
 def index(request):

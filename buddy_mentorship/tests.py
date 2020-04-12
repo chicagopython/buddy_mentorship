@@ -4,8 +4,8 @@ from django.test import TransactionTestCase, TestCase, Client
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
 
-from .models import BuddyRequest
-from apps.users.models import User, Profile
+from .models import BuddyRequest, Profile
+from apps.users.models import User
 from .views import can_request, send_request
 
 class BuddyRequestTest(TransactionTestCase):
@@ -27,6 +27,18 @@ class BuddyRequestTest(TransactionTestCase):
             f"Buddy request from mentee@user.com to mentor@user.com "
             f"on {buddy_request.request_sent.__str__()}"
         )
+
+
+class ProfileTest(TestCase):
+    def test_create_profile(self):
+        new_user = User.objects.create_user(email="testprofile@user.com")
+        user = User.objects.first()
+        Profile.objects.create(user = user, bio="i'm super interested in Python", help_wanted = True, can_help = False)
+        record = Profile.objects.get(id=1)
+        self.assertEqual(record.user, user) 
+        self.assertEqual(record.bio, "i'm super interested in Python")
+        self.assertEqual(record.help_wanted, True)
+        self.assertEqual(record.can_help, False)
 
 
 class SendRequestTest(TestCase):
