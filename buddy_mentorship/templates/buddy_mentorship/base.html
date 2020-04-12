@@ -49,17 +49,12 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
+              <li class="nav-item">
                 <a class="nav-link" href="{% url 'index' %}">Home</a>
               </li>
               <li class="nav-item">
-
-              {% if user.is_authenticated %}
-                <a class="nav-link" href="{% url 'profile' user.uuid %}">Profile</a>
-              {% endif %}
-              {% if not user.is_authenticated %}
                 <a class="nav-link" href="{% url 'your_profile' %}">Profile</a>
-              {% endif %}
+
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="#">Search</a>

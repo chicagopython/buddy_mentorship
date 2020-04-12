@@ -1,12 +1,12 @@
 import datetime as dt
 
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
 
 from .models import BuddyRequest
-from apps.users.models import User
-
+from apps.users.models import User, Profile
+from .views import can_request, send_request
 
 class BuddyRequestTest(TransactionTestCase):
     def test_create_buddy_request(self):
@@ -27,3 +27,80 @@ class BuddyRequestTest(TransactionTestCase):
             f"Buddy request from mentee@user.com to mentor@user.com "
             f"on {buddy_request.request_sent.__str__()}"
         )
+
+
+class SendRequestTest(TestCase):
+    def setUp(self):
+        mentor = User.objects.create_user(
+            first_name = "Frank",
+            last_name = "Mackey",
+            email="mentor@user.com"
+        )
+
+        Profile.objects.create(
+            user=mentor, 
+            bio="Experienced Undercover detective.",
+            can_help=True,
+            help_wanted=False
+        )
+
+        mentee = User.objects.create_user(
+            first_name = "Cassie",
+            last_name = "Maddox",
+            email="mentee@user.com"
+        )
+
+        Profile.objects.create(
+            user=mentee, 
+            bio="Aspiring Undercover detective with background in Murder.",
+            can_help=False,
+            help_wanted=True
+        )
+
+        someone = User.objects.create_user(
+            first_name = "Rob",
+            last_name = "Ryan",
+            email="someone@user.com"
+        )
+
+        Profile.objects.create(
+            user=someone, 
+            bio="You ever see somebody ruin their own life?",
+            can_help=False,
+            help_wanted=False
+        )
+
+    def test_can_request(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        someone = User.objects.get(email="someone@user.com")
+        assert can_request(mentee, mentor)
+        
+        mentor.is_active = False
+        assert not can_request(mentee, mentor)
+        mentor.is_active = True
+
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            message="Please help me!"
+        )
+        assert not can_request(mentee, someone)
+        assert not can_request(someone, mentor)
+        assert not can_request(mentee, mentor)
+        buddy_request.delete()
+
+    def test_send_request(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        assert not BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)
+        
+        c.force_login(mentee)
+        response = c.get(f"/send_request/{mentor.uuid}")
+        assert response.status_code == 302
+        assert BuddyRequest.objects.get(requestor=mentee)
+
+        response = c.get(f"/send_request/{mentor.uuid}")
+        assert response.status_code == 403
+        assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1

@@ -23,6 +23,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("apps.users.urls")),
     path("profile/", views.profile, name="your_profile"),
-    path("profile/<uuid:profile_uuid>", views.profile, name="profile"),
+    path("profile/<int:profile_id>", views.profile, name="profile"),
     path("send_request/<uuid:uuid>", views.send_request, name="send_request")
 ]
