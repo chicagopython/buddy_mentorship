@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from apps.users.models import User
 
@@ -54,9 +55,13 @@ def can_request(requestor, requestee):
     )
 
 
-@login_required(login_url="login")
-class Search(ListView):
+
+class Search(LoginRequiredMixin, ListView):
+    login_url = 'login'
     queryset = Profile.objects.filter(can_help=True)
+    template_name = 'buddy_mentorship/search.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['active_page': 'search']
+        context['active_page'] = 'search'
+        return context

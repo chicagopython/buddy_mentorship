@@ -10,106 +10,218 @@
   <div class="container">
     <div class="starter-template">
         <h1>
-            Find a Mentor
+          Find a Mentor
         </h1>
         <div class="row mb-2">
-            <div class="col">
-                <div class="bio card">
-                    <div class="card-body">
-                        <div class="card-title h5">
-                            Biography
-                        </div>
-                        <p class="card-text">
-                            I've been working in python for years and love helping others get started.
-                        </p>
-                    </div>
+          <div class="col">
+            <div class="filter card">
+              <div class="card-body">
+                <div class="card-title h5">
+                  Search
                 </div>
+                  <div class="card-text">
+                    <div class="btn-toolbar justify-content-around" role="toolbar" aria-label="Search toolbar">
+                      <div class="input-group">
+                        <input type="search" id="search" class="form-control">
+                        <div class="input-group-append">
+                          <button class="btn btn-primary" type="button">
+                            <svg class="bi bi-search" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                              <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 011.415 0l3.85 3.85a1 1 0 01-1.414 1.415l-3.85-3.85a1 1 0 010-1.415z" clip-rule="evenodd"/>
+                              <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 100-11 5.5 5.5 0 000 11zM13 6.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" clip-rule="evenodd"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="btn-group mr-2" role="group" aria-label="Filter buttons">
+                        <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#skillFilters" aria-expanded="false" aria-controls="skillFilters">
+                          Skills
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#locationFilters" aria-expanded="false" aria-controls="locationFilters">
+                          Locations
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#demographicFilters" aria-expanded="false" aria-controls="demographicFilters">
+                          Demographics
+                        </button>
+
+                      </div>
+                    </div>
+                    <div class="collapse" id="skillFilters">
+                      <div class="card card-body mb-3">
+                        <div class="card-title">Skills</div>
+                        <div class="card-text">
+                          <div class="form-row">
+                            <div class="col input-group mb-2">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="skill-1">Skill</span>
+                              </div>
+                              <input type="text" class="form-control" placeholder="Python" aria-label="Username" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="col input-group mb-2">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="min-level-1">Minimum Level</span>
+                              </div>
+                              <select class="form-control" id="levelSelect1">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                              </select>
+                            </div>
+                            <div class="col-2 my-1">
+                              <div class="form-check">
+                                  <input class="form-check-input" type="checkbox" value="" id="skill-filter-check-1">
+                                  <label class="form-check-label" for "skill-filter-check-1">Add to Filter</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-row">
+                            <div class="col input-group mb-2">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="skill-2">Skill</span>
+                              </div>
+                              <input type="text" class="form-control" placeholder="Python" aria-label="Username" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="col input-group mb-2">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="min-level-2">Minimum Level</span>
+                              </div>
+                              <select class="form-control" id="levelSelect1">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                              </select>
+                            </div>
+                              <div class="col-2 my-1">
+                              <div class="form-check">
+                                  <input class="form-check-input" type="checkbox" value="" id="skill-filter-check-2">
+                                  <label class="form-check-label" for "skill-filter-check-2">Add to Filter</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-row">
+                            <div class="col input-group mb-2">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="skill-3">Skill</span>
+                              </div>
+                              <input type="text" class="form-control" placeholder="Python" aria-label="Username" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="col input-group mb-2">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="min-level-3">Minimum Level</span>
+                              </div>
+                              <select class="form-control" id="levelSelect1">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                              </select>
+                            </div>
+                            <div class="col-2 my-1">
+                              <div class="form-check">
+                                  <input class="form-check-input" type="checkbox" value="" id="skill-filter-check-3">
+                                  <label class="form-check-label" for "skill-filter-check-3">Add to Filter</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="collapse" id="locationFilters">
+                      <div class="card card-body mb-3">
+                        <div class="card-title">Locations</div>
+                        <div class="card-text">
+                          TK
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="collapse" id="demographicFilters">
+                      <div class="card card-body mb-3">
+                        <div class="card-title">Demographics</div>
+                        <div class="card-text">
+                          TK
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-        </div>
+          </div>
+
 
         <div class="row mb-2">
             <div class="col">
-                <div class="demographics card">
+                <div class="profile-list card">
                     <div class="card-body">
-                        <div class="card-title h5">
-                            Demographics
-                        </div>
-                        <p class="card-text">
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-2">
-            <div class="col">
-                <div class="want-help card">
-                    <div class="card-body">
-                        <div class="card-title h5">
-                            Want Help
-                        </div>
+                      <div class="card-title h5">
+                          Available Mentors
+                      </div>
                         <div class="card-text">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Django
-                                    <span class="badge badge-primary badge-pill">1/5</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Flask
-                                    <span class="badge badge-primary badge-pill">2/5</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    MVC
-                                    <span class="badge badge-primary badge-pill">1/5</span>
-                                </li>
-                            </ul>
+                            <table class="table table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Bio</th>
+                                        <th scope="col">Can Help With</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                
+                                  <tr>
+                                    <td><a href="#">Frank Mackey</a></td>
+                                    <td>Experienced undercover detective.</td>
+                                    <td>
+                                      <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                          Pandas
+                                          <span class="badge badge-primary badge-pill">4/5</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                          Tensorflow
+                                          <span class="badge badge-primary badge-pill">4/5</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                          Jupyter
+                                          <span class="badge badge-primary badge-pill">5/5</span>
+                                        </li>
+                                      </ul>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td><a href="#">Cassie Maddox</a></td>
+                                    <td>Aspiring undercover detective with background in Murder.</td>
+                                    <td>
+                                      <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                          Django
+                                          <span class="badge badge-primary badge-pill">3/5</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                          Flask
+                                          <span class="badge badge-primary badge-pill">4/5</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                          MVC
+                                          <span class="badge badge-primary badge-pill">3/5</span>
+                                        </li>
+                                      </ul>
+                                    </td>
+                                  </tr>
+                            </table>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-            <div class="col">
-                <div class="can-help card">
-                    <div class="card-body">
-                        <div class="card-title h5">
-                            Can Help
-                        </div>
-                        <div class="card-text">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Pandas
-                                    <span class="badge badge-primary badge-pill">4/5</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Tensorflow
-                                    <span class="badge badge-primary badge-pill">4/5</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Jupyter
-                                    <span class="badge badge-primary badge-pill">5/5</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-
-        <div class="row">
-             <div class="col d-flex justify-content-center">
-                <div id="mapid"></div>
-             </div>
-        </div>
+      </div>
     </div>
   </div>
-    {% block map_js %}
-        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-        crossorigin=""></script>
-        <script src="{% static "js/map.js" %}" onload="loadMap()"/>
-        <script>
-        </script>
-    {% endblock map_js %}
 {% endblock content %}
