@@ -25,6 +25,7 @@ First off, thank you for considering contributing to `Buddy Mentorship`!
 It’s thanks to people like you that we continue to have a high-quality, updated and documented app.
 
 There are a few key ways to contribute:
+
 1. Writing new code
 2. Writing tests
 3. Writing documentation
@@ -54,7 +55,6 @@ Don’t be afraid to ask questions if something is unclear!
 
 Each of these abbreviated workflow steps has additional instructions in sections below.
 
-
 ## Development Practices and Standards
 
 - Obey [`black`'s code formatting'](https://black.readthedocs.io/en/stable/the_black_code_style.html) and [Google's docstring format](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
@@ -74,61 +74,59 @@ Each of these abbreviated workflow steps has additional instructions in sections
   and the change will only be merged into the next major version release.
 - [Semantic line breaks](https://sembr.org/) are encouraged.
 
-
 ## Set up Git and a GitHub Account
 
 - If you don't already have a GitHub account, you can register for free.
 - If you don't already have Git installed,
   you can follow these [git installation instructions](https://help.github.com/en/articles/set-up-git).
 
-
 ## Fork and Clone
 
 1. You will need your own fork to work on the code. Go to the [project page](https://github.com/chicagopython/buddy_mentorship) and hit the Fork button.
 2. Next, you'll want to clone your fork to your machine:
 
-    ```bash
-    git clone https://github.com/chicagopython/buddy_mentorship.git buddy_mentorship-dev
-    cd buddy_mentorship-dev
-    git remote add upstream https://github.com/chicagopython/buddy_mentorship.git
-    ```
-
+   ```bash
+   git clone https://github.com/chicagopython/buddy_mentorship.git buddy_mentorship-dev
+   cd buddy_mentorship-dev
+   git remote add upstream https://github.com/chicagopython/buddy_mentorship.git
+   ```
 
 ## Set up a Development Environment
 
 1. Ensure you you have `pipenv` [installed](https://pipenv.kennethreitz.org/en/latest/#install-pipenv-today)
 2. Install the dependencies
-    ```bash
-    pipenv install --dev
-    ```
-    If you run into an error install postgres on Mac, you may need to do one/more of the following:
-      - Confirm you have CommandLineTools installed, or install them with `xcode-select --install`
-      - Reset CommandLineTools' settings with `xcode-select --reset`
-      - run the following command instead of the above one:
-      ```bash
-      env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pipenv install --dev
-      ```
+   ```bash
+   pipenv install --dev
+   ```
+   If you run into an error install postgres on Mac, you may need to do one/more of the following:
+   - Confirm you have CommandLineTools installed, or install them with `xcode-select --install`
+   - Reset CommandLineTools' settings with `xcode-select --reset`
+   - run the following command instead of the above one:
+   ```bash
+   env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pipenv install --dev
+   ```
 3. Make sure to configure your [editor to use black](https://github.com/psf/black#editor-integration)
 4. Ensure you have a local instance of postgres running that matches the settings in `buddy_mentorship/settings/local.py`.
-  If you have docker, you can achieve this by running
-    ```bash
-    docker run --name postgres -e POSTGRES_USER=buddy_mentorship  -e POSTGRES_DB='buddy_mentorship' -p 5432:5432 -d postgres
-    ```
+   If you have docker, you can achieve this by running
+   ```bash
+   docker run --name postgres -e POSTGRES_USER=buddy_mentorship  -e POSTGRES_DB='buddy_mentorship' -p 5432:5432 -d postgres
+   ```
 5. Optional: Confirm access to the database by running
-    ```bash
-    docker exec -it my-postgres bash
-    psql -U buddy_mentorship
-    ```
-6. Run all migrations
-    ```bash
-    python manage.py migrate --settings=buddy_mentorship.settings.local
-    ```
-7. Run the local server
-    ```bash
-    python manage.py runserver --settings=buddy_mentorship.settings.local
-    ```
-8. Open `http://127.0.0.1:8000/` in your browser
-9. Optional: Create a local superuser (interactively)
+   ```bash
+   docker exec -it my-postgres bash
+   psql -U buddy_mentorship
+   ```
+6. Create your .env file with your local environment variables by copying `.env.dist` to `.env` and filling in the appropriate settings
+7. Run all migrations
+   ```bash
+   python manage.py migrate --settings=buddy_mentorship.settings.local
+   ```
+8. Run the local server
+   ```bash
+   python manage.py runserver --settings=buddy_mentorship.settings.local
+   ```
+9. Open `http://127.0.0.1:8000/` in your browser
+10. Optional: Create a local superuser (interactively)
     ```bash
     python manage.py createsuperuser --settings=buddy_mentorship.settings.local
     ```
@@ -141,7 +139,6 @@ To add a new feature, you will create every feature branch off of the master bra
 git checkout master
 git checkout -b feature/<feature_name_in_snake_case>
 ```
-
 
 ## Rebase on Master and Squash
 
@@ -156,7 +153,6 @@ git checkout feature/<feature_name_in_snake_case>
 git rebase -i master
 ```
 
-
 ## Create a Pull Request to the master branch
 
 [Create a pull request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork)
@@ -165,33 +161,33 @@ Tests will be be triggered to run via xxx.
 Check that your PR passes CI,
 since it won't be reviewed for inclusion until it passes all steps.
 
-
 ## For Maintainers
 
 Steps for maintainers are largely the same,
 with a few additional steps before releasing a new version:
 
--   Update version in xxx.
--   Update the CHANGELOG.md and the main README.md (as appropriate).
--   Rebuild the docs in your local version to verify how they render using:
+- Update version in xxx.
+- Update the CHANGELOG.md and the main README.md (as appropriate).
+- Rebuild the docs in your local version to verify how they render using:
 
-    ```bash
-    xxx
-    ```
--   Test the new deployment/migration:
+  ```bash
+  xxx
+  ```
 
-    ```bash
-    xxx
-    ```
--   Releases are indicated using git tags.
-    Create a tag locally for the apporiate commit in master, and push that tag to GitHub.
-    Travis's CD is triggered on tags within master:
+- Test the new deployment/migration:
+
+  ```bash
+  xxx
+  ```
+
+- Releases are indicated using git tags.
+  Create a tag locally for the apporiate commit in master, and push that tag to GitHub.
+  Travis's CD is triggered on tags within master:
 
 ```bash
     git tag -a v<#.#.#> <SHA-goes-here> -m "buddy mentorship version <#.#.#>"
     git push origin --tags
 ```
-
 
 ## Guides
 
@@ -204,4 +200,4 @@ inside this project:
 1. Create an `[app_name]` folder in the `apps/` directory for your app
 1. `python manage.py startapp users ./apps/[app_name]`
 1. Add `[app_name]` to the `INSTALLED_APPS` in the the Django settings file,
-  `buddy_mentorship/settings/local.py`
+   `buddy_mentorship/settings/local.py`
