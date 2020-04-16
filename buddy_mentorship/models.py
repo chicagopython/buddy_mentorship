@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
@@ -38,7 +39,7 @@ class BuddyRequest(models.Model):
                 f"{self.requestor.first_name} sent you a " 
                 "BuddyRequest",
                 self.message,
-                self.requestor.email,
+                settings.EMAIL_ADDRESS,
                 [self.requestee.email],
             )
         elif self.status == 1:
@@ -46,7 +47,7 @@ class BuddyRequest(models.Model):
                 f"{self.requestee.first_name} accepted your " 
                 "BuddyRequest",
                 self.message,
-                self.requestee.email,
+                settings.EMAIL_ADDRESS,
                 [self.requestor.email],
             )
 
