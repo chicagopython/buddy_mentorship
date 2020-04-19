@@ -174,7 +174,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                  {% for profile in object_list %}
+                                  {% for profile in profile_list %}
                                     <tr>
                                       <td><a href="{% url 'profile' profile.id %}">{{profile.user.first_name}} {{profile.user.last_name}}</a></td>
                                       <td>{{profile.bio}}</td>

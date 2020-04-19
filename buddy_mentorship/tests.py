@@ -2,6 +2,7 @@ import datetime as dt
 
 from django.test import TransactionTestCase, TestCase, Client
 from django.utils import timezone
+from django.utils.encoding import escape_uri_path
 
 from .models import BuddyRequest, Profile
 from .views import can_request, send_request
@@ -118,7 +119,6 @@ class SendRequestTest(TestCase):
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1
 
 
-# very in progress
 class SearchTest(TestCase):
     def setUp(self):
         user = User.objects.create_user(
@@ -130,26 +130,35 @@ class SearchTest(TestCase):
         Profile.objects.create(
             user=user,
             bio="",
-            can_help = True,
-            want_help = True
+            can_help=True,
+            help_wanted=True
         )
 
-        mentor_one_skill = User.objects.create_user(
+        mentor1 = User.objects.create_user(
             email="mr@bennet.org",
             first_name="Mr.",
             last_name="Bennet",
         )
 
         Profile.objects.create(
-            user=mentor_one_skill,
-            bio="")
+            user=mentor1,
+            bio="Father, country gentleman",
+            can_help =True,
+            help_wanted=False
+            )
 
-
-        mentor_another_skill = User.objects.create_user(
-            email="jane@bennet.org",
-            first_name="Jane",
-            last_name="Bennet"
+        mentor2 = User.objects.create_user(
+            email="charlotte@lucas.org",
+            first_name="Charlotte",
+            last_name="Lucas",
         )
+
+        Profile.objects.create(
+            user=mentor2,
+            bio="Sensible, intelligent woman",
+            can_help =True,
+            help_wanted=False
+            )
 
         not_a_mentor = User.objects.create_user(
             email="jenny@bennet.org",
@@ -157,32 +166,52 @@ class SearchTest(TestCase):
             last_name="Bennet",
         )
 
-        mentor_wrong_location = User.objects.create_user(
-            email="mrs@gardiner.org",
-            first_name="Mrs.",
-            last_name="Gardiner"
+        Profile.objects.create(
+            user=not_a_mentor,
+            bio="Mother of five, host of nerves",
+            can_help=False,
+            help_wanted=False
         )
 
-        mentor_wrong_skill = User.objects.create_user(
-            email="charlotte@collins.org",
-            first_name="Charlotte",
-            last_name="Collins"
+        another_mentee = User.objects.create_user(
+            email="kitty@bennet.org",
+            first_name="Kitty",
+            last_name="Bennet",
         )
 
-        mentor_insufficient_skill = User.objects.create_user(
-            email="lydia@bennet.org",
-            first_name="Lydia",
-            last_name="Bennet"
-        )
-
-        mentor_wrong_demo = User.objects.create_user(
-            email="charles@bingley.org",
-            first_name="Charles",
-            last_name="Bingley"
+        Profile.objects.create(
+            user=another_mentee,
+            bio="Likes a man in uniform",
+            can_help=False,
+            help_wanted=True
         )
 
     def test_all_qualified(self):
+        user = User.objects.get(email="elizabeth@bennet.org")
+        mentor1 = User.objects.get(email="mr@bennet.org")
+        mentor2 = User.objects.get(email="charlotte@lucas.org")
         c = Client()
+        c.force_login(user)
         response = c.get('/search/')
-        search_results = response.queryset
+        search_results = response.context_data['profile_list']
+        assert len(search_results) == 2
+        assert not search_results.filter(user=user)
+        assert search_results.get(user=mentor1)
+        assert search_results.get(user=mentor2)
+
+    def test_text_search(self):
+        user = User.objects.get(email="elizabeth@bennet.org")
+        mentor1 = User.objects.get(email="mr@bennet.org")
+        mentor2 = User.objects.get(email="charlotte@lucas.org")
+        c = Client()
+        c.force_login(user)
         
+        response = c.get('/search/?q=mr')
+        search_results = response.context_data['profile_list']
+        assert len(search_results) == 1
+        assert search_results[0].user == mentor1
+
+        response = c.get('/search/?q=sensible woman')
+        search_results = response.context_data['profile_list']
+        assert len(search_results) == 1
+        assert search_results[0].user == mentor2
