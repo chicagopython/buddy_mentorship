@@ -19,3 +19,17 @@ class BuddyRequest(models.Model):
             f"{self.requestor.email} to {self.requestee.email} on "
             f"{self.request_sent}"
         )
+
+
+class Profile(models.Model):
+    """
+    A model for storing user profile information
+    """
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    bio = models.TextField()
+    help_wanted = models.BooleanField(default=False)
+    can_help = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.bio

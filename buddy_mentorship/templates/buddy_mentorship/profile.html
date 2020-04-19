@@ -10,7 +10,7 @@
   <div class="container">
     <div class="starter-template">
         <h1>
-            profile page
+            {{profile.user.first_name}} {{profile.user.last_name}}
         </h1>
         <div class="row mb-2">
             <div class="col">
@@ -20,13 +20,13 @@
                             Biography
                         </div>
                         <p class="card-text">
-                            I've been working in python for years and love helping others get started.
+                            {{profile.bio}}
                         </p>
                     </div>
                 </div>
             </div>
         </div>
-
+{% comment %} 
         <div class="row mb-2">
             <div class="col">
                 <div class="demographics card">
@@ -39,7 +39,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> {% endcomment %}
 
         <div class="row mb-2">
             <div class="col">
@@ -50,18 +50,12 @@
                         </div>
                         <div class="card-text">
                             <ul class="list-group list-group-flush">
+                                {% if profile.help_wanted %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Django
-                                    <span class="badge badge-primary badge-pill">1/5</span>
+                                    Python
+                                    {% comment %} <span class="badge badge-primary badge-pill">1/5</span> {% endcomment %}
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Flask
-                                    <span class="badge badge-primary badge-pill">2/5</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    MVC
-                                    <span class="badge badge-primary badge-pill">1/5</span>
-                                </li>
+                                {% endif %}
                             </ul>
                         </div>
 
@@ -77,18 +71,12 @@
                         </div>
                         <div class="card-text">
                             <ul class="list-group list-group-flush">
+                                {% if profile.can_help %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Pandas
-                                    <span class="badge badge-primary badge-pill">4/5</span>
+                                    Python
+                                    {% comment %} <span class="badge badge-primary badge-pill">4/5</span> {% endcomment %}
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Tensorflow
-                                    <span class="badge badge-primary badge-pill">4/5</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Jupyter
-                                    <span class="badge badge-primary badge-pill">5/5</span>
-                                </li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
@@ -97,19 +85,35 @@
 
         </div>
 
-        <div class="row">
+        {% comment %} <div class="row">
              <div class="col d-flex justify-content-center">
                 <div id="mapid"></div>
              </div>
+        </div> {% endcomment %}
+
+        {% if can_request %}
+        <div class="row mb-2">
+            <div class="col">
+                <div class="send-request card">
+                    <div class="card-body">
+                        <a href="{% url "send_request" profile.user.uuid %}">
+                            <button type="button" class="btn btn-primary btn-lg btn-block">Request</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
+        {% endif %}
+        
     </div>
   </div>
-    {% block map_js %}
-        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-        crossorigin=""></script>
-        <script src="{% static "js/map.js" %}" onload="loadMap()"/>
-        <script>
-        </script>
-    {% endblock map_js %}
+{% block map_js %}
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+    <script src="{% static "js/map.js" %}" onload="loadMap()"/>
+    <script>
+    </script>
+{% endblock map_js %}
+
 {% endblock content %}

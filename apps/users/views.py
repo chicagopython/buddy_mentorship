@@ -24,7 +24,7 @@ def requests_list(request):
             "id": 3,
         }
     ]
-    context = {"requests_sent": requests_sent, "requests_received": requests_received}
+    context = {"requests_sent": requests_sent, "requests_received": requests_received, "active_page": "requests"}
     return render(request, "users/requests.html", context)
 
 
