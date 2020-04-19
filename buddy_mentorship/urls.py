@@ -24,6 +24,6 @@ urlpatterns = [
     path("", include("apps.users.urls")),
     path("profile/", views.profile, name="your_profile"),
     path("profile/<int:profile_id>", views.profile, name="profile"),
-    path("send_request/<uuid:uuid>", views.send_request, name="send_request")
+    path("send_request/<uuid:uuid>", views.send_request, name="send_request"),
     path("social/", include("social_django.urls", namespace="social")),
 ]
