@@ -1,4 +1,5 @@
 {% extends 'buddy_mentorship/base.html' %}
+{% block title %} Requests {% endblock %}
 {% block content %}
 <h2>
     Your Requests
@@ -9,15 +10,19 @@
 </p>
 
 <ul>
+    {% if not requests_received %}
+        <li> You have not received any requests </li>
+    {% endif %}
     {% for request in requests_received %}
 
         <li>
             <a href="/requests/{{ request.id }}">
-                {{ request.from }} sent you a request with the message "{{ request.message }}"
+                {{ request.requestor.first_name }} sent you a request with the message "{{ request.message }}"
             </a>
         </li>
 
     {% endfor %}
+    
 </ul>
 
 <p>
@@ -25,11 +30,14 @@
 </p>
 
 <ul>
+    {% if not requests_sent %}
+        <li> You have not sent any requests </li>
+    {% endif %}
     {% for request in requests_sent %}
 
         <li>
             <a href="/requests/{{ request.id }}">
-                You sent a request to {{ request.to }} with the message "{{ request.message }}"
+                You sent a request to {{ request.requestee.first_name }} with the message "{{ request.message }}"
             </a>
         </li>
 

@@ -1,14 +1,14 @@
 import datetime as dt
 
-from django.test import TransactionTestCase, TestCase, Client
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import TransactionTestCase
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile
-from apps.users.models import User
 from .views import can_request, send_request
 
-class BuddyRequestTest(TransactionTestCase):
+from apps.users.models import User
+
+class CreateBuddyRequestTest(TransactionTestCase):
     def test_create_buddy_request(self):
         mentee = User.objects.create_user(email="mentee@user.com")
         mentor = User.objects.create_user(email="mentor@user.com")
