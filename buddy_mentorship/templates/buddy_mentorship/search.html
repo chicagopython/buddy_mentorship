@@ -174,7 +174,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                
                                   <tr>
                                     <td><a href="#">Frank Mackey</a></td>
                                     <td>Experienced undercover detective.</td>
@@ -215,6 +214,22 @@
                                       </ul>
                                     </td>
                                   </tr>
+{% comment %}                                   {% for profile in object_list %}
+                                    <tr>
+                                      <td><a href="{% url profile.id %}">{{profile.user.first_name}} {{profile.user.last_name}}</a></td>
+                                      <td>{{profile.bio}}</td>
+                                      <td>
+                                        <ul class="list-group list-group-flush">
+                                          {% for experience in profile.can_help %}                                        
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                              {{experience.skill.name}}
+                                              <span class="badge badge-primary badge-pill">{{experience.level}}4/5</span>
+                                            </li>
+                                          {% endfor %}
+                                        </ul>
+                                      </td>
+                                    </tr>
+                                  {% endfor %} {% endcomment %}
                             </table>
                         </div>
                     </div>

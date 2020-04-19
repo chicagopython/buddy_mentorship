@@ -116,3 +116,73 @@ class SendRequestTest(TestCase):
         response = c.get(f"/send_request/{mentor.uuid}")
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1
+
+
+# very in progress
+class SearchTest(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(
+            email="elizabeth@bennet.org",
+            first_name="Elizabeth",
+            last_name="Bennet",
+        )
+
+        Profile.objects.create(
+            user=user,
+            bio="",
+            can_help = True,
+            want_help = True
+        )
+
+        mentor_one_skill = User.objects.create_user(
+            email="mr@bennet.org",
+            first_name="Mr.",
+            last_name="Bennet",
+        )
+
+        Profile.objects.create(
+            user=mentor_one_skill,
+            bio="")
+
+
+        mentor_another_skill = User.objects.create_user(
+            email="jane@bennet.org",
+            first_name="Jane",
+            last_name="Bennet"
+        )
+
+        not_a_mentor = User.objects.create_user(
+            email="jenny@bennet.org",
+            first_name="Jane Gardiner",
+            last_name"Bennet",
+        )
+
+        mentor_wrong_location = User.objects.create_user(
+            email="mrs@gardiner.org",
+            first_name="Mrs.",
+            last_name="Gardiner"
+        )
+
+        mentor_wrong_skill = User.objects.create_user(
+            email="charlotte@collins.org",
+            first_name="Charlotte",
+            last_name="Collins"
+        )
+
+        mentor_insufficient_skill = User.objects.create_user(
+            email="lydia@bennet.org",
+            first_name="Lydia",
+            last_name="Bennet"
+        )
+
+        mentor_wrong_demo = User.objects.create_user(
+            email="charles@bingley.org",
+            first_name="Charles",
+            last_name="Bingley"
+        )
+
+    def test_all_qualified(self):
+        c = Client()
+        response = c.get('/search/')
+        search_results = response.queryset
+        
