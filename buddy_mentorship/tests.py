@@ -154,7 +154,7 @@ class SearchTest(TestCase):
         not_a_mentor = User.objects.create_user(
             email="jenny@bennet.org",
             first_name="Jane Gardiner",
-            last_name"Bennet",
+            last_name="Bennet",
         )
 
         mentor_wrong_location = User.objects.create_user(
