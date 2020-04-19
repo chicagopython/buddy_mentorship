@@ -1,6 +1,6 @@
 import datetime as dt
 
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile
