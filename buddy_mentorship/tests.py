@@ -190,14 +190,15 @@ class SearchTest(TestCase):
         user = User.objects.get(email="elizabeth@bennet.org")
         mentor1 = User.objects.get(email="mr@bennet.org")
         mentor2 = User.objects.get(email="charlotte@lucas.org")
+        mentor1_profile = Profile.objects.get(user__email="mr@bennet.org")
+        mentor2_profile = Profile.objects.get(user__email="mr@bennet.org")
         c = Client()
         c.force_login(user)
         response = c.get('/search/')
-        search_results = response.context_data['profile_list']
+        search_results = list(response.context_data['profile_list'])
         assert len(search_results) == 2
-        assert not search_results.filter(user=user)
-        assert search_results.get(user=mentor1)
-        assert search_results.get(user=mentor2)
+        assert mentor1_profile in search_results
+        assert mentor2_profile in search_results
 
     def test_text_search(self):
         user = User.objects.get(email="elizabeth@bennet.org")
@@ -206,12 +207,12 @@ class SearchTest(TestCase):
         c = Client()
         c.force_login(user)
         
-        response = c.get('/search/?q=mr')
-        search_results = response.context_data['profile_list']
+        response = c.get('/search/?q=mr.+bennet')
+        search_results = list(response.context_data['profile_list'])
         assert len(search_results) == 1
         assert search_results[0].user == mentor1
 
         response = c.get('/search/?q=sensible woman')
-        search_results = response.context_data['profile_list']
+        search_results = list(response.context_data['profile_list'])
         assert len(search_results) == 1
         assert search_results[0].user == mentor2
