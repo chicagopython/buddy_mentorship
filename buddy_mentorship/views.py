@@ -61,7 +61,7 @@ def can_request(requestor, requestee):
 class Search(LoginRequiredMixin, ListView):
     login_url = "login"
 
-    paginate_by = 2
+    paginate_by = 5
 
     queryset = Profile.objects.all()
 
@@ -71,16 +71,17 @@ class Search(LoginRequiredMixin, ListView):
 
         query_text = self.request.GET.get("q", None)
         if query_text is not None:
-            search_vector = SearchVector(
-                "user__first_name", "user__last_name", "bio",
-            )
-            search_query = SearchQuery(query_text, search_type='plain')
-            search_results = search_results.annotate(
-                search=search_vector
-            ).filter(search=search_query)
-            search_results = search_results.annotate(
-                rank=SearchRank(search_vector, search_query)
-            ).order_by("-rank")
+            if query_text is not "":
+                search_vector = SearchVector(
+                    "user__first_name", "user__last_name", "bio",
+                )
+                search_query = SearchQuery(query_text, search_type='plain')
+                search_results = search_results.annotate(
+                    search=search_vector
+                ).filter(search=search_query)
+                search_results = search_results.annotate(
+                    rank=SearchRank(search_vector, search_query)
+                ).order_by("-rank")
         return search_results
 
     template_name = "buddy_mentorship/search.html"
