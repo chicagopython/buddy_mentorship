@@ -2,7 +2,6 @@ import datetime as dt
 
 from django.test import TransactionTestCase, TestCase, Client
 from django.utils import timezone
-from django.utils.encoding import escape_uri_path
 
 from .models import BuddyRequest, Profile
 from .views import can_request, send_request
