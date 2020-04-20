@@ -61,6 +61,8 @@ def can_request(requestor, requestee):
 class Search(LoginRequiredMixin, ListView):
     login_url = "login"
 
+    paginate_by = 2
+
     queryset = Profile.objects.all()
 
     def get_queryset(self):
@@ -86,4 +88,5 @@ class Search(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_page"] = "search"
+        context["query_text"] = self.request.GET.get("q", None)
         return context
