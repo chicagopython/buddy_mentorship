@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -87,7 +88,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "buddy_mentorship",
         "USER": "buddy_mentorship",
-        "HOST": "127.0.0.1",
+        "HOST": os.getenv("DATABASE_URL"),
     }
 }
 
@@ -151,12 +152,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 SOCIAL_AUTH_GITHUB_KEY = os.getenv("GITHUB_APP_ID")
 SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_API_SECRET")
+# SOCIAL_AUTH_GITHUB_KEY = "123"
+# SOCIAL_AUTH_GITHUB_SECRET = "secret"
 
-# Email integration
-EMAIL_ADDRESS = ""
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = os.environ['EMAIL_PORT']
-EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
-EMAIL_USE_SSL = True
-
+django_heroku.settings(locals())

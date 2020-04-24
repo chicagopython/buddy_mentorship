@@ -14,6 +14,6 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True, verbose=True)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "buddy_mentorship.settings")
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "buddy_mentorship.settings")
 
 application = get_wsgi_application()
