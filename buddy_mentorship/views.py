@@ -63,7 +63,7 @@ class Search(LoginRequiredMixin, ListView):
 
     paginate_by = 5
 
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.all().order_by('-id')
 
     def get_queryset(self):
         all_mentors = self.queryset.filter(can_help=True)
