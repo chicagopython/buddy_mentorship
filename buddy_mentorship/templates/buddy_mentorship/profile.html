@@ -96,9 +96,7 @@
             <div class="col">
                 <div class="send-request card">
                     <div class="card-body">
-                        {% comment %} <a href="{% url "send_request" profile.user.uuid %}"> {% endcomment %}
-                            <p><button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="collapse" data-target="#requestForm">Request</button></p>
-                        {% comment %} </a> {% endcomment %}
+                        <p><button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="collapse" data-target="#requestForm">Request</button></p>
                         <form class="collapse" id="requestForm" action="{% url "send_request" profile.user.uuid %}" method="post">
                             {% csrf_token %}
                             <p><textarea class="form-control" id="requestMessage" name="message" rows="3">Hi! Will you be my Python mentor?</textarea></p>
