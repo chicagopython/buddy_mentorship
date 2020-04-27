@@ -109,10 +109,10 @@ class SendRequestTest(TestCase):
         assert not BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)
         
         c.force_login(mentee)
-        response = c.get(f"/send_request/{mentor.uuid}")
+        response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
         assert response.status_code == 302
         assert BuddyRequest.objects.get(requestor=mentee)
 
-        response = c.get(f"/send_request/{mentor.uuid}")
+        response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor))==1

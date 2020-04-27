@@ -29,9 +29,12 @@ def profile(request, profile_id=""):
 def send_request(request, uuid):
     user = request.user
     requestee = User.objects.get(uuid=uuid)
+    if request.method != 'POST':
+        return HttpResponseForbidden("Error - page accessed incorrectly")
+    message = request.POST['message']
     if can_request(user, requestee):
         BuddyRequest.objects.create(
-            requestor=user, requestee=requestee, message="Hi! Will you be my mentor?"
+            requestor=user, requestee=requestee, message=message
         )
         return redirect("requests")
     return HttpResponseForbidden("You cannot send this user a request")
