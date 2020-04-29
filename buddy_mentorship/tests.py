@@ -1,7 +1,6 @@
 import datetime as dt
 
 from django.test import (
-<<<<<<< HEAD
     Client,
     override_settings,
     TestCase,
