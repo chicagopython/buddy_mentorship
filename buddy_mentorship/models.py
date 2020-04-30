@@ -1,9 +1,21 @@
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
 from apps.users.models import User
 
 
 class BuddyRequest(models.Model):
+    class Status(models.IntegerChoices):
+        NEW = 0
+        ACCEPTED = 1
+        REJECTED = 2
+
+    status = models.IntegerField(
+                        choices=Status.choices, 
+                        blank=False, 
+                        default=0
+    )
     request_sent = models.DateTimeField(default=timezone.now)
     requestee = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="requestee"
@@ -19,6 +31,25 @@ class BuddyRequest(models.Model):
             f"{self.requestor.email} to {self.requestee.email} on "
             f"{self.request_sent}"
         )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.status == 0:
+            send_mail(
+                f"{self.requestor.first_name} sent you a " 
+                "BuddyRequest",
+                self.message,
+                settings.EMAIL_ADDRESS,
+                [self.requestee.email],
+            )
+        elif self.status == 1:
+            send_mail(
+                f"{self.requestee.first_name} accepted your " 
+                "BuddyRequest",
+                self.message,
+                settings.EMAIL_ADDRESS,
+                [self.requestor.email],
+            )
 
 
 class Profile(models.Model):

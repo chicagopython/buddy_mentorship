@@ -1,6 +1,13 @@
 import datetime as dt
 
-from django.test import TransactionTestCase, TestCase, Client
+from django.test import (
+    Client,
+    override_settings,
+    TestCase,
+    override_settings,
+    TransactionTestCase
+)
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile
@@ -9,6 +16,7 @@ from .views import can_request, send_request
 from apps.users.models import User
 
 class CreateBuddyRequestTest(TransactionTestCase):
+    @override_settings(EMAIL_HOST="localhost")
     def test_create_buddy_request(self):
         mentee = User.objects.create_user(email="mentee@user.com")
         mentor = User.objects.create_user(email="mentor@user.com")
