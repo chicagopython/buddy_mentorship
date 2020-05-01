@@ -10,6 +10,6 @@ This is a request from {{ buddy_request.requestor.first_name }} {{ buddy_request
 </p>
 
 <p>
-{{ buddy_request.message }}
+{{ buddy_request.message | linebreaks}}
 </p>
 {% endblock %}
