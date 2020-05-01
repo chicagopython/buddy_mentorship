@@ -15,6 +15,9 @@ selenium = "*"
 bootstrap4 = "*"
 social-auth-app-django = "*"
 python-dotenv = "*"
+django-config = "*"
+django-heroku = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"
