@@ -35,6 +35,8 @@ class Profile(models.Model):
 
     def get_short_bio(self):
         trunc_bio = self.bio[:240]
+        if self.bio == trunc_bio:
+            return trunc_bio
         first_nl = trunc_bio.find("\n")
         if first_nl > -1:
             return trunc_bio[:first_nl]
