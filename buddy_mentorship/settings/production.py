@@ -155,4 +155,12 @@ SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_API_SECRET")
 # SOCIAL_AUTH_GITHUB_KEY = "123"
 # SOCIAL_AUTH_GITHUB_SECRET = "secret"
 
+# Email integration
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = os.environ['EMAIL_PORT']
+EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+EMAIL_USE_SSL = True
+
 django_heroku.settings(locals())

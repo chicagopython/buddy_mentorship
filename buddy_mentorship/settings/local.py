@@ -153,7 +153,7 @@ SOCIAL_AUTH_GITHUB_KEY = os.getenv("GITHUB_APP_ID")
 SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_API_SECRET")
 
 # Email integration
-EMAIL_ADDRESS = ""
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = os.environ['EMAIL_PORT']
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
