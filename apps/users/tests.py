@@ -2,6 +2,7 @@ from django.test import TransactionTestCase, TestCase, Client
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from .models import User
 from .views import user_can_access_request
 
@@ -54,11 +55,11 @@ class UserLoginTest(StaticLiveServerTestCase):
             username="myuser", password="secret", email="myuser@example.com"
         )
         self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element_by_name("username")
+        username_input = self.selenium.find_element(By.NAME,"username")
         username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element_by_name("password")
+        password_input = self.selenium.find_element(By.NAME,"password")
         password_input.send_keys("secret")
-        login_button = self.selenium.find_element_by_xpath('//input[@value="login"]')
+        login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
 
         assert "you are logged in" in self.selenium.page_source
@@ -68,11 +69,11 @@ class UserLoginTest(StaticLiveServerTestCase):
             username="myuser", password="secret", email="myuser@example.com"
         )
         self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element_by_name("username")
+        username_input = self.selenium.find_element(By.NAME,"username")
         username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element_by_name("password")
+        password_input = self.selenium.find_element(By.NAME,"password")
         password_input.send_keys("wrongsecret")
-        login_button = self.selenium.find_element_by_xpath('//input[@value="login"]')
+        login_button = self.selenium.find_element(By.XPATH,'//input[@value="login"]')
         login_button.click()
 
         assert "you are logged in" not in self.selenium.page_source
@@ -82,11 +83,11 @@ class UserLoginTest(StaticLiveServerTestCase):
             username="myuser", password="secret", email="myuser@example.com"
         )
         self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element_by_name("username")
+        username_input = self.selenium.find_element(By.NAME,"username")
         username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element_by_name("password")
+        password_input = self.selenium.find_element(By.NAME,"password")
         password_input.send_keys("secret")
-        login_button = self.selenium.find_element_by_xpath('//input[@value="login"]')
+        login_button = self.selenium.find_element(By.XPATH,'//input[@value="login"]')
         login_button.click()
 
         self.selenium.get("%s%s" % (self.live_server_url, "/logout/"))

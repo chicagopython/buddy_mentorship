@@ -1,0 +1,228 @@
+{% extends 'buddy_mentorship/base.html' %}
+
+{% load static %}
+
+{% block title %}
+	Mentor Search
+{% endblock title %}
+
+{% block content %}
+  <div class="container">
+    <div class="starter-template">
+      <h1>
+        Find a Mentor
+      </h1>
+      <div class="row mb-2">
+        <div class="col">
+          <div class="filter card">
+            <div class="card-body">
+              <div class="card-title h5">
+                Search
+              </div>
+              <form action="{% url "search" %}" method="get" id="search">
+                <div class="card-text">
+                  <div class="btn-toolbar justify-content-around" role="toolbar" aria-label="Search toolbar">
+                    <div class="input-group">
+                      <input type="search" id="q" name="q" class="form-control">
+                      <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit" form="search">
+                          <svg class="bi bi-search" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 011.415 0l3.85 3.85a1 1 0 01-1.414 1.415l-3.85-3.85a1 1 0 010-1.415z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 100-11 5.5 5.5 0 000 11zM13 6.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" clip-rule="evenodd"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="btn-group mr-2" role="group" aria-label="Filter buttons">
+                      <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#skillFilters" aria-expanded="false" aria-controls="skillFilters">
+                        Skills
+                      </button>
+                      {% comment %} <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#locationFilters" aria-expanded="false" aria-controls="locationFilters">
+                        Locations
+                      </button>
+                      <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#demographicFilters" aria-expanded="false" aria-controls="demographicFilters">
+                        Demographics
+                      </button> {% endcomment %}
+
+                    </div>
+                  </div>
+                  <div class="collapse" id="skillFilters">
+                    <div class="card card-body mb-3">
+                      <div class="card-title">Skills</div>
+                      <div class="card-text">
+                        <div class="form-row">
+                          <div class="col input-group mb-2">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="skill-1">Skill</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Python" aria-label="Username" aria-describedby="basic-addon1">
+                          </div>
+                          <div class="col input-group mb-2">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="min-level-1">Minimum Level</span>
+                            </div>
+                            <select class="form-control" id="levelSelect1">
+                              <option>1</option>
+                              <option>2</option>
+                              <option>3</option>
+                              <option>4</option>
+                              <option>5</option>
+                            </select>
+                          </div>
+                          <div class="col-2 my-1">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="skill-filter-check-1">
+                              <label class="form-check-label" for "skill-filter-check-1">Add to Filter</label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-row">
+                          <div class="col input-group mb-2">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="skill-2">Skill</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Python" aria-label="Username" aria-describedby="basic-addon1">
+                          </div>
+                          <div class="col input-group mb-2">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="min-level-2">Minimum Level</span>
+                            </div>
+                            <select class="form-control" id="levelSelect1">
+                              <option>1</option>
+                              <option>2</option>
+                              <option>3</option>
+                              <option>4</option>
+                              <option>5</option>
+                            </select>
+                          </div>
+                          <div class="col-2 my-1">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="skill-filter-check-2">
+                              <label class="form-check-label" for "skill-filter-check-2">Add to Filter</label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-row">
+                          <div class="col input-group mb-2">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="skill-3">Skill</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Python" aria-label="Username" aria-describedby="basic-addon1">
+                          </div>
+                          <div class="col input-group mb-2">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text" id="min-level-3">Minimum Level</span>
+                            </div>
+                            <select class="form-control" id="levelSelect1">
+                              <option>1</option>
+                              <option>2</option>
+                              <option>3</option>
+                              <option>4</option>
+                              <option>5</option>
+                            </select>
+                          </div>
+                          <div class="col-2 my-1">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="skill-filter-check-3">
+                              <label class="form-check-label" for "skill-filter-check-3">Add to Filter</label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% comment %} 
+                    <div class="collapse" id="locationFilters">
+                      <div class="card card-body mb-3">
+                        <div class="card-title">Locations</div>
+                        <div class="card-text">
+                          TK
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="collapse" id="demographicFilters">
+                      <div class="card card-body mb-3">
+                        <div class="card-title">Demographics</div>
+                        <div class="card-text">
+                          TK
+                        </div>
+                      </div> 
+                  {% endcomment %}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">
+          <div class="profile-list card">
+            <div class="card-body">
+              <div class="card-title h5">
+                Available Mentors
+              </div>
+              <div class="card-text">
+                <table class="table table-hover">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Bio</th>
+                      <th scope="col">Can Help With</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for profile in profile_list %}
+                      <tr>
+                        <td class="text-nowrap"><a href="{% url 'profile' profile.id %}">{{profile.user.first_name}} {{profile.user.last_name}}</a></td>
+                        <td>{{profile.get_short_bio}}</td>
+                        <td>
+                          <ul class="list-group list-group-flush">
+                            {% if profile.can_help %}
+                              <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Python
+                              </li>
+                            {% endif %}
+                            {% comment %}
+                              {% for experience in profile.can_help %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                  {{experience.skill.name}}
+                                  <span class="badge badge-primary badge-pill">{{experience.level}}4/5</span>
+                                </li>
+                              {% endfor %} 
+                            {% endcomment %}
+                          </ul>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not page_obj.has_previous %} disabled {% endif %}">
+              <a class="page-link" href="?{% if query_text %}q={{ query_text }}&{% endif %}page=1">&laquo;</a>
+            </li>
+            <li class="page-item {% if not page_obj.has_previous %} disabled {% endif %}">
+              <a class="page-link" {% if page_obj.has_previous %} href="?{% if query_text %}q={{ query_text }}&{% endif %}page={{ page_obj.previous_page_number }}" {% endif %}><</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link"> Page {{ page_obj.number }} of {{page_obj.paginator.num_pages }}</a>
+            </li>
+            <li class="page-item {% if not page_obj.has_next %} disabled {% endif %}">
+              <a class="page-link" {% if page_obj.has_next %} href="?{% if query_text %}q={{ query_text }}&{% endif %}page={{ page_obj.next_page_number }}" {% endif %}>></a>
+            </li>
+            <li class="page-item {% if not page_obj.has_next %} disabled {% endif %}">
+              <a class="page-link" href="?{% if query_text %}q={{ query_text }}&{% endif %}page=last">&raquo;</a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+{% endblock content %}
