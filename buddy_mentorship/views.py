@@ -61,6 +61,8 @@ def can_request(requestor, requestee):
 class Search(LoginRequiredMixin, ListView):
     login_url = "login"
 
+    template_name = "buddy_mentorship/search.html"
+
     paginate_by = 5
 
     queryset = Profile.objects.all().order_by('-id')
@@ -83,8 +85,6 @@ class Search(LoginRequiredMixin, ListView):
                     rank=SearchRank(search_vector, search_query)
                 ).order_by("-rank")
         return search_results
-
-    template_name = "buddy_mentorship/search.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
