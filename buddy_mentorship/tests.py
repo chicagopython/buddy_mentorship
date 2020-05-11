@@ -112,7 +112,7 @@ class ProfileTest(TestCase):
         assert profile.get_short_bio() == "".join(bio_parts[:4])
 
 
-class SendRequestTest(TestCase):
+class SendBuddyRequestTest(TestCase):
     def setUp(self):
         mentor = User.objects.create_user(
             first_name="Frank", last_name="Mackey", email="mentor@user.com"
@@ -176,6 +176,7 @@ class SendRequestTest(TestCase):
         response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
         assert response.status_code == 302
         assert BuddyRequest.objects.get(requestor=mentee)
+
         assert len(mail.outbox) == 1
         assert mail.outbox[0].subject == 'Cassie sent you a Buddy Request'
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
@@ -183,10 +184,33 @@ class SendRequestTest(TestCase):
         sent_message = mail.outbox[0].alternatives[0][0]
         assert profile_link in sent_message
         assert mentee_name in sent_message
+        assert mentor.email in mail.outbox[0].recipients()
 
         response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)) == 1
+    
+    def test_accept_request(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            message="Please be my mentor"
+        )
+        buddy_request.status = 1
+        buddy_request.save()
+
+        assert len(mail.outbox) == 2
+        assert mail.outbox[1].subject == 'Frank accepted your Buddy Request'
+        profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
+        mentor_name = f"{mentor.first_name} {mentor.last_name}"
+        sent_message = mail.outbox[1].alternatives[0][0]
+        assert profile_link in sent_message
+        assert mentor_name in sent_message
+        assert mentee.email in mail.outbox[1].recipients()
 
 
 class SearchTest(TestCase):

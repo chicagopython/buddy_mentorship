@@ -68,7 +68,7 @@ class BuddyRequest(models.Model):
             ])
             html_message = "".join([
                 f"<p><a href='{os.getenv('APP_URL')}{profile_url}'>",
-                f"{self.requestee.first_name} {self.requestor.last_name}</a> ",
+                f"{self.requestee.first_name} {self.requestee.last_name}</a> ",
                 f"has accepted your Buddy Request. Contact them at ",
                 f"<a href='mailto:{self.requestee.email}'>",
                 f"{self.requestee.email}</a> to begin your mentorship!</p>"
@@ -82,7 +82,6 @@ class BuddyRequest(models.Model):
                 html_message=html_message
             )
         elif self.status == 2:
-            # rejection email
             pass
 
 

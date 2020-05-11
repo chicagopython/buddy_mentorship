@@ -61,6 +61,21 @@ def can_request(requestor, requestee):
     )
 
 
+@login_required(login_url="login")
+def update_request(request, buddy_request_id):
+    buddy_request = BuddyRequest.objects.get(id=buddy_request_id)    
+    if request.user != buddy_request.requestor:
+        return HttpResponseForbidden("You cannot accept or reject this request")
+    if request.method != 'POST':
+        return HttpResponseForbidden("Error - page accessed incorrectly")
+    if request.POST['status'] == "accept":
+        buddy_request.status = 1
+    if request.POST['status'] == "ignore":
+        buddy_request.status = 2
+    buddy_request.save()
+    return redirect("requests")
+
+
 class Search(LoginRequiredMixin, ListView):
     login_url = "login"
 
@@ -94,3 +109,5 @@ class Search(LoginRequiredMixin, ListView):
         context["active_page"] = "search"
         context["query_text"] = self.request.GET.get("q", None)
         return context
+
+
