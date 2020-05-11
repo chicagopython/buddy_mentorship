@@ -65,6 +65,27 @@
           </div>
         </div>
       </div>
+      {% if buddy_request.status == 1 %}
+        <div class="row mb-2 col card">
+          <div class="card-body">
+            <div class="card-title h5">
+              <span class="badge badge-success">Request Accepted!</span>
+            </div>
+            <div class="card-text">
+            {% if user == buddy_request.requestee %}
+              Contact {{buddy_request.requestor.first_name}} at 
+              <a href="mailto:{{ buddy_request.requestor.email }}">
+              {{ buddy_request.requestor.email }}</a>.</p>
+            {% endif %}
+            {% if user == buddy_request.requestor %}
+              Contact {{buddy_request.requestee.first_name}} at 
+              <a href="mailto:{{ buddy_request.requestee.email }}">
+              {{ buddy_request.requestee.email }}</a>.</p>
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 
