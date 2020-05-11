@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 
 from django.test import (
     Client,
@@ -7,7 +8,9 @@ from django.test import (
     override_settings,
     TransactionTestCase
 )
+from django.core import mail
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile
@@ -20,7 +23,9 @@ class CreateBuddyRequestTest(TransactionTestCase):
     @override_settings(EMAIL_HOST="localhost")
     def test_create_buddy_request(self):
         mentee = User.objects.create_user(email="mentee@user.com")
+        Profile.objects.create(user=mentee)
         mentor = User.objects.create_user(email="mentor@user.com")
+        Profile.objects.create(user=mentor)
         msg = "test message"
         new_buddy_request = BuddyRequest.objects.create(
             requestor=mentee, requestee=mentor, message=msg
@@ -48,8 +53,7 @@ class ProfileTest(TestCase):
             help_wanted=True,
             can_help=False,
         )
-        record = Profile.objects.get(id=1)
-        self.assertEqual(record.user, user)
+        record = Profile.objects.get(user=user)
         self.assertEqual(record.bio, "i'm super interested in Python")
         self.assertEqual(record.help_wanted, True)
         self.assertEqual(record.can_help, False)
@@ -128,7 +132,7 @@ class SendRequestTest(TestCase):
         Profile.objects.create(
             user=mentee,
             bio="Aspiring Undercover detective with background in Murder.",
-            can_help=False,
+            can_help=True,
             help_wanted=True,
         )
 
@@ -165,12 +169,20 @@ class SendRequestTest(TestCase):
         c = Client()
         mentee = User.objects.get(email="mentee@user.com")
         mentor = User.objects.get(email="mentor@user.com")
+        mentee_profile = Profile.objects.get(user=mentee)
         assert not BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)
 
         c.force_login(mentee)
         response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
         assert response.status_code == 302
         assert BuddyRequest.objects.get(requestor=mentee)
+        assert len(mail.outbox) == 1
+        assert mail.outbox[0].subject == 'Cassie sent you a Buddy Request'
+        profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
+        mentee_name = f"{mentee.first_name} {mentee.last_name}"
+        sent_message = mail.outbox[0].alternatives[0][0]
+        assert profile_link in sent_message
+        assert mentee_name in sent_message
 
         response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
         assert response.status_code == 403

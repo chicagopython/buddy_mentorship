@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from .models import User
 from .views import user_can_access_request
 
-from buddy_mentorship.models import BuddyRequest
+from buddy_mentorship.models import BuddyRequest, Profile
 
 import platform
 
@@ -109,7 +109,9 @@ class UserCanAccessRequestTest(TestCase):
         }
         su = User.objects.create_superuser(**params)
         requestee = User.objects.create_user(email="requestee@user.com")
+        Profile.objects.create(user=requestee)
         requestor = User.objects.create_user(email="requestor@user.com")
+        Profile.objects.create(user=requestor)
         someone = User.objects.create_user(email="someone@user.com")
         buddy_request = BuddyRequest.objects.create(
             requestee=requestee, requestor=requestor, message="test message"
