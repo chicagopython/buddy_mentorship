@@ -10,6 +10,7 @@ from buddy_mentorship.models import BuddyRequest, Profile
 
 import platform
 
+
 class CustomUserManagerTest(TransactionTestCase):
     def test_create_user(self):
         new_user = User.objects.create_user(email="test@user.com")
@@ -30,6 +31,7 @@ class CustomUserManagerTest(TransactionTestCase):
         assert user.first_name == "John"
         assert user.last_name == "Snow"
 
+
 class UserLoginTest(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
@@ -37,10 +39,10 @@ class UserLoginTest(StaticLiveServerTestCase):
         chrome_options = Options()
         # runs headless chrome for wsl environments
         if (
-            "linux" in platform.uname()[0].lower() 
+            "linux" in platform.uname()[0].lower()
             and "microsoft" in platform.uname()[2].lower()
         ):
-            chrome_options.add_argument('--headless')
+            chrome_options.add_argument("--headless")
 
         cls.selenium = WebDriver(chrome_options=chrome_options)
         cls.selenium.implicitly_wait(5)
@@ -55,9 +57,9 @@ class UserLoginTest(StaticLiveServerTestCase):
             username="myuser", password="secret", email="myuser@example.com"
         )
         self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element(By.NAME,"username")
+        username_input = self.selenium.find_element(By.NAME, "username")
         username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element(By.NAME,"password")
+        password_input = self.selenium.find_element(By.NAME, "password")
         password_input.send_keys("secret")
         login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
@@ -69,11 +71,11 @@ class UserLoginTest(StaticLiveServerTestCase):
             username="myuser", password="secret", email="myuser@example.com"
         )
         self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element(By.NAME,"username")
+        username_input = self.selenium.find_element(By.NAME, "username")
         username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element(By.NAME,"password")
+        password_input = self.selenium.find_element(By.NAME, "password")
         password_input.send_keys("wrongsecret")
-        login_button = self.selenium.find_element(By.XPATH,'//input[@value="login"]')
+        login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
 
         assert "you are logged in" not in self.selenium.page_source
@@ -83,11 +85,11 @@ class UserLoginTest(StaticLiveServerTestCase):
             username="myuser", password="secret", email="myuser@example.com"
         )
         self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element(By.NAME,"username")
+        username_input = self.selenium.find_element(By.NAME, "username")
         username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element(By.NAME,"password")
+        password_input = self.selenium.find_element(By.NAME, "password")
         password_input.send_keys("secret")
-        login_button = self.selenium.find_element(By.XPATH,'//input[@value="login"]')
+        login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
 
         self.selenium.get("%s%s" % (self.live_server_url, "/logout/"))
@@ -209,7 +211,6 @@ class RequestListTest(TestCase):
         requests_received = response.context["requests_received"]
         assert len(requests_received) == 1
         assert recd_request_1 in requests_sent
-
 
         # two requests in each category
         sent_request_2 = BuddyRequest.objects.create(

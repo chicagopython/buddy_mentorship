@@ -13,7 +13,7 @@ def requests_list(request):
         "requests_sent": requests_sent,
         "requests_received": requests_received,
         "title": "Requests",
-        "active_page": "requests"
+        "active_page": "requests",
     }
     return render(request, "users/requests.html", context)
 
@@ -24,10 +24,10 @@ def request_detail(request, request_id: int):
     if not user_can_access_request(request.user, buddy_request):
         return HttpResponseForbidden("You do not have access to this request")
     context = {
-        "buddy_request": buddy_request, 
+        "buddy_request": buddy_request,
         "title": "Request Detail",
         "requestor_profile": Profile.objects.get(user=buddy_request.requestor).id,
-        "requestee_profile": Profile.objects.get(user=buddy_request.requestee).id
+        "requestee_profile": Profile.objects.get(user=buddy_request.requestee).id,
     }
     return render(request, "users/request.html", context)
 

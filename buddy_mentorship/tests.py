@@ -6,7 +6,7 @@ from django.test import (
     override_settings,
     TestCase,
     override_settings,
-    TransactionTestCase
+    TransactionTestCase,
 )
 from django.core import mail
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
@@ -173,12 +173,14 @@ class SendBuddyRequestTest(TestCase):
         assert not BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)
 
         c.force_login(mentee)
-        response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
+        response = c.post(
+            f"/send_request/{mentor.uuid}", {"message": "Please be my mentor."}
+        )
         assert response.status_code == 302
         assert BuddyRequest.objects.get(requestor=mentee)
 
         assert len(mail.outbox) == 1
-        assert mail.outbox[0].subject == 'Cassie sent you a Buddy Request'
+        assert mail.outbox[0].subject == "Cassie sent you a Buddy Request"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
         mentee_name = f"{mentee.first_name} {mentee.last_name}"
         sent_message = mail.outbox[0].alternatives[0][0]
@@ -186,25 +188,25 @@ class SendBuddyRequestTest(TestCase):
         assert mentee_name in sent_message
         assert mentor.email in mail.outbox[0].recipients()
 
-        response = c.post(f"/send_request/{mentor.uuid}", {'message': "Please be my mentor."})
+        response = c.post(
+            f"/send_request/{mentor.uuid}", {"message": "Please be my mentor."}
+        )
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)) == 1
-    
+
     def test_accept_request(self):
         c = Client()
         mentee = User.objects.get(email="mentee@user.com")
         mentor = User.objects.get(email="mentor@user.com")
         mentor_profile = Profile.objects.get(user=mentor)
         buddy_request = BuddyRequest.objects.create(
-            requestor=mentee,
-            requestee=mentor,
-            message="Please be my mentor"
+            requestor=mentee, requestee=mentor, message="Please be my mentor"
         )
         buddy_request.status = 1
         buddy_request.save()
 
         assert len(mail.outbox) == 2
-        assert mail.outbox[1].subject == 'Frank accepted your Buddy Request'
+        assert mail.outbox[1].subject == "Frank accepted your Buddy Request"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
         mentor_name = f"{mentor.first_name} {mentor.last_name}"
         sent_message = mail.outbox[1].alternatives[0][0]

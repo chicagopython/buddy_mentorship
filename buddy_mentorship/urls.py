@@ -25,7 +25,11 @@ urlpatterns = [
     path("profile/", views.profile, name="your_profile"),
     path("profile/<int:profile_id>", views.profile, name="profile"),
     path("send_request/<uuid:uuid>", views.send_request, name="send_request"),
-    path("update_request/<int:buddy_request_id>", views.update_request, name="update_request"),
+    path(
+        "update_request/<int:buddy_request_id>",
+        views.update_request,
+        name="update_request",
+    ),
     path("social/", include("social_django.urls", namespace="social")),
-    path("search/", views.Search.as_view(), name="search")
+    path("search/", views.Search.as_view(), name="search"),
 ]
