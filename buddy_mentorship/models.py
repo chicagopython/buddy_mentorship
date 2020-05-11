@@ -38,6 +38,7 @@ class BuddyRequest(models.Model):
         if self.status == 0:
             profile = Profile.objects.get(user=self.requestor)
             profile_url = reverse('profile', args=[profile.id])
+            request_detail_url = reverse('request_detail', args=[self.id])
             plain_message = "".join([
                 f"{self.requestor.first_name} {self.requestor.last_name} ",
                 "sent you a Buddy Request with the following message: \n",
@@ -46,7 +47,8 @@ class BuddyRequest(models.Model):
             html_message = "".join([
                 f"<p><a href='{os.getenv('APP_URL')}{profile_url}'>",
                 f"{self.requestor.first_name} {self.requestor.last_name}</a> ",
-                f"sent you a Buddy Request ",
+                f"sent you a <a href='{os.getenv('APP_URL')}{request_detail_url}''>",
+                f"Buddy Request</a> ",
                 "with the following message:</p>",
                 f"{self.message}"
             ])

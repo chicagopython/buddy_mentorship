@@ -73,7 +73,7 @@ def update_request(request, buddy_request_id):
     if request.POST['status'] == "ignore":
         buddy_request.status = 2
     buddy_request.save()
-    return redirect("requests")
+    return redirect("request_detail", request_id=buddy_request_id)
 
 
 class Search(LoginRequiredMixin, ListView):
