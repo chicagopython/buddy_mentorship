@@ -53,7 +53,8 @@ def can_request(requestor, requestee):
     )
 
     return (
-        requestor_profile.help_wanted
+        requestor != requestee
+        and requestor_profile.help_wanted
         and requestee_profile.can_help
         and requestor.is_active
         and requestee.is_active
