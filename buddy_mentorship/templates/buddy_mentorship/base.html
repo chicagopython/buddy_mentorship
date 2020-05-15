@@ -1,5 +1,6 @@
 {# Load the tag library #}
 {% load bootstrap4 %}
+{% load i18n %}
 
 {# Load CSS #}
 {% bootstrap_css %}
@@ -85,9 +86,11 @@
       </main>
 
       {# Footer #}
-      <footer class="footer">
+      <footer class="footer text-center">
         <div class="container">
-          <span class="text-muted">base.html footer text</span>
+          <span class="text-muted">
+            &copy; {% now "Y" %} {% trans "Chicago Python User Group" %}. {% trans "Source code available on " %}<a href="https://github.com/chicagopython/buddy_mentorship">Github</a>.
+          </span>
         </div>
       </footer>
 
