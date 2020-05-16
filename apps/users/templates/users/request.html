@@ -1,15 +1,92 @@
 {% extends 'buddy_mentorship/base.html' %}
 {% block title %} Request Detail {% endblock %}
 {% block content %}
-<h2>
-    Request
-</h2>
+  <div class="container">
+    <div class="starter-template">
+      <h1>
+        Request
+      </h1>
+      <div class="row mb-2">
+        <div class="col">
+          <div class="request card">
+            <div class="card-body">
+              <div class="card-title h5">
+                From <a href="{% url 'profile' requestor_profile %}">{{ buddy_request.requestor.first_name }} {{ buddy_request.requestor.last_name }}</a> to <a href="{% url 'profile' requestee_profile %}">{{ buddy_request.requestee.first_name }} {{ buddy_request.requestee.last_name }}</a>.
+              </div>
+              <div class="card-text">
+                {{ buddy_request.message | linebreaks}}
+              </div>
+              {% if user == buddy_request.requestee and buddy_request.status == 0 %}
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#acceptModal">Accept</button>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#ignoreModal">Ignore</button>
+                <form action="{% url 'update_request' buddy_request.id %}" method="post" id="update_request">
+                  {% csrf_token %}
+                  <div class="modal fade" id="acceptModal" tabindex="-1" role="dialog" aria-labelledby="acceptModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="acceptModalLabel">Accept Buddy Request</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          Please confirm you want to accept {{buddy_request.requestor.first_name}} {{buddy_request.requestor.last_name}}'s request.
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="status" value="accept">Accept</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal fade" id="ignoreModal" tabindex="-1" role="dialog" aria-labelledby="ignoreModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="ignoreModalLabel">Ignore Buddy Request</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          Please confirm you want to ignore {{buddy_request.requestor.first_name}} {{buddy_request.requestor.last_name}}'s request.
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-danger" name="status" value="ignore">Ignore</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% if buddy_request.status == 1 %}
+        <div class="row mb-2 col card">
+          <div class="card-body">
+            <div class="card-title h5">
+              <span class="badge badge-success">Request Accepted!</span>
+            </div>
+            <div class="card-text">
+            {% if user == buddy_request.requestee %}
+              Contact {{buddy_request.requestor.first_name}} at 
+              <a href="mailto:{{ buddy_request.requestor.email }}">
+              {{ buddy_request.requestor.email }}</a>.</p>
+            {% endif %}
+            {% if user == buddy_request.requestor %}
+              Contact {{buddy_request.requestee.first_name}} at 
+              <a href="mailto:{{ buddy_request.requestee.email }}">
+              {{ buddy_request.requestee.email }}</a>.</p>
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 
-<p>
-This is a request from {{ buddy_request.requestor.first_name }} {{ buddy_request.requestor.last_name }} to {{ buddy_request.requestee.first_name }} {{ buddy_request.requestee.last_name }}.
-</p>
-
-<p>
-{{ buddy_request.message | linebreaks}}
-</p>
 {% endblock %}

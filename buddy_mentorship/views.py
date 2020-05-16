@@ -32,9 +32,9 @@ def profile(request, profile_id=""):
 def send_request(request, uuid):
     user = request.user
     requestee = User.objects.get(uuid=uuid)
-    if request.method != 'POST':
+    if request.method != "POST":
         return HttpResponseForbidden("Error - page accessed incorrectly")
-    message = request.POST['message']
+    message = request.POST["message"]
     if can_request(user, requestee):
         BuddyRequest.objects.create(
             requestor=user, requestee=requestee, message=message
@@ -53,7 +53,8 @@ def can_request(requestor, requestee):
     )
 
     return (
-        requestor_profile.help_wanted
+        requestor != requestee
+        and requestor_profile.help_wanted
         and requestee_profile.can_help
         and requestor.is_active
         and requestee.is_active
@@ -61,12 +62,29 @@ def can_request(requestor, requestee):
     )
 
 
+@login_required(login_url="login")
+def update_request(request, buddy_request_id):
+    buddy_request = BuddyRequest.objects.get(id=buddy_request_id)
+    if request.user != buddy_request.requestor:
+        return HttpResponseForbidden("You cannot accept or reject this request")
+    if request.method != "POST":
+        return HttpResponseForbidden("Error - page accessed incorrectly")
+    if request.POST["status"] == "accept":
+        buddy_request.status = 1
+    if request.POST["status"] == "ignore":
+        buddy_request.status = 2
+    buddy_request.save()
+    return redirect("request_detail", request_id=buddy_request_id)
+
+
 class Search(LoginRequiredMixin, ListView):
     login_url = "login"
 
+    template_name = "buddy_mentorship/search.html"
+
     paginate_by = 5
 
-    queryset = Profile.objects.all().order_by('-id')
+    queryset = Profile.objects.all().order_by("-id")
 
     def get_queryset(self):
         all_mentors = self.queryset.filter(can_help=True)
@@ -78,16 +96,14 @@ class Search(LoginRequiredMixin, ListView):
                 search_vector = SearchVector(
                     "user__first_name", "user__last_name", "bio",
                 )
-                search_query = SearchQuery(query_text, search_type='plain')
-                search_results = search_results.annotate(
-                    search=search_vector
-                ).filter(search=search_query)
+                search_query = SearchQuery(query_text, search_type="plain")
+                search_results = search_results.annotate(search=search_vector).filter(
+                    search=search_query
+                )
                 search_results = search_results.annotate(
                     rank=SearchRank(search_vector, search_query)
                 ).order_by("-rank")
         return search_results
-
-    template_name = "buddy_mentorship/search.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
