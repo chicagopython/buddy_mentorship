@@ -54,11 +54,11 @@ def can_request(requestor, requestee):
     requestee_profile = Profile.objects.get(user=requestee)
     requestor_experiences = Experience.objects.filter(profile=requestor_profile).all()
     requestee_experiences = Experience.objects.filter(profile=requestee_profile).all()
-
-
-    # when possible, should be no pending existing requests
-    existing_requests = BuddyRequest.objects.filter(
-        requestor=requestor, requestee=requestee
+    existing_requests_to = BuddyRequest.objects.filter(
+        requestor=requestor, requestee=requestee, type=REQUEST
+    )
+    existing_requests_from = BuddyRequest.objects.filter(
+        requestor=requestee, requestee=requestor, type=OFFER
     )
 
     return (
@@ -67,7 +67,8 @@ def can_request(requestor, requestee):
         and any([experience.can_help for experience in requestee_experiences])
         and requestor.is_active
         and requestee.is_active
-        and not existing_requests
+        and not existing_requests_to
+        and not existing_requests_from
     )
 
 
@@ -84,6 +85,26 @@ def update_request(request, buddy_request_id):
         buddy_request.status = 2
     buddy_request.save()
     return redirect("request_detail", request_id=buddy_request_id)
+
+    
+# needs to be updated as we expand profile model
+def can_offer(requestor, requestee):
+    requestor_profile = Profile.objects.get(user=requestor)
+    requestee_profile = Profile.objects.get(user=requestee)
+    existing_requests_to = BuddyRequest.objects.filter(
+        requestor=requestor, requestee=requestee, type=OFFER
+    )
+    existing_requests_to = BuddyRequest.objects.filter(
+        requestor=requestor, requestee=requestee, type=OFFER
+    )
+
+    return (
+        requestee_profile.help_wanted
+        and requestor_profile.can_help
+        and requestor.is_active
+        and requestee.is_active
+        and not existing_requests
+    )
 
 
 class ProfileEdit(LoginRequiredMixin, FormView):

@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import BuddyRequest, Profile, Skill, Experience
-from .views import can_request, send_request
+from .views import can_request, send_request, can_offer
 
 from apps.users.models import User
 
@@ -206,6 +206,24 @@ class SendBuddyRequestTest(TestCase):
         assert not can_request(mentee, someone)
         assert not can_request(someone, mentor)
         assert not can_request(mentee, mentor)
+        buddy_request.delete()
+
+    def test_can_offer(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        someone = User.objects.get(email="someone@user.com")
+        assert can_offer(mentor, mentee)
+
+        mentee.is_active = False
+        assert not can_offer(mentor, mentee)
+        mentee.is_active = True
+
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentee, requestee=mentor, message="Please help me!"
+        )
+        assert not can_offer(mentor, someone)
+        assert not can_offer(someone, mentee)
+        assert not can_offer(mentor, mentee)
         buddy_request.delete()
 
     def test_send_request(self):
