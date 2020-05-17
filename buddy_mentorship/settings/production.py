@@ -129,7 +129,7 @@ STATIC_URL = "/static/"
 AUTH_USER_MODEL = "users.User"
 
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/profile/"
 
 # Social Auth
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
@@ -155,10 +155,10 @@ SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_API_SECRET")
 
 # Email integration
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = os.environ['EMAIL_PORT']
-EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_PORT = os.environ["EMAIL_PORT"]
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_SSL = True
 
 django_heroku.settings(locals())

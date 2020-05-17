@@ -24,6 +24,7 @@ urlpatterns = [
     path("", include("apps.users.urls")),
     path("profile/", views.profile, name="your_profile"),
     path("profile/<int:profile_id>", views.profile, name="profile"),
+    path("profile_edit/", views.ProfileEdit.as_view(), name="edit_profile"),
     path("send_request/<uuid:uuid>", views.send_request, name="send_request"),
     path(
         "update_request/<int:buddy_request_id>",

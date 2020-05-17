@@ -4,9 +4,12 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import FormView
+from django.urls import reverse
 
 from apps.users.models import User
 
+from .forms import ProfileEditForm
 from .models import BuddyRequest, Profile
 
 
@@ -18,7 +21,10 @@ def index(request):
 def profile(request, profile_id=""):
     if not profile_id:
         user = request.user
-        profile_id = Profile.objects.get(user=user).id
+        profile = Profile.objects.filter(user=user).first()
+        profile_id = profile.id if profile else None
+    if profile_id is None:
+        return redirect("edit_profile")
     profile = Profile.objects.get(id=profile_id)
     context = {
         "can_request": can_request(request.user, profile.user),
@@ -75,6 +81,50 @@ def update_request(request, buddy_request_id):
         buddy_request.status = 2
     buddy_request.save()
     return redirect("request_detail", request_id=buddy_request_id)
+
+
+class ProfileEdit(LoginRequiredMixin, FormView):
+    login_url = "login"
+
+    template_name = "buddy_mentorship/edit_profile.html"
+    form_class = ProfileEditForm
+    success_url = "/profile/"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        profile = Profile.objects.filter(user=self.request.user).first()
+
+        context["first_name"] = user.first_name
+        context["last_name"] = user.last_name
+        context["bio"] = profile.bio if profile else ""
+        context["email"] = user.email
+        context["can_help"] = profile.can_help if profile else False
+        context["help_wanted"] = profile.help_wanted if profile else False
+
+        return context
+
+    def form_valid(self, form: ProfileEditForm):
+        self.update_user(form)
+        self.upsert_profile(form)
+
+        return super().form_valid(form)
+
+    def update_user(self, form: ProfileEditForm):
+        user = self.request.user
+        user.first_name = form.cleaned_data.get("first_name")
+        user.last_name = form.cleaned_data.get("last_name")
+        user.email = form.cleaned_data.get("email")
+
+        user.save()
+
+    def upsert_profile(self, form: ProfileEditForm):
+
+        profile, _ = Profile.objects.get_or_create(user=self.request.user)
+        profile.bio = form.cleaned_data.get("bio")
+        profile.can_help = form.cleaned_data.get("can_help")
+        profile.help_wanted = form.cleaned_data.get("help_wanted")
+        profile.save()
 
 
 class Search(LoginRequiredMixin, ListView):
