@@ -27,8 +27,10 @@ def profile(request, profile_id=""):
     profile = Profile.objects.get(id=profile_id)
     context = {
         "can_request": can_request(request.user, profile.user),
+        "can_offer": can_offer(request.user, profile.user),
         "profile": profile,
         "active_page": "profile",
+        "request_type": BuddyRequest.RequestType,
     }
     return render(request, "buddy_mentorship/profile.html", context)
 
@@ -40,25 +42,50 @@ def send_request(request, uuid):
     if request.method != "POST":
         return HttpResponseForbidden("Error - page accessed incorrectly")
     message = request.POST["message"]
-    if can_request(user, requestee):
+    request_type = request.POST["request_type"]
+
+    can_send_request = int(request_type) == int(
+        BuddyRequest.RequestType.REQUEST
+    ) and can_request(user, requestee)
+
+    can_send_offer = int(request_type) == int(
+        BuddyRequest.RequestType.OFFER
+    ) and can_offer(user, requestee)
+
+    if can_send_request or can_send_offer:
         BuddyRequest.objects.create(
-            requestor=user, requestee=requestee, message=message
+            requestor=user,
+            requestee=requestee,
+            message=message,
+            request_type=request_type,
         )
         return redirect("requests")
-    return HttpResponseForbidden("You cannot send this user a request")
+
+    if int(request_type) == int(BuddyRequest.RequestType.REQUEST):
+        forbidden_string = " request"
+    if int(request_type) == int(BuddyRequest.RequestType.OFFER):
+        forbidden_string = "n offer"
+
+    return HttpResponseForbidden(f"You cannot send this user a{forbidden_string}")
 
 
 # needs to be updated as we expand profile model
 def can_request(requestor, requestee):
     requestor_profile = Profile.objects.get(user=requestor)
     requestee_profile = Profile.objects.get(user=requestee)
+
     requestor_experiences = Experience.objects.filter(profile=requestor_profile).all()
     requestee_experiences = Experience.objects.filter(profile=requestee_profile).all()
-    existing_requests_to = BuddyRequest.objects.filter(
-        requestor=requestor, requestee=requestee, type=REQUEST
+
+    existing_requests = BuddyRequest.objects.filter(
+        requestor=requestor,
+        requestee=requestee,
+        request_type=BuddyRequest.RequestType.REQUEST,
     )
-    existing_requests_from = BuddyRequest.objects.filter(
-        requestor=requestee, requestee=requestor, type=OFFER
+    existing_offers = BuddyRequest.objects.filter(
+        requestor=requestee,
+        requestee=requestor,
+        request_type=BuddyRequest.RequestType.OFFER,
     )
 
     return (
@@ -67,43 +94,34 @@ def can_request(requestor, requestee):
         and any([experience.can_help for experience in requestee_experiences])
         and requestor.is_active
         and requestee.is_active
-        and not existing_requests_to
-        and not existing_requests_from
+        and not existing_requests
+        and not existing_offers
     )
 
 
-@login_required(login_url="login")
-def update_request(request, buddy_request_id):
-    buddy_request = BuddyRequest.objects.get(id=buddy_request_id)
-    if request.user != buddy_request.requestor:
-        return HttpResponseForbidden("You cannot accept or reject this request")
-    if request.method != "POST":
-        return HttpResponseForbidden("Error - page accessed incorrectly")
-    if request.POST["status"] == "accept":
-        buddy_request.status = 1
-    if request.POST["status"] == "ignore":
-        buddy_request.status = 2
-    buddy_request.save()
-    return redirect("request_detail", request_id=buddy_request_id)
-
-    
 # needs to be updated as we expand profile model
 def can_offer(requestor, requestee):
     requestor_profile = Profile.objects.get(user=requestor)
     requestee_profile = Profile.objects.get(user=requestee)
-    existing_requests_to = BuddyRequest.objects.filter(
-        requestor=requestor, requestee=requestee, type=OFFER
+    existing_requests = BuddyRequest.objects.filter(
+        requestor=requestee,
+        requestee=requestor,
+        request_type=BuddyRequest.RequestType.REQUEST,
     )
-    existing_requests_to = BuddyRequest.objects.filter(
-        requestor=requestor, requestee=requestee, type=OFFER
+    existing_offers = BuddyRequest.objects.filter(
+        requestor=requestor,
+        requestee=requestee,
+        request_type=BuddyRequest.RequestType.OFFER,
     )
 
     return (
-        requestee_profile.help_wanted
+        requestor != requestee
+        and requestee_profile.help_wanted
         and requestor_profile.can_help
         and requestor.is_active
         and requestee.is_active
         and not existing_requests
+        and not existing_offers
     )
 
 
@@ -147,6 +165,21 @@ class ProfileEdit(LoginRequiredMixin, FormView):
         profile.can_help = form.cleaned_data.get("can_help")
         profile.help_wanted = form.cleaned_data.get("help_wanted")
         profile.save()
+
+
+@login_required(login_url="login")
+def update_request(request, buddy_request_id):
+    buddy_request = BuddyRequest.objects.get(id=buddy_request_id)
+    if request.user != buddy_request.requestor:
+        return HttpResponseForbidden("You cannot accept or reject this request")
+    if request.method != "POST":
+        return HttpResponseForbidden("Error - page accessed incorrectly")
+    if request.POST["status"] == "accept":
+        buddy_request.status = 1
+    if request.POST["status"] == "ignore":
+        buddy_request.status = 2
+    buddy_request.save()
+    return redirect("request_detail", request_id=buddy_request_id)
 
 
 class Search(LoginRequiredMixin, ListView):

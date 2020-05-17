@@ -14,6 +14,11 @@ class BuddyRequest(models.Model):
         ACCEPTED = 1
         REJECTED = 2
 
+    class RequestType(models.IntegerChoices):
+        REQUEST = 0
+        OFFER = 1
+
+    request_type = models.IntegerField(choices=RequestType.choices, blank=False)
     status = models.IntegerField(choices=Status.choices, blank=False, default=0)
     request_sent = models.DateTimeField(default=timezone.now)
     requestee = models.ForeignKey(
@@ -117,27 +122,33 @@ class Profile(models.Model):
             return trunc_bio[: last_sentence + 1]
         return trunc_bio[: trunc_bio.rfind(" ") + 1]
 
+
 class Skill(models.Model):
     """
     A list of skills
     """
-    skill = models.CharField(max_length = 30)
+
+    skill = models.CharField(max_length=30)
 
     def __str__(self):
         return self.skill
 
+
 class Experience(models.Model):
     """
     """
+
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    level = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    level = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     can_help = models.BooleanField(default=False)
     help_wanted = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['skill','profile'], name='unique_skill')
+            models.UniqueConstraint(fields=["skill", "profile"], name="unique_skill")
         ]
 
     def __str__(self):

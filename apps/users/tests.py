@@ -116,7 +116,10 @@ class UserCanAccessRequestTest(TestCase):
         Profile.objects.create(user=requestor)
         someone = User.objects.create_user(email="someone@user.com")
         buddy_request = BuddyRequest.objects.create(
-            requestee=requestee, requestor=requestor, message="test message"
+            requestee=requestee,
+            requestor=requestor,
+            message="test message",
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         assert user_can_access_request(su, buddy_request)
         assert user_can_access_request(requestee, buddy_request)
@@ -139,7 +142,10 @@ class RequestDetailTest(TestCase):
         requestee = User.objects.create_user(email="requestee@user.com")
         requestor = User.objects.create_user(email="requestor@user.com")
         BuddyRequest.objects.create(
-            requestee=requestee, requestor=requestor, message="test message"
+            requestee=requestee,
+            requestor=requestor,
+            message="test message",
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
 
     def invalid_request(self):
@@ -192,10 +198,12 @@ class RequestListTest(TestCase):
         sent_request_1 = BuddyRequest.objects.create(
             requestor=user,
             requestee=User.objects.create_user(email="requestee1@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         recd_request_1 = BuddyRequest.objects.create(
             requestee=user,
             requestor=User.objects.create_user(email="requestor1@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
 
         # one request in each category
@@ -216,10 +224,12 @@ class RequestListTest(TestCase):
         sent_request_2 = BuddyRequest.objects.create(
             requestor=user,
             requestee=User.objects.create_user(email="requestee2@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         recd_request_2 = BuddyRequest.objects.create(
             requestee=user,
             requestor=User.objects.create_user(email="requestor2@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         response = c.get("/requests/")
         assert response.status_code == 200

@@ -30,7 +30,10 @@ class CreateBuddyRequestTest(TransactionTestCase):
         Profile.objects.create(user=mentor)
         msg = "test message"
         new_buddy_request = BuddyRequest.objects.create(
-            requestor=mentee, requestee=mentor, message=msg
+            requestor=mentee,
+            requestee=mentor,
+            message=msg,
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         buddy_request = BuddyRequest.objects.first()
         assert new_buddy_request == buddy_request
@@ -201,7 +204,10 @@ class SendBuddyRequestTest(TestCase):
         mentor.is_active = True
 
         buddy_request = BuddyRequest.objects.create(
-            requestor=mentee, requestee=mentor, message="Please help me!"
+            requestor=mentee,
+            requestee=mentor,
+            message="Please help me!",
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         assert not can_request(mentee, someone)
         assert not can_request(someone, mentor)
@@ -219,7 +225,10 @@ class SendBuddyRequestTest(TestCase):
         mentee.is_active = True
 
         buddy_request = BuddyRequest.objects.create(
-            requestor=mentee, requestee=mentor, message="Please help me!"
+            requestor=mentor,
+            requestee=mentee,
+            message="Please help me!",
+            request_type=BuddyRequest.RequestType.OFFER,
         )
         assert not can_offer(mentor, someone)
         assert not can_offer(someone, mentee)
@@ -231,11 +240,19 @@ class SendBuddyRequestTest(TestCase):
         mentee = User.objects.get(email="mentee@user.com")
         mentor = User.objects.get(email="mentor@user.com")
         mentee_profile = Profile.objects.get(user=mentee)
-        assert not BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)
+        assert not BuddyRequest.objects.filter(
+            requestor=mentee,
+            requestee=mentor,
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
 
         c.force_login(mentee)
         response = c.post(
-            f"/send_request/{mentor.uuid}", {"message": "Please be my mentor."}
+            f"/send_request/{mentor.uuid}",
+            {
+                "message": "Please be my mentor.",
+                "request_type": BuddyRequest.RequestType.REQUEST,
+            },
         )
         assert response.status_code == 302
         assert BuddyRequest.objects.get(requestor=mentee)
@@ -250,7 +267,11 @@ class SendBuddyRequestTest(TestCase):
         assert mentor.email in mail.outbox[0].recipients()
 
         response = c.post(
-            f"/send_request/{mentor.uuid}", {"message": "Please be my mentor."}
+            f"/send_request/{mentor.uuid}",
+            {
+                "message": "Please be my mentor.",
+                "request_type": BuddyRequest.RequestType.REQUEST,
+            },
         )
         assert response.status_code == 403
         assert len(BuddyRequest.objects.filter(requestor=mentee, requestee=mentor)) == 1
@@ -261,7 +282,10 @@ class SendBuddyRequestTest(TestCase):
         mentor = User.objects.get(email="mentor@user.com")
         mentor_profile = Profile.objects.get(user=mentor)
         buddy_request = BuddyRequest.objects.create(
-            requestor=mentee, requestee=mentor, message="Please be my mentor"
+            requestor=mentee,
+            requestee=mentor,
+            message="Please be my mentor",
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         buddy_request.status = 1
         buddy_request.save()
