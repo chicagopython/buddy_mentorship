@@ -7,11 +7,23 @@ from buddy_mentorship.models import BuddyRequest, Profile
 
 @login_required(login_url="login")
 def requests_list(request):
-    requests_sent = BuddyRequest.objects.filter(requestor=request.user)
-    requests_received = BuddyRequest.objects.filter(requestee=request.user)
+    requests_sent = BuddyRequest.objects.filter(
+        requestor=request.user, request_type=BuddyRequest.RequestType.REQUEST
+    )
+    requests_received = BuddyRequest.objects.filter(
+        requestee=request.user, request_type=BuddyRequest.RequestType.REQUEST
+    )
+    offers_sent = BuddyRequest.objects.filter(
+        requestor=request.user, request_type=BuddyRequest.RequestType.OFFER
+    )
+    offers_received = BuddyRequest.objects.filter(
+        requestee=request.user, request_type=BuddyRequest.RequestType.OFFER
+    )
     context = {
         "requests_sent": requests_sent,
         "requests_received": requests_received,
+        "offers_sent": offers_sent,
+        "offers_received": offers_received,
         "title": "Requests",
         "active_page": "requests",
     }

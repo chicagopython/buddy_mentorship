@@ -30,8 +30,9 @@ class BuddyRequest(models.Model):
     message = models.TextField()
 
     def __str__(self):
+        request_type_str = ["Request", "Offer"][int(self.request_type)]
         return (
-            "Buddy request from "
+            f"{request_type_str} from "
             f"{self.requestor.email} to {self.requestee.email} on "
             f"{self.request_sent}"
         )
@@ -89,7 +90,7 @@ class BuddyRequest(models.Model):
             )
             send_mail(
                 f"{self.requestee.first_name} accepted your "
-                f"Buddy {request_type_str} ",
+                f"Buddy {request_type_str}",
                 plain_message,
                 settings.EMAIL_ADDRESS,
                 [self.requestor.email],

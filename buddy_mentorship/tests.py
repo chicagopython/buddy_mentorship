@@ -43,7 +43,7 @@ class CreateBuddyRequestTest(TransactionTestCase):
         assert buddy_request.requestor == mentee
         assert buddy_request.message == msg
         assert buddy_request.__str__() == (
-            f"Buddy request from mentee@user.com to mentor@user.com "
+            f"Request from mentee@user.com to mentor@user.com "
             f"on {buddy_request.request_sent.__str__()}"
         )
 
@@ -289,7 +289,7 @@ class SendBuddyRequestTest(TestCase):
         )
         buddy_request.status = 1
         buddy_request.save()
-
+        outbox = mail.outbox
         assert len(mail.outbox) == 2
         assert mail.outbox[1].subject == "Frank accepted your Buddy Request"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
