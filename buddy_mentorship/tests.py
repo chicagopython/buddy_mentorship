@@ -23,11 +23,15 @@ from django.db import IntegrityError
 
 class CreateBuddyRequestTest(TransactionTestCase):
     @override_settings(EMAIL_HOST="localhost")
-    def test_create_buddy_request(self):
+    def setUp(self):
         mentee = User.objects.create_user(email="mentee@user.com")
         Profile.objects.create(user=mentee)
         mentor = User.objects.create_user(email="mentor@user.com")
         Profile.objects.create(user=mentor)
+
+    def test_create_buddy_request(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
         msg = "test message"
         new_buddy_request = BuddyRequest.objects.create(
             requestor=mentee,
@@ -35,7 +39,7 @@ class CreateBuddyRequestTest(TransactionTestCase):
             message=msg,
             request_type=BuddyRequest.RequestType.REQUEST,
         )
-        buddy_request = BuddyRequest.objects.first()
+        buddy_request = BuddyRequest.objects.get(requestor=mentee, requestee=mentor)
         assert new_buddy_request == buddy_request
         assert timezone.now() - buddy_request.request_sent > dt.timedelta(seconds=0)
         assert timezone.now() - buddy_request.request_sent < dt.timedelta(minutes=1)
@@ -44,6 +48,28 @@ class CreateBuddyRequestTest(TransactionTestCase):
         assert buddy_request.message == msg
         assert buddy_request.__str__() == (
             f"Request from mentee@user.com to mentor@user.com "
+            f"on {buddy_request.request_sent.__str__()}"
+        )
+
+    def test_create_buddy_offer(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        msg = "test message"
+        new_buddy_request = BuddyRequest.objects.create(
+            requestee=mentee,
+            requestor=mentor,
+            message=msg,
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        buddy_request = BuddyRequest.objects.get(requestor=mentor, requestee=mentee)
+        assert new_buddy_request == buddy_request
+        assert timezone.now() - buddy_request.request_sent > dt.timedelta(seconds=0)
+        assert timezone.now() - buddy_request.request_sent < dt.timedelta(minutes=1)
+        assert buddy_request.requestee == mentee
+        assert buddy_request.requestor == mentor
+        assert buddy_request.message == msg
+        assert buddy_request.__str__() == (
+            f"Offer from mentor@user.com to mentee@user.com "
             f"on {buddy_request.request_sent.__str__()}"
         )
 
@@ -214,27 +240,6 @@ class SendBuddyRequestTest(TestCase):
         assert not can_request(mentee, mentor)
         buddy_request.delete()
 
-    def test_can_offer(self):
-        mentee = User.objects.get(email="mentee@user.com")
-        mentor = User.objects.get(email="mentor@user.com")
-        someone = User.objects.get(email="someone@user.com")
-        assert can_offer(mentor, mentee)
-
-        mentee.is_active = False
-        assert not can_offer(mentor, mentee)
-        mentee.is_active = True
-
-        buddy_request = BuddyRequest.objects.create(
-            requestor=mentor,
-            requestee=mentee,
-            message="Please help me!",
-            request_type=BuddyRequest.RequestType.OFFER,
-        )
-        assert not can_offer(mentor, someone)
-        assert not can_offer(someone, mentee)
-        assert not can_offer(mentor, mentee)
-        buddy_request.delete()
-
     def test_send_request(self):
         c = Client()
         mentee = User.objects.get(email="mentee@user.com")
@@ -289,7 +294,7 @@ class SendBuddyRequestTest(TestCase):
         )
         buddy_request.status = 1
         buddy_request.save()
-        outbox = mail.outbox
+
         assert len(mail.outbox) == 2
         assert mail.outbox[1].subject == "Frank accepted your Buddy Request"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
@@ -298,6 +303,158 @@ class SendBuddyRequestTest(TestCase):
         assert profile_link in sent_message
         assert mentor_name in sent_message
         assert mentee.email in mail.outbox[1].recipients()
+
+    def test_reject_request(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
+        buddy_request.status = 2
+        buddy_request.save()
+
+        # right now this doesn't do anything
+        assert len(mail.outbox) == 1
+
+
+class SendBuddyOfferTest(TestCase):
+    def setUp(self):
+        mentor = User.objects.create_user(
+            first_name="Frank", last_name="Mackey", email="mentor@user.com"
+        )
+
+        Profile.objects.create(
+            user=mentor,
+            bio="Experienced Undercover detective.",
+            can_help=True,
+            help_wanted=False,
+        )
+
+        mentee = User.objects.create_user(
+            first_name="Cassie", last_name="Maddox", email="mentee@user.com"
+        )
+
+        Profile.objects.create(
+            user=mentee,
+            bio="Aspiring Undercover detective with background in Murder.",
+            can_help=True,
+            help_wanted=True,
+        )
+
+        someone = User.objects.create_user(
+            first_name="Rob", last_name="Ryan", email="someone@user.com"
+        )
+
+        Profile.objects.create(
+            user=someone,
+            bio="You ever see somebody ruin their own life?",
+            can_help=False,
+            help_wanted=False,
+        )
+
+    def test_can_offer(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        someone = User.objects.get(email="someone@user.com")
+        assert can_offer(mentor, mentee)
+
+        mentee.is_active = False
+        assert not can_offer(mentor, mentee)
+        mentee.is_active = True
+
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            message="Please help me!",
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        assert not can_offer(mentor, someone)
+        assert not can_offer(someone, mentee)
+        assert not can_offer(mentor, mentee)
+        buddy_request.delete()
+
+    def test_send_offer(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        assert not BuddyRequest.objects.filter(
+            requestor=mentor,
+            requestee=mentee,
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+
+        c.force_login(mentor)
+        response = c.post(
+            f"/send_request/{mentee.uuid}",
+            {
+                "message": "Please be my mentee.",
+                "request_type": BuddyRequest.RequestType.OFFER,
+            },
+        )
+        assert response.status_code == 302
+        assert BuddyRequest.objects.get(requestor=mentor)
+
+        assert len(mail.outbox) == 1
+        assert mail.outbox[0].subject == "Frank sent you a Buddy Offer"
+        profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
+        mentor_name = f"{mentor.first_name} {mentor.last_name}"
+        sent_message = mail.outbox[0].alternatives[0][0]
+        assert profile_link in sent_message
+        assert mentor_name in sent_message
+        assert mentee.email in mail.outbox[0].recipients()
+
+        response = c.post(
+            f"/send_request/{mentee.uuid}",
+            {
+                "message": "Please be my mentee.",
+                "request_type": BuddyRequest.RequestType.OFFER,
+            },
+        )
+        assert response.status_code == 403
+        assert len(BuddyRequest.objects.filter(requestor=mentor, requestee=mentee)) == 1
+
+    def test_accept_offer(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        mentee_profile = Profile.objects.get(user=mentee)
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            message="Please be my mentee",
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        buddy_request.status = 1
+        buddy_request.save()
+
+        assert len(mail.outbox) == 2
+        assert mail.outbox[1].subject == "Cassie accepted your Buddy Offer"
+        profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
+        mentee_name = f"{mentee.first_name} {mentee.last_name}"
+        sent_message = mail.outbox[1].alternatives[0][0]
+        assert profile_link in sent_message
+        assert mentee_name in sent_message
+        assert mentor.email in mail.outbox[1].recipients()
+
+    def test_reject_offer(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        buddy_request.status = 2
+        buddy_request.save()
+
+        # right now this doesn't do anything
+        assert len(mail.outbox) == 1
 
 
 class ProfileEditTest(TestCase):
