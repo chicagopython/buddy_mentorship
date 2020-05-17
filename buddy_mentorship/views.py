@@ -170,7 +170,7 @@ class ProfileEdit(LoginRequiredMixin, FormView):
 @login_required(login_url="login")
 def update_request(request, buddy_request_id):
     buddy_request = BuddyRequest.objects.get(id=buddy_request_id)
-    if request.user != buddy_request.requestor:
+    if request.user != buddy_request.requestee:
         return HttpResponseForbidden("You cannot accept or reject this request")
     if request.method != "POST":
         return HttpResponseForbidden("Error - page accessed incorrectly")
