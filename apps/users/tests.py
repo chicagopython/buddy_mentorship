@@ -40,6 +40,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         chrome_options = Options()
         if settings.CHROMEDRIVER_HEADLESS == "TRUE":
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--no-sandbox")
 
         cls.selenium = WebDriver(chrome_options=chrome_options)
         cls.selenium.implicitly_wait(5)
