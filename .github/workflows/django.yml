@@ -28,3 +28,12 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+      env:
+        GITHUB_APP_ID: secret
+        GITHUB_API_SECRET: secret
+        DJANGO_SETTINGS_MODULE: buddy_mentorship.settings.local
+        EMAIL_PORT: 465
+        EMAIL_HOST_USER: apikey
+        EMAIL_HOST_PASSWORD: secret
+        EMAIL_ADDRESS: test@testing.ly
+        APP_URL: http://example.com
