@@ -39,7 +39,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         super().setUpClass()
         chrome_options = Options()
         print(settings.CHROMEDRIVER_HEADLESS)
-        if settings.CHROMEDRIVER_HEADLESS == "TRUE":
+        if settings.CHROMEDRIVER_HEADLESS == "true":
             print("ENV FILE WORKED!!!!")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--headless")
