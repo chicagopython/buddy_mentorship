@@ -42,8 +42,9 @@ class UserLoginTest(StaticLiveServerTestCase):
             chrome_options.add_argument("--headless")
 
         if settings.SYSTEM == "github":
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--disable-dev-shm-usage")
+            chrome_options.add_argument("--headless")
+            # chrome_options.add_argument("--no-sandbox")
+            # chrome_options.add_argument("--disable-dev-shm-usage")
 
         cls.selenium = WebDriver(chrome_options=chrome_options)
         cls.selenium.implicitly_wait(5)
