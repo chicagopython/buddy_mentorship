@@ -61,7 +61,7 @@ jobs:
           POSTGRES_PORT: 5432
           GITHUB_APP_ID: secret
           GITHUB_API_SECRET: secret
-          DJANGO_SETTINGS_MODULE: buddy_mentorship.settings.local
+          DJANGO_SETTINGS_MODULE: buddy_mentorship.settings.ci
           EMAIL_PORT: 465
           EMAIL_HOST_USER: apikey
           EMAIL_HOST_PASSWORD: secret
