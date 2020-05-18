@@ -38,9 +38,11 @@ class UserLoginTest(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         chrome_options = Options()
-        if settings.CHROMEDRIVER_HEADLESS == "true":
-            chrome_options.add_argument("--no-sandbox")
+        if settings.SYSTEM == "wsl":
             chrome_options.add_argument("--headless")
+
+        if settings.SYSTEM == "github":
+            chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
 
         cls.selenium = WebDriver(chrome_options=chrome_options)
