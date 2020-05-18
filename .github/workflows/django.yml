@@ -50,13 +50,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Connect to PostgreSQL
+      - name: Run tests
         run: | 
           python manage.py test
         env:
           # The hostname used to communicate with the PostgreSQL service container
           POSTGRES_HOST: postgres
           # The default PostgreSQL port
+          POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_PORT: 5432
           GITHUB_APP_ID: secret
           GITHUB_API_SECRET: secret
