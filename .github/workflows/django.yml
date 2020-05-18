@@ -72,3 +72,4 @@ jobs:
           EMAIL_HOST_PASSWORD: secret
           EMAIL_ADDRESS: test@testing.ly
           APP_URL: http://example.com
+          CHROMEDRIVER_HEADLESS: TRUE
