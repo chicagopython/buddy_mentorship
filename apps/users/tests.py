@@ -39,6 +39,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         super().setUpClass()
         chrome_options = Options()
         if settings.CHROMEDRIVER_HEADLESS == "TRUE":
+            print("ENV FILE WORKED!!!!")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--disable-dev-shm-usage")
