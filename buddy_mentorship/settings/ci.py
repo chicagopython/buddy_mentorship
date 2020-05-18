@@ -88,6 +88,7 @@ DATABASES = {
         "NAME": "buddy_mentorship",
         "USER": "buddy_mentorship",
         "HOST": "postgres",
+        "PASSWORD": "postgres",
     }
 }
 
