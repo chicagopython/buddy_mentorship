@@ -38,11 +38,10 @@ class UserLoginTest(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         chrome_options = Options()
-        if settings.SYSTEM == "wsl":
+        if settings.CHROME_HEADLESS:
             chrome_options.add_argument("--headless")
 
-        if settings.SYSTEM == "github":
-            chrome_options.add_argument("--headless")
+        if not settings.CHROME_SANDBOX:
             chrome_options.add_argument("--no-sandbox")
 
         cls.selenium = WebDriver(chrome_options=chrome_options)
