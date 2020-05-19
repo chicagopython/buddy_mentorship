@@ -1,5 +1,6 @@
 from django.test import TransactionTestCase, TestCase, Client
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.conf import settings
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -37,12 +38,11 @@ class UserLoginTest(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         chrome_options = Options()
-        # runs headless chrome for wsl environments
-        if (
-            "linux" in platform.uname()[0].lower()
-            and "microsoft" in platform.uname()[2].lower()
-        ):
+        if settings.CHROME_HEADLESS:
             chrome_options.add_argument("--headless")
+
+        if not settings.CHROME_SANDBOX:
+            chrome_options.add_argument("--no-sandbox")
 
         cls.selenium = WebDriver(chrome_options=chrome_options)
         cls.selenium.implicitly_wait(5)

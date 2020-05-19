@@ -1,0 +1,82 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+
+jobs:
+  container-job:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.7]
+
+    container: python:3.7
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: buddy_mentorship
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: buddy_mentorship
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # Downloads a copy of the code in your repository before running CI tests
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+
+      # Performs a clean installation of all dependencies in the `package.json` file
+      # For more information, see https://docs.npmjs.com/cli/ci.html
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+          sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          apt-get -y update
+          apt-get install -y google-chrome-stable
+
+          wget -q "https://chromedriver.storage.googleapis.com/81.0.4044.138/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
+          && unzip /tmp/chromedriver.zip -d /usr/bin/ \
+          && rm /tmp/chromedriver.zip
+
+      - name: Run tests
+        run: | 
+          python manage.py test
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_HOST: postgres
+          # The default PostgreSQL port
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_PORT: 5432
+          GITHUB_APP_ID: secret
+          GITHUB_API_SECRET: secret
+          DJANGO_SETTINGS_MODULE: buddy_mentorship.settings.ci
+          EMAIL_PORT: 465
+          EMAIL_HOST_USER: apikey
+          EMAIL_HOST_PASSWORD: secret
+          EMAIL_ADDRESS: test@testing.ly
+          APP_URL: http://example.com
+          # for selenium drivers
+          DISPLAY: 99

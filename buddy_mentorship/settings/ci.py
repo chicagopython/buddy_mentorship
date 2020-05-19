@@ -87,7 +87,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "buddy_mentorship",
         "USER": "buddy_mentorship",
-        "HOST": "127.0.0.1",
+        "HOST": "postgres",
+        "PASSWORD": "postgres",
     }
 }
 
@@ -128,7 +129,7 @@ STATIC_URL = "/static/"
 AUTH_USER_MODEL = "users.User"
 
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
-LOGIN_REDIRECT_URL = "/profile/"
+LOGIN_REDIRECT_URL = "/"
 
 # Social Auth
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
@@ -160,6 +161,5 @@ EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_SSL = True
 
-# used for selenium tests
-CHROME_HEADLESS = bool(os.environ["CHROME_HEADLESS"])
-CHROME_SANDBOX = bool(os.environ["CHROME_SANDBOX"])
+CHROME_HEADLESS = True
+CHROME_SANDBOX = False
