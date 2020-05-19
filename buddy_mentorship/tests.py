@@ -86,7 +86,7 @@ class ProfileTest(TestCase):
 
         # multiple paragraphs
         profile.bio = """I am a person.
-        
+
         My bio has two paragraphs."""
         assert profile.get_short_bio() == "I am a person."
 
@@ -213,6 +213,62 @@ class SendBuddyRequestTest(TestCase):
         assert profile_link in sent_message
         assert mentor_name in sent_message
         assert mentee.email in mail.outbox[1].recipients()
+
+
+class ProfileEditTest(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(
+            email="me@hariseldon", first_name="Hari", last_name="Seldon",
+        )
+
+    def test_edit_myself(self):
+        user = User.objects.get(email="me@hariseldon")
+        c = Client()
+        c.force_login(user)
+
+        response = c.post(
+            f"/profile_edit/",
+            {
+                "first_name": "new name",
+                "last_name": "new last name",
+                "email": "newemail@example.com",
+                "bio": "predicting the future",
+                "can_help": True,
+                "help_wanted": False,
+            },
+        )
+        user.refresh_from_db()
+        assert user.first_name == "new name"
+        assert user.last_name == "new last name"
+        assert user.email == "newemail@example.com"
+        profile = Profile.objects.get(user=user)
+        assert profile.bio == "predicting the future"
+        assert profile.can_help == True
+        assert profile.help_wanted == False
+
+    def test_edit_my_profile(self):
+        user = User.objects.get(email="me@hariseldon")
+        profile = Profile.objects.create(
+            user=user, bio="no future", can_help=False, help_wanted=True
+        )
+        c = Client()
+        c.force_login(user)
+
+        response = c.post(
+            f"/profile_edit/",
+            {
+                "first_name": "new name",
+                "last_name": "new last name",
+                "email": "newemail@example.com",
+                "bio": "predicting the future",
+                "can_help": True,
+                "help_wanted": False,
+            },
+        )
+        profile = Profile.objects.get(user=user)
+        assert profile.bio == "predicting the future"
+        assert profile.can_help == True
+        assert profile.help_wanted == False
 
 
 class SearchTest(TestCase):
