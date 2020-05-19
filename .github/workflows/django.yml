@@ -79,5 +79,4 @@ jobs:
           EMAIL_ADDRESS: test@testing.ly
           APP_URL: http://example.com
           # for selenium drivers
-          SYSTEM: github
           DISPLAY: 99
