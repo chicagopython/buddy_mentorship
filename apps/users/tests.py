@@ -64,7 +64,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
 
-        assert "you are logged in" in self.selenium.page_source
+        assert "Logout</a>" in self.selenium.page_source
 
     def test_bad_login(self):
         User.objects.create_superuser(
@@ -78,7 +78,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
 
-        assert "you are logged in" not in self.selenium.page_source
+        assert "Login</a>" in self.selenium.page_source
 
     def test_logout(self):
         User.objects.create_superuser(
@@ -98,7 +98,7 @@ class UserLoginTest(StaticLiveServerTestCase):
 
         self.selenium.get("%s%s" % (self.live_server_url, "/"))
 
-        assert "you are not logged in" in self.selenium.page_source
+        assert "Login</a>" in self.selenium.page_source
 
 
 class UserCanAccessRequestTest(TestCase):
