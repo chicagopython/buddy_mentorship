@@ -6,13 +6,78 @@
 
 {% block content %}
   <div class="starter-template">
-    Tada! It's the homepage!<br>
-
-    {% if user.is_authenticated %}
-    	<p>you are logged in</p>
-	{% else %}
-	    <p>you are not logged in</p>
-	{% endif %}
+  		<h1 class="display-3 text-center">
+  			Welcome to <span class="text-primary">ChiPy Mentorship</span>.
+  		</h1>
+  		<p class="lead text-center text-muted mb-6 mb-lg-8">
+  			Find Python mentors or mentees in the Chicagoland area.
+  		</p>
   </div>
+
+  <div class="starter-template">
+  	<h1 class="display-5 text-center text-md-left">How does it work?</h1>
+	  <p class="steps"><b>Create a FREE account</b> by logging in with GitHub.</p>
+	  <p class="steps"><b>Fill out your profile.</b> This will include details such as a bio, skill survey, etc. to help you find matches and potential matches find you.</p>
+	  <p class="steps"><b>Search for mentors or mentees.</b> When you find one you like, simply send a xxx request. If the requestee is interested in working with you, you'll receive an e-mail to get you connected.</p>
+	  <p class="steps"><b>Self-organize meet-ups with your new mentor/mentee!</b> Meet as many or few times as you want.</p>
+	  <p class="steps">Profit. You, not us - we're not-for-profit.</p>
+	</div>
+
+  <div class="starter-template text-md-left">
+  	<h1 class="display-5 text-center text-md-left">FAQ</h1>
+	  <p>How much does it cost?</p>
+	  <p class="text-muted">
+	  	It's totally free.
+	  	If you'd like to help support this app and other ChiPy offerings, please consider
+	  	<a href="https://www.chipy.org/pages/donate/">donating</a>.
+	  </p>
+
+	  <p>Who can participate?</p>
+	  <p class="text-muted">
+	  	Anyone who lives in the Chicagoland area
+	  	or who can physically be in the Chicagoland area to meet with their mentor/mentee.
+	  	While mentors/mentees can meet remotely,
+	  	the ability to meet in-person is of huge benefit.
+	  	Also, ChiPy is a Chicago-local organization :).
+	  </p>
+
+	  <p>Do I need to know X?</p>
+	  <p class="text-muted">
+		  Nope. We welcome folks of any level of prior knowledge.
+		  Totally new to Python or programming? No problem.
+		  Experienced Webdev who wants to learn some data science? Awesome!
+		</p>
+
+	  <p>How long should a mentor/mentee relationship last?</p>
+	  <p class="text-muted">
+	  	You can meet with your mentor/mentee as many or few times as you want,
+	  	over as long or short of a period as you want.
+	  	Generally we suggest targeting longer-term relationships, with multiple meetings over a period of months or longer.
+	  </p>
+
+	  <p>Where should we meet?</p>
+	  <p class="text-muted">
+	  	Given the current Covid-19 pandemic, all meetings should be held remotely.
+	  	Once it is safe to meet in person, we suggest public spaces to promote safety.
+	  </p>
+
+	  <p>What's an appropriate relationship between a mentee/mentor?</p>
+	  <p class="text-muted">
+	  	We want our participants to have an enjoyable and fulfilling experience.
+	  	Accordingly, every participant is expected to show respect and courtesy to each other.
+	  	To make clear what is expected,
+	  	all participants are required to conform to ChiPy's Code of Conduct at all times.
+	  	Read our full Code of Conduct <a href="https://www.chipy.org/pages/conduct/">here</a>.
+	  	If you have any concerns you should immediately contact ChiPy organizers
+	  	in-person, on Slack, or text/call. For text/call, the On-Call responder can be reached at 1+201-778-4075. 
+	  </p>
+
+	  <p>Is this the same thing as ChiPy's Mentorship Program?</p>
+	  <p class="text-muted">
+	  	No. ChiPy's Mentorship Program was a twice-annual, 13-week structured program where participating mentees worked with their respective mentors to complete a selected project, while blogging about/presenting the process/results and participating in Project Nights. The program ran from Fall 2014 through Fall 2019. It was discontinued in favor of opening up access to mentorship experiences via this app and apprenticeship offerings via ongoing projects such as the Web Guild.
+		</p>
+
+
+	</div>
 
 {% endblock content %}
