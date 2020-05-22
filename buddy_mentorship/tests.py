@@ -13,10 +13,12 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import BuddyRequest, Profile
+from .models import BuddyRequest, Profile, Skill, Experience
 from .views import can_request, send_request
 
 from apps.users.models import User
+
+from django.db import IntegrityError
 
 
 class CreateBuddyRequestTest(TransactionTestCase):
@@ -43,20 +45,55 @@ class CreateBuddyRequestTest(TransactionTestCase):
         )
 
 
-class ProfileTest(TestCase):
+class ProfileTest(TransactionTestCase):
     def test_create_profile(self):
         new_user = User.objects.create_user(email="testprofile@user.com")
         user = User.objects.first()
-        Profile.objects.create(
-            user=user,
-            bio="i'm super interested in Python",
-            help_wanted=True,
-            can_help=False,
+        profile = Profile.objects.create(user=user, bio="i'm super interested in Python")
+        skill1, skill2 = Skill.objects.create(skill="Django"), Skill.objects.create(skill="seaborn")
+
+        Experience.objects.create(
+            profile = profile,
+            skill = skill1,
+            level = 4,
+            can_help = True,
+            help_wanted = False,
         )
-        record = Profile.objects.get(user=user)
-        self.assertEqual(record.bio, "i'm super interested in Python")
-        self.assertEqual(record.help_wanted, True)
-        self.assertEqual(record.can_help, False)
+
+        Experience.objects.create(
+            profile = profile,
+            skill = skill2,
+            level = 1,
+            can_help = False,
+            help_wanted = True,
+        )
+
+        with self.assertRaises(IntegrityError):
+            Experience.objects.create(
+                profile = profile,
+                skill = skill2,
+                level = 1,
+                can_help = False,
+                help_wanted = True,
+            )         
+
+        profileRecord = Profile.objects.get(user=user)
+        self.assertEqual(profileRecord.bio, "i'm super interested in Python")
+
+        experienceRecord1 = Experience.objects.get(profile=profile, skill=skill1)
+        self.assertEqual(experienceRecord1.can_help, True)
+        self.assertEqual(experienceRecord1.help_wanted, False)
+
+        experienceRecord2 = Experience.objects.get(profile=profile, skill=skill2)
+        self.assertEqual(experienceRecord2.can_help, False)
+        self.assertEqual(experienceRecord2.help_wanted, True)
+
+        skillRecord1 = Skill.objects.get(skill=skill1)
+        self.assertEqual(skillRecord1.skill, 'Django')
+
+        skillRecord2 = Skill.objects.get(skill=skill2)
+        self.assertEqual(skillRecord2.skill, 'seaborn')
+
 
     def test_short_bio(self):
         user = User.objects.create_user(email="user@user.com")
@@ -77,7 +114,7 @@ class ProfileTest(TestCase):
         ]
         bio = "".join(bio_parts)
         profile = Profile.objects.create(
-            user=user, bio=bio, help_wanted=True, can_help=True
+            user=user, bio=bio
         )
         short_bio = "".join(
             bio_parts[:3] + ["brown american shorthair and kitten manx."]
@@ -114,37 +151,43 @@ class ProfileTest(TestCase):
 
 class SendBuddyRequestTest(TestCase):
     def setUp(self):
+
+        skill1, skill2 = Skill.objects.create(skill="pandas"), Skill.objects.create(skill="Flask")
+
         mentor = User.objects.create_user(
             first_name="Frank", last_name="Mackey", email="mentor@user.com"
         )
 
-        Profile.objects.create(
-            user=mentor,
-            bio="Experienced Undercover detective.",
-            can_help=True,
-            help_wanted=False,
+        mentor_profile = Profile.objects.create(
+            user=mentor, bio="Experienced Undercover detective."
+        )
+
+        Experience.objects.create(
+            profile = mentor_profile, skill = skill1, level = 2, can_help=True, help_wanted=False
         )
 
         mentee = User.objects.create_user(
             first_name="Cassie", last_name="Maddox", email="mentee@user.com"
         )
 
-        Profile.objects.create(
-            user=mentee,
-            bio="Aspiring Undercover detective with background in Murder.",
-            can_help=True,
-            help_wanted=True,
+        mentee_profile = Profile.objects.create(
+            user=mentee, bio="Aspiring Undercover detective with background in Murder."
+        )
+
+        Experience.objects.create(
+            profile = mentee_profile, skill = skill1, level = 3, can_help=True, help_wanted=True
         )
 
         someone = User.objects.create_user(
             first_name="Rob", last_name="Ryan", email="someone@user.com"
         )
 
-        Profile.objects.create(
-            user=someone,
-            bio="You ever see somebody ruin their own life?",
-            can_help=False,
-            help_wanted=False,
+        someone_profile = Profile.objects.create(
+            user=someone, bio="You ever see somebody ruin their own life?"
+        )
+
+        Experience.objects.create(
+            profile = someone_profile, skill = skill2, level = 5, can_help=False, help_wanted=False
         )
 
     def test_can_request(self):
@@ -233,8 +276,6 @@ class ProfileEditTest(TestCase):
                 "last_name": "new last name",
                 "email": "newemail@example.com",
                 "bio": "predicting the future",
-                "can_help": True,
-                "help_wanted": False,
             },
         )
         user.refresh_from_db()
@@ -243,13 +284,11 @@ class ProfileEditTest(TestCase):
         assert user.email == "newemail@example.com"
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
-        assert profile.can_help == True
-        assert profile.help_wanted == False
 
     def test_edit_my_profile(self):
         user = User.objects.get(email="me@hariseldon")
         profile = Profile.objects.create(
-            user=user, bio="no future", can_help=False, help_wanted=True
+            user=user, bio="no future"
         )
         c = Client()
         c.force_login(user)
@@ -261,64 +300,85 @@ class ProfileEditTest(TestCase):
                 "last_name": "new last name",
                 "email": "newemail@example.com",
                 "bio": "predicting the future",
-                "can_help": True,
-                "help_wanted": False,
             },
         )
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
-        assert profile.can_help == True
-        assert profile.help_wanted == False
 
 
 class SearchTest(TestCase):
     def setUp(self):
+
+        skill1, skill2 = Skill.objects.create(skill="pandas"), Skill.objects.create(skill="Flask")
+
         user = User.objects.create_user(
             email="elizabeth@bennet.org", first_name="Elizabeth", last_name="Bennet",
         )
 
-        Profile.objects.create(user=user, bio="", can_help=True, help_wanted=True)
+        profile_user = Profile.objects.create(user=user, bio="")
+
+        Experience.objects.create(
+            profile = profile_user, 
+            skill = skill2, 
+            level = 5, 
+            can_help=True, 
+            help_wanted=True
+        )
 
         mentor1 = User.objects.create_user(
             email="mr@bennet.org", first_name="Mr.", last_name="Bennet",
         )
 
-        Profile.objects.create(
-            user=mentor1,
-            bio="Father, country gentleman",
+        profile_mentor1 = Profile.objects.create(user=mentor1, bio="Father, country gentleman")
+
+        Experience.objects.create(
+            profile = profile_mentor1, 
+            skill = skill1, 
+            level = 1,            
             can_help=True,
-            help_wanted=False,
+            help_wanted=False
         )
 
         mentor2 = User.objects.create_user(
             email="charlotte@lucas.org", first_name="Charlotte", last_name="Lucas",
         )
 
-        Profile.objects.create(
-            user=mentor2,
-            bio="Sensible, intelligent woman",
+        profile_mentor2 = Profile.objects.create(user=mentor2, bio="Sensible, intelligent woman")
+
+        Experience.objects.create(
+            profile = profile_mentor2, 
+            skill = skill2, 
+            level = 3, 
             can_help=True,
-            help_wanted=False,
+            help_wanted=False
         )
+
 
         not_a_mentor = User.objects.create_user(
             email="jenny@bennet.org", first_name="Jane Gardiner", last_name="Bennet",
         )
 
-        Profile.objects.create(
-            user=not_a_mentor,
-            bio="Mother of five, host of nerves",
+        profile_not_a_mentor = Profile.objects.create(user=not_a_mentor, bio="Mother of five, host of nerves")
+
+        Experience.objects.create(
+            profile = profile_not_a_mentor,
+            skill=skill2,
+            level=1,
             can_help=False,
-            help_wanted=False,
+            help_wanted=False
         )
+
 
         another_mentee = User.objects.create_user(
             email="kitty@bennet.org", first_name="Kitty", last_name="Bennet",
         )
 
-        Profile.objects.create(
-            user=another_mentee,
-            bio="Likes a man in uniform",
+        profile_another_mentee = Profile.objects.create(user=another_mentee, bio="Likes a man in uniform")
+
+        Experience.objects.create(
+            profile=profile_another_mentee,
+            skill=skill1,
+            level=3,
             can_help=False,
             help_wanted=True,
         )

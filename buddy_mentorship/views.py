@@ -9,7 +9,7 @@ from django.views.generic.edit import FormView
 from apps.users.models import User
 
 from .forms import ProfileEditForm
-from .models import BuddyRequest, Profile
+from .models import BuddyRequest, Profile, Experience
 
 
 def index(request):
@@ -52,6 +52,10 @@ def send_request(request, uuid):
 def can_request(requestor, requestee):
     requestor_profile = Profile.objects.get(user=requestor)
     requestee_profile = Profile.objects.get(user=requestee)
+    requestor_experiences = Experience.objects.filter(profile=requestor_profile).all()
+    requestee_experiences = Experience.objects.filter(profile=requestee_profile).all()
+
+
     # when possible, should be no pending existing requests
     existing_requests = BuddyRequest.objects.filter(
         requestor=requestor, requestee=requestee
@@ -59,8 +63,8 @@ def can_request(requestor, requestee):
 
     return (
         requestor != requestee
-        and requestor_profile.help_wanted
-        and requestee_profile.can_help
+        and any([experience.help_wanted for experience in requestor_experiences])
+        and any([experience.can_help for experience in requestee_experiences])
         and requestor.is_active
         and requestee.is_active
         and not existing_requests
@@ -98,8 +102,6 @@ class ProfileEdit(LoginRequiredMixin, FormView):
         context["last_name"] = user.last_name
         context["bio"] = profile.bio if profile else ""
         context["email"] = user.email
-        context["can_help"] = profile.can_help if profile else False
-        context["help_wanted"] = profile.help_wanted if profile else False
 
         return context
 
@@ -136,7 +138,7 @@ class Search(LoginRequiredMixin, ListView):
     queryset = Profile.objects.all().order_by("-id")
 
     def get_queryset(self):
-        all_mentors = self.queryset.filter(can_help=True)
+        all_mentors = self.queryset.filter(experience__can_help=True)
         search_results = all_mentors.exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", None)

@@ -5,6 +5,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from apps.users.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class BuddyRequest(models.Model):
@@ -97,8 +98,6 @@ class Profile(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     bio = models.TextField()
-    help_wanted = models.BooleanField(default=False)
-    can_help = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Profile for {self.user.email}"
@@ -118,3 +117,28 @@ class Profile(models.Model):
             return trunc_bio[: last_sentence + 1]
         return trunc_bio[: trunc_bio.rfind(" ") + 1]
 
+class Skill(models.Model):
+    """
+    A list of skills
+    """
+    skill = models.CharField(max_length = 30)
+
+    def __str__(self):
+        return self.skill
+
+class Experience(models.Model):
+    """
+    """
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    level = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    can_help = models.BooleanField(default=False)
+    help_wanted = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['skill','profile'], name='unique_skill')
+        ]
+
+    def __str__(self):
+        return f"{self.profile.user.email} {self.skill}"
