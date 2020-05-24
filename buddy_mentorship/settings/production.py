@@ -5,7 +5,7 @@ from .base import *
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = False
+DEBUG = os.getenv("DEBUG_MODE") == "true"
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
