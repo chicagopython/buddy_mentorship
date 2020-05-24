@@ -140,6 +140,7 @@ class Skill(models.Model):
 
 class Experience(models.Model):
     """
+    Details an individual user's experience with a skill
     """
 
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)

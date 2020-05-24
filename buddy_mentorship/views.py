@@ -27,7 +27,7 @@ def profile(request, profile_id=""):
     profile = Profile.objects.get(id=profile_id)
     context = {
         "can_request": can_request(request.user, profile.user),
-        "can_offer": can_offer(request.user, profile.user),
+        "can_offer": can_request(profile.user, request.user),
         "profile": profile,
         "active_page": "profile",
         "request_type": BuddyRequest.RequestType,
@@ -50,7 +50,7 @@ def send_request(request, uuid):
 
     can_send_offer = int(request_type) == int(
         BuddyRequest.RequestType.OFFER
-    ) and can_offer(user, requestee)
+    ) and can_request(requestee, user)
 
     if can_send_request or can_send_offer:
         BuddyRequest.objects.create(
@@ -92,32 +92,6 @@ def can_request(requestor, requestee):
         requestor != requestee
         and any([experience.help_wanted for experience in requestor_experiences])
         and any([experience.can_help for experience in requestee_experiences])
-        and requestor.is_active
-        and requestee.is_active
-        and not existing_requests
-        and not existing_offers
-    )
-
-
-# needs to be updated as we expand profile model
-def can_offer(requestor, requestee):
-    requestor_profile = Profile.objects.get(user=requestor)
-    requestee_profile = Profile.objects.get(user=requestee)
-    existing_requests = BuddyRequest.objects.filter(
-        requestor=requestee,
-        requestee=requestor,
-        request_type=BuddyRequest.RequestType.REQUEST,
-    )
-    existing_offers = BuddyRequest.objects.filter(
-        requestor=requestor,
-        requestee=requestee,
-        request_type=BuddyRequest.RequestType.OFFER,
-    )
-
-    return (
-        requestor != requestee
-        and requestee_profile.help_wanted
-        and requestor_profile.can_help
         and requestor.is_active
         and requestee.is_active
         and not existing_requests
