@@ -62,11 +62,9 @@ def send_request(request, uuid):
         return redirect("requests")
 
     if int(request_type) == int(BuddyRequest.RequestType.REQUEST):
-        forbidden_string = " request"
+        return HttpResponseForbidden(f"You cannot send this user a request.")
     if int(request_type) == int(BuddyRequest.RequestType.OFFER):
-        forbidden_string = "n offer"
-
-    return HttpResponseForbidden(f"You cannot send this user a{forbidden_string}")
+        return HttpResponseForbidden(f"You cannot send this user an offer.")
 
 
 # needs to be updated as we expand profile model
