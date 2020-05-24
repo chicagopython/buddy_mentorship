@@ -11,7 +11,7 @@ from buddy_mentorship.models import BuddyRequest, Profile
 
 import platform
 
-'''
+
 class CustomUserManagerTest(TransactionTestCase):
     def test_create_user(self):
         new_user = User.objects.create_user(email="test@user.com")
@@ -64,7 +64,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
 
-        assert "you are logged in" in self.selenium.page_source
+        assert "Logout</a>" in self.selenium.page_source
 
     def test_bad_login(self):
         User.objects.create_superuser(
@@ -78,7 +78,7 @@ class UserLoginTest(StaticLiveServerTestCase):
         login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
         login_button.click()
 
-        assert "you are logged in" not in self.selenium.page_source
+        assert "Login</a>" in self.selenium.page_source
 
     def test_logout(self):
         User.objects.create_superuser(
@@ -98,7 +98,7 @@ class UserLoginTest(StaticLiveServerTestCase):
 
         self.selenium.get("%s%s" % (self.live_server_url, "/"))
 
-        assert "you are not logged in" in self.selenium.page_source
+        assert "Login</a>" in self.selenium.page_source
 
 
 class UserCanAccessRequestTest(TestCase):
@@ -116,7 +116,10 @@ class UserCanAccessRequestTest(TestCase):
         Profile.objects.create(user=requestor)
         someone = User.objects.create_user(email="someone@user.com")
         buddy_request = BuddyRequest.objects.create(
-            requestee=requestee, requestor=requestor, message="test message"
+            requestee=requestee,
+            requestor=requestor,
+            message="test message",
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         assert user_can_access_request(su, buddy_request)
         assert user_can_access_request(requestee, buddy_request)
@@ -139,7 +142,10 @@ class RequestDetailTest(TestCase):
         requestee = User.objects.create_user(email="requestee@user.com")
         requestor = User.objects.create_user(email="requestor@user.com")
         BuddyRequest.objects.create(
-            requestee=requestee, requestor=requestor, message="test message"
+            requestee=requestee,
+            requestor=requestor,
+            message="test message",
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
 
     def invalid_request(self):
@@ -185,17 +191,33 @@ class RequestListTest(TestCase):
         assert response.status_code == 200
         assert not response.context["requests_sent"]
         assert not response.context["requests_received"]
+        assert not response.context["offers_received"]
+        assert not response.context["offers_sent"]
 
-    def one_or_two_request(self):
+    def one_or_two_requests(self):
         user = User.objects.get(email="user@user.com")
 
         sent_request_1 = BuddyRequest.objects.create(
             requestor=user,
             requestee=User.objects.create_user(email="requestee1@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         recd_request_1 = BuddyRequest.objects.create(
             requestee=user,
             requestor=User.objects.create_user(email="requestor1@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
+
+        sent_offer_1 = BuddyRequest.objects.create(
+            requestor=user,
+            requestee=User.objects.get(email="requestee1@user.com"),
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+
+        recd_offer_1 = BuddyRequest.objects.create(
+            requestee=user,
+            requestor=User.objects.get(email="requestor1@user.com"),
+            request_type=BuddyRequest.RequestType.OFFER,
         )
 
         # one request in each category
@@ -210,16 +232,36 @@ class RequestListTest(TestCase):
 
         requests_received = response.context["requests_received"]
         assert len(requests_received) == 1
-        assert recd_request_1 in requests_sent
+        assert recd_request_1 in requests_received
+
+        offers_sent = response.context["offers_sent"]
+        assert len(offers_sent) == 1
+        assert sent_offer_1 in offers_sent
+
+        offers_received = response.context["offers_received"]
+        assert len(offers_received) == 1
+        assert recd_offer_1 in offers_received
 
         # two requests in each category
         sent_request_2 = BuddyRequest.objects.create(
             requestor=user,
             requestee=User.objects.create_user(email="requestee2@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
         )
         recd_request_2 = BuddyRequest.objects.create(
             requestee=user,
             requestor=User.objects.create_user(email="requestor2@user.com"),
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
+        sent_offer_2 = BuddyRequest.objects.create(
+            requestor=user,
+            requestee=User.objects.get(email="requestee2@user.com"),
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        recd_offer_2 = BuddyRequest.objects.create(
+            requestee=user,
+            requestor=User.objects.get(email="requestor2@user.com"),
+            request_type=BuddyRequest.RequestType.OFFER,
         )
         response = c.get("/requests/")
         assert response.status_code == 200
@@ -233,4 +275,13 @@ class RequestListTest(TestCase):
         assert len(requests_received) == 2
         assert recd_request_1 in requests_sent
         assert recd_request_2 in requests_sent
-'''
+
+        offers_sent = response.context["offers_sent"]
+        assert len(offers_sent) == 2
+        assert sent_offer_1 in offers_sent
+        assert sent_offer_2 in offers_sent
+
+        offers_received = response.context["offers_received"]
+        assert len(offers_received) == 2
+        assert recd_offer_1 in offers_received
+        assert recd_offer_2 in offers_received

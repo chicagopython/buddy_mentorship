@@ -57,7 +57,7 @@ jobs:
           apt-get -y update
           apt-get install -y google-chrome-stable
 
-          wget -q "https://chromedriver.storage.googleapis.com/81.0.4044.138/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
+          wget -q "https://chromedriver.storage.googleapis.com/83.0.4103.39/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
           && unzip /tmp/chromedriver.zip -d /usr/bin/ \
           && rm /tmp/chromedriver.zip
 
