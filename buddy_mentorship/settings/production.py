@@ -19,4 +19,9 @@ DATABASES = {
     }
 }
 
+# will only work for one admin
+ADMINS = [tuple(os.getenv("ADMINS").split(","))] if os.getenv("ADMINS") else []
+
 django_heroku.settings(locals())
+
+DEBUG_PROPAGATE_EXCEPTIONS = True
