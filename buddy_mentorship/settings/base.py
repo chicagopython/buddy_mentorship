@@ -164,11 +164,11 @@ EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_SSL = True
 
 # used for selenium tests
-CHROME_HEADLESS = bool(os.getenv("CHROME_HEADLESS"))
-CHROME_SANDBOX = bool(os.getenv("CHROME_SANDBOX"))
+CHROME_HEADLESS = os.getenv("CHROME_HEADLESS") == "true"
+CHROME_SANDBOX = os.getenv("CHROME_SANDBOX") == "true"
 
 # if True the maintenance-mode will be activated
-MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE")
+MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE") == "true"
 MAINTENANCE_MODE_TEMPLATE = "buddy_mentorship/coming_soon.html"
 
 # if True admin site will not be affected by the maintenance-mode page
