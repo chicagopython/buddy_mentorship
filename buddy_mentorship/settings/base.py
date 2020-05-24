@@ -25,7 +25,9 @@ SECRET_KEY = "tfs8a%6a@y9nq#57!@m09wmnm9sl!+0!#ut-czzp#0u0+-j91*"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = (
+    os.getenv("ALLOWED_HOSTS").split(",") if os.getenv("ALLOWED_HOSTS") else []
+)
 
 
 # Application definition
