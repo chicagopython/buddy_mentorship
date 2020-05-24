@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # internal
     "apps.users",
     "buddy_mentorship",
+    "maintenance_mode",
 ]
 
 MIDDLEWARE = [
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "maintenance_mode.middleware.MaintenanceModeMiddleware",
 ]
 
 ROOT_URLCONF = "buddy_mentorship.urls"
@@ -71,6 +73,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
+                "maintenance_mode.context_processors.maintenance_mode",
             ],
         },
     },
@@ -163,3 +166,10 @@ EMAIL_USE_SSL = True
 # used for selenium tests
 CHROME_HEADLESS = bool(os.getenv("CHROME_HEADLESS"))
 CHROME_SANDBOX = bool(os.getenv("CHROME_SANDBOX"))
+
+# if True the maintenance-mode will be activated
+MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE")
+MAINTENANCE_MODE_TEMPLATE = "buddy_mentorship/coming_soon.html"
+
+# if True admin site will not be affected by the maintenance-mode page
+MAINTENANCE_MODE_IGNORE_ADMIN_SITE = True
