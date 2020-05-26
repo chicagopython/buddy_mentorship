@@ -22,7 +22,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
-    fields = ["skill"]
+    fields = ["skill", "display_name"]
 
 
 @admin.register(Experience)

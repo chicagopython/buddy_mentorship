@@ -31,8 +31,6 @@ def profile(request, profile_id=""):
         "profile": profile,
         "active_page": "profile",
         "request_type": BuddyRequest.RequestType,
-        "can_help": Experience.objects.filter(profile=profile, can_help=True),
-        "help_wanted": Experience.objects.filter(profile=profile, help_wanted=True),
     }
     return render(request, "buddy_mentorship/profile.html", context)
 
@@ -166,7 +164,7 @@ class Search(LoginRequiredMixin, ListView):
     queryset = Profile.objects.all().order_by("-id")
 
     def get_queryset(self):
-        all_mentors = self.queryset.filter(experience__can_help=True)
+        all_mentors = self.queryset.filter(experience__can_help=True).distinct()
         search_results = all_mentors.exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", None)
