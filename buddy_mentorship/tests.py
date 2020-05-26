@@ -120,6 +120,40 @@ class ProfileTest(TransactionTestCase):
         skillRecord2 = Skill.objects.get(skill=skill2)
         self.assertEqual(skillRecord2.skill, "seaborn")
 
+    def test_profile_view(self):
+        skill1 = Skill.objects.create(skill="python")
+        skill2 = Skill.objects.create(skill="django")
+        skill3 = Skill.objects.create(skill="numpy")
+        skill4 = Skill.objects.create(skill="pandas")
+
+        skills = [
+            {"skill": skill1, "level": 4, "can_help": True, "help_wanted": False},
+            {"skill": skill2, "level": 3, "can_help": True, "help_wanted": True},
+            {"skill": skill3, "level": 2, "can_help": False, "help_wanted": True},
+            {"skill": skill4, "level": 1, "can_help": False, "help_wanted": False},
+        ]
+
+        user = create_test_users(1, "user", skills)[0]
+        profile = Profile.objects.get(user=user)
+
+        exp1 = Experience.objects.get(profile=profile, skill=skill1)
+        exp2 = Experience.objects.get(profile=profile, skill=skill2)
+        exp3 = Experience.objects.get(profile=profile, skill=skill3)
+
+        c = Client()
+        c.force_login(user)
+        response = c.get(f"/profile/",)
+        assert response.status_code == 200
+        assert response.context["can_request"] == False
+        assert response.context["can_offer"] == False
+        assert response.context["profile"] == Profile.objects.get(user=user)
+        assert response.context["active_page"] == "profile"
+        assert response.context["request_type"] == BuddyRequest.RequestType
+        can_help = response.context["can_help"]
+        assert len(can_help) == 2 and exp1 in can_help and exp2 in can_help
+        help_wanted = response.context["help_wanted"]
+        assert len(help_wanted) == 2 and exp2 in help_wanted and exp3 in help_wanted
+
     def test_short_bio(self):
         user = User.objects.create_user(email="user@user.com")
 

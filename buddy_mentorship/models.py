@@ -129,10 +129,16 @@ class Profile(models.Model):
 
 class Skill(models.Model):
     """
-    A list of skills
+    skill: lowercased name of skill (e.g. "python", "mvc", etc.). Must be unique.\n
+    display_name: name showed in UI, e.g. "Python", "MVC", etc.
     """
 
     skill = models.CharField(max_length=30, unique=True)
+    display_name = models.CharField(max_length=30, null=True)
+
+    def save(self, *args, **kwargs):
+        self.display_name = self.skill.title()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.skill

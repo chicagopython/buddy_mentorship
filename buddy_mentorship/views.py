@@ -31,6 +31,8 @@ def profile(request, profile_id=""):
         "profile": profile,
         "active_page": "profile",
         "request_type": BuddyRequest.RequestType,
+        "can_help": Experience.objects.filter(profile=profile, can_help=True),
+        "help_wanted": Experience.objects.filter(profile=profile, help_wanted=True),
     }
     return render(request, "buddy_mentorship/profile.html", context)
 
