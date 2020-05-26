@@ -132,7 +132,7 @@ class Skill(models.Model):
     A list of skills
     """
 
-    skill = models.CharField(max_length=30)
+    skill = models.CharField(max_length=30, unique=True)
 
     def __str__(self):
         return self.skill

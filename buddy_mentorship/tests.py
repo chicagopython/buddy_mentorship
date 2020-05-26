@@ -595,6 +595,15 @@ class SearchTest(TestCase):
         assert search_results[0].user == mentor2
 
 
+class CreateSkillTest(TestCase):
+    def test_create_skill(self):
+        assert not Skill.objects.filter(skill="python")
+        Skill.objects.create(skill="python")
+        assert Skill.objects.get(skill="python")
+        with self.assertRaises(IntegrityError):
+            Skill.objects.create(skill="python")
+
+
 def create_test_users(n, handle, experiences):
     """
     n: number of users to create \n
