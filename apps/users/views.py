@@ -8,17 +8,21 @@ from buddy_mentorship.models import BuddyRequest, Profile
 @login_required(login_url="login")
 def requests_list(request):
     requests_sent = BuddyRequest.objects.filter(
-        requestor=request.user, request_type=BuddyRequest.RequestType.REQUEST
-    )
+        requestor=request.user, request_type=BuddyRequest.RequestType.REQUEST,
+    ).exclude(status=BuddyRequest.Status.REJECTED)
+
     requests_received = BuddyRequest.objects.filter(
         requestee=request.user, request_type=BuddyRequest.RequestType.REQUEST
-    )
+    ).exclude(status=BuddyRequest.Status.REJECTED)
+
     offers_sent = BuddyRequest.objects.filter(
         requestor=request.user, request_type=BuddyRequest.RequestType.OFFER
-    )
+    ).exclude(status=BuddyRequest.Status.REJECTED)
+
     offers_received = BuddyRequest.objects.filter(
         requestee=request.user, request_type=BuddyRequest.RequestType.OFFER
-    )
+    ).exclude(status=BuddyRequest.Status.REJECTED)
+
     context = {
         "requests_sent": requests_sent,
         "requests_received": requests_received,

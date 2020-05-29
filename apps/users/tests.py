@@ -7,7 +7,8 @@ from selenium.webdriver.common.by import By
 from .models import User
 from .views import user_can_access_request
 
-from buddy_mentorship.models import BuddyRequest, Profile
+from buddy_mentorship.models import BuddyRequest, Profile, Skill
+from buddy_mentorship.tests import create_test_users
 
 import platform
 
@@ -138,53 +139,82 @@ class UserCanAccessRequestTest(TestCase):
 
 
 class RequestDetailTest(TestCase):
-    def setup(self):
-        requestee = User.objects.create_user(email="requestee@user.com")
-        requestor = User.objects.create_user(email="requestor@user.com")
+    def setUp(self):
+        skill = Skill.objects.create(skill="python")
+        requestee = create_test_users(
+            1,
+            "requestee",
+            [{"skill": skill, "level": 4, "can_help": True, "help_wanted": False}],
+        )[0]
+        requestor = create_test_users(
+            1,
+            "requestor",
+            [{"skill": skill, "level": 1, "can_help": False, "help_wanted": True}],
+        )[0]
         BuddyRequest.objects.create(
             requestee=requestee,
             requestor=requestor,
             message="test message",
             request_type=BuddyRequest.RequestType.REQUEST,
         )
+        someone = create_test_users(1, "someone", [])[0]
 
-    def invalid_request(self):
-        c = Client()
-        response = c.get("/requests/2/")
-        assert response.status_code == 404
-
-    def no_access(self):
-        someone = User.objects.create_user(email="someone@user.com")
+    def test_invalid_request(self):
+        someone = User.objects.get(email="someone0@buddy.com")
         c = Client()
         c.force_login(someone)
-        response = c.get("/requests/1/")
+        buddy_request_id = BuddyRequest.objects.first().id
+        response = c.get(f"/requests/{buddy_request_id + 1}")
+        assert response.status_code == 404
+
+    def test_no_access(self):
+        someone = User.objects.get(email="someone0@buddy.com")
+        c = Client()
+        c.force_login(someone)
+        buddy_request_id = BuddyRequest.objects.first().id
+        response = c.get(f"/requests/{buddy_request_id}")
         assert response.status_code == 403
 
-    def valid_request(self):
-        requestee = User.objects.get(email="requestor@user.com")
-        requestor = User.objects.get(email="requestor@user.com")
+    def test_valid_request(self):
+        requestee = User.objects.get(email="requestee0@buddy.com")
+        requestor = User.objects.get(email="requestor0@buddy.com")
         c = Client()
         c.force_login(requestor)
-        response = c.get("/requests/1/")
+        buddy_request_id = BuddyRequest.objects.first().id
+        response = c.get(f"/requests/{buddy_request_id}")
         assert response.status_code == 200
         buddy_request = response.context["buddy_request"]
         assert buddy_request.requestee == requestee
         assert buddy_request.requestor == requestor
         assert buddy_request.message == "test message"
-        assert buddy_request.id == 1
 
 
 class RequestListTest(TestCase):
-    def setup(self):
-        User.objects.create_user(email="user@user.com")
+    def setUp(self):
+        skill = Skill.objects.create(skill="python")
+        create_test_users(
+            1,
+            "user",
+            [{"skill": skill, "level": 3, "can_help": True, "help_wanted": True}],
+        )
+        create_test_users(
+            2,
+            "requestee",
+            [{"skill": skill, "level": 4, "can_help": True, "help_wanted": False}],
+        )
+        create_test_users(
+            2,
+            "requestor",
+            [{"skill": skill, "level": 2, "can_help": False, "help_wanted": True}],
+        )[0]
 
-    def not_logged_in(self):
+    def test_not_logged_in(self):
         c = Client()
         response = c.get("/requests/")
-        self.assertRedirects(response, "/login/")
+        self.assertRedirects(response, "/login/?next=/requests/")
 
-    def no_requests(self):
-        user = User.objects.get(email="user@user.com")
+    def test_no_requests(self):
+        user = User.objects.get(email="user0@buddy.com")
         c = Client()
         c.force_login(user)
         response = c.get("/requests/")
@@ -194,29 +224,29 @@ class RequestListTest(TestCase):
         assert not response.context["offers_received"]
         assert not response.context["offers_sent"]
 
-    def one_or_two_requests(self):
-        user = User.objects.get(email="user@user.com")
+    def test_one_or_two_requests(self):
+        user = User.objects.get(email="user0@buddy.com")
 
         sent_request_1 = BuddyRequest.objects.create(
             requestor=user,
-            requestee=User.objects.create_user(email="requestee1@user.com"),
+            requestee=User.objects.get(email="requestee0@buddy.com"),
             request_type=BuddyRequest.RequestType.REQUEST,
         )
         recd_request_1 = BuddyRequest.objects.create(
             requestee=user,
-            requestor=User.objects.create_user(email="requestor1@user.com"),
+            requestor=User.objects.get(email="requestor0@buddy.com"),
             request_type=BuddyRequest.RequestType.REQUEST,
         )
 
         sent_offer_1 = BuddyRequest.objects.create(
             requestor=user,
-            requestee=User.objects.get(email="requestee1@user.com"),
+            requestee=User.objects.get(email="requestee0@buddy.com"),
             request_type=BuddyRequest.RequestType.OFFER,
         )
 
         recd_offer_1 = BuddyRequest.objects.create(
             requestee=user,
-            requestor=User.objects.get(email="requestor1@user.com"),
+            requestor=User.objects.get(email="requestor0@buddy.com"),
             request_type=BuddyRequest.RequestType.OFFER,
         )
 
@@ -245,22 +275,22 @@ class RequestListTest(TestCase):
         # two requests in each category
         sent_request_2 = BuddyRequest.objects.create(
             requestor=user,
-            requestee=User.objects.create_user(email="requestee2@user.com"),
+            requestee=User.objects.get(email="requestee1@buddy.com"),
             request_type=BuddyRequest.RequestType.REQUEST,
         )
         recd_request_2 = BuddyRequest.objects.create(
             requestee=user,
-            requestor=User.objects.create_user(email="requestor2@user.com"),
+            requestor=User.objects.get(email="requestor1@buddy.com"),
             request_type=BuddyRequest.RequestType.REQUEST,
         )
         sent_offer_2 = BuddyRequest.objects.create(
             requestor=user,
-            requestee=User.objects.get(email="requestee2@user.com"),
+            requestee=User.objects.get(email="requestee1@buddy.com"),
             request_type=BuddyRequest.RequestType.OFFER,
         )
         recd_offer_2 = BuddyRequest.objects.create(
             requestee=user,
-            requestor=User.objects.get(email="requestor2@user.com"),
+            requestor=User.objects.get(email="requestor1@buddy.com"),
             request_type=BuddyRequest.RequestType.OFFER,
         )
         response = c.get("/requests/")
@@ -273,8 +303,8 @@ class RequestListTest(TestCase):
 
         requests_received = response.context["requests_received"]
         assert len(requests_received) == 2
-        assert recd_request_1 in requests_sent
-        assert recd_request_2 in requests_sent
+        assert recd_request_1 in requests_received
+        assert recd_request_2 in requests_received
 
         offers_sent = response.context["offers_sent"]
         assert len(offers_sent) == 2
@@ -285,3 +315,38 @@ class RequestListTest(TestCase):
         assert len(offers_received) == 2
         assert recd_offer_1 in offers_received
         assert recd_offer_2 in offers_received
+
+    def test_rejected_request(self):
+        user = User.objects.get(email="user0@buddy.com")
+        requestee = User.objects.get(email="requestee0@buddy.com")
+
+        rejected_request = BuddyRequest.objects.create(
+            requestor=user,
+            requestee=requestee,
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
+
+        rejected_request.status = BuddyRequest.Status.REJECTED
+        rejected_request.save()
+
+        rejected_offer = BuddyRequest.objects.create(
+            requestor=user,
+            requestee=requestee,
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+
+        rejected_offer.status = BuddyRequest.Status.REJECTED
+        rejected_offer.save()
+
+        c = Client()
+        c.force_login(user)
+        response = c.get("/requests/")
+
+        assert not response.context["requests_sent"]
+        assert not response.context["offers_sent"]
+
+        c.force_login(requestee)
+        response = c.get("/requests/")
+
+        assert not response.context["requests_received"]
+        assert not response.context["offers_received"]
