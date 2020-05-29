@@ -164,7 +164,7 @@ class Search(LoginRequiredMixin, ListView):
     queryset = Profile.objects.all().order_by("-id")
 
     def get_queryset(self):
-        all_mentors = self.queryset.filter(experience__can_help=True)
+        all_mentors = self.queryset.filter(experience__can_help=True).distinct()
         search_results = all_mentors.exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", None)

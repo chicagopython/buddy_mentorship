@@ -180,19 +180,12 @@
                         <td>{{profile.get_short_bio}}</td>
                         <td>
                           <ul class="list-group list-group-flush">
-                            {% if profile.can_help %}
+                            {% for experience in profile.get_top_can_help %}
                               <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Python
+                                {{experience.skill.display_name}}
+                                <span class="badge badge-primary badge-pill">{{experience.level}}/5</span>
                               </li>
-                            {% endif %}
-                            {% comment %}
-                              {% for experience in profile.can_help %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                  {{experience.skill.name}}
-                                  <span class="badge badge-primary badge-pill">{{experience.level}}4/5</span>
-                                </li>
-                              {% endfor %} 
-                            {% endcomment %}
+                            {% endfor %} 
                           </ul>
                         </td>
                       </tr>

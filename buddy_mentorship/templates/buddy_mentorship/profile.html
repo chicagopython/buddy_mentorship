@@ -50,12 +50,12 @@
                         </div>
                         <div class="card-text">
                             <ul class="list-group list-group-flush">
-                                {% if profile.help_wanted %}
+                                {% for experience in profile.get_help_wanted %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Python
-                                    {% comment %} <span class="badge badge-primary badge-pill">1/5</span> {% endcomment %}
+                                    {{ experience.skill.display_name }}
+                                    <span class="badge badge-primary badge-pill">{{ experience.level }}/5</span>
                                 </li>
-                                {% endif %}
+                                {% endfor %}
                             </ul>
                         </div>
 
@@ -71,12 +71,12 @@
                         </div>
                         <div class="card-text">
                             <ul class="list-group list-group-flush">
-                                {% if profile.can_help %}
+                                {% for experience in profile.get_can_help %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Python
-                                    {% comment %} <span class="badge badge-primary badge-pill">4/5</span> {% endcomment %}
+                                    {{ experience.skill.display_name }}
+                                    <span class="badge badge-primary badge-pill">{{ experience.level }}/5</span>
                                 </li>
-                                {% endif %}
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>

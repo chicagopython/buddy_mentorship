@@ -120,6 +120,41 @@ class ProfileTest(TransactionTestCase):
         skillRecord2 = Skill.objects.get(skill=skill2)
         self.assertEqual(skillRecord2.skill, "seaborn")
 
+    def test_profile_view(self):
+        skill1 = Skill.objects.create(skill="python")
+        skill2 = Skill.objects.create(skill="django")
+        skill3 = Skill.objects.create(skill="numpy")
+        skill4 = Skill.objects.create(skill="pandas")
+
+        skill3.display_name = "Abracadabra"
+        skill3.save()
+
+        skills = [
+            {"skill": skill1, "level": 4, "can_help": True, "help_wanted": False},
+            {"skill": skill2, "level": 3, "can_help": True, "help_wanted": True},
+            {"skill": skill3, "level": 2, "can_help": False, "help_wanted": True},
+            {"skill": skill4, "level": 1, "can_help": False, "help_wanted": False},
+        ]
+
+        user = create_test_users(1, "user", skills)[0]
+        profile = Profile.objects.get(user=user)
+
+        exp1 = Experience.objects.get(profile=profile, skill=skill1)
+        exp2 = Experience.objects.get(profile=profile, skill=skill2)
+        exp3 = Experience.objects.get(profile=profile, skill=skill3)
+
+        c = Client()
+        c.force_login(user)
+        response = c.get(f"/profile/",)
+        assert response.status_code == 200
+        assert response.context["can_request"] == False
+        assert response.context["can_offer"] == False
+        assert response.context["profile"] == Profile.objects.get(user=user)
+        assert response.context["active_page"] == "profile"
+        assert response.context["request_type"] == BuddyRequest.RequestType
+        assert bytes("Abracadabra", "utf-8") in response.content
+        assert bytes("numpy", "utf-8") not in response.content
+
     def test_short_bio(self):
         user = User.objects.create_user(email="user@user.com")
 
@@ -170,6 +205,42 @@ class ProfileTest(TransactionTestCase):
         ]
         profile.bio = "".join(bio_parts)
         assert profile.get_short_bio() == "".join(bio_parts[:4])
+
+    def test_get_experiences(self):
+        skill1, skill2, skill3, skill4, skill5 = (
+            Skill.objects.create(skill="pandas"),
+            Skill.objects.create(skill="flask"),
+            Skill.objects.create(skill="numpy"),
+            Skill.objects.create(skill="python"),
+            Skill.objects.create(skill="django"),
+        )
+
+        user = create_test_users(
+            1,
+            "user",
+            [
+                {"skill": skill1, "level": 1, "can_help": False, "help_wanted": True},
+                {"skill": skill2, "level": 2, "can_help": True, "help_wanted": True},
+                {"skill": skill3, "level": 3, "can_help": True, "help_wanted": True},
+                {"skill": skill4, "level": 4, "can_help": True, "help_wanted": True},
+                {"skill": skill5, "level": 5, "can_help": True, "help_wanted": False},
+            ],
+        )[0]
+
+        profile = Profile.objects.get(user=user)
+        exp1 = Experience.objects.get(profile=profile, skill=skill1)
+        exp2 = Experience.objects.get(profile=profile, skill=skill2)
+        exp3 = Experience.objects.get(profile=profile, skill=skill3)
+        exp4 = Experience.objects.get(profile=profile, skill=skill4)
+        exp5 = Experience.objects.get(profile=profile, skill=skill5)
+
+        assert list(profile.get_can_help()) == [exp5, exp4, exp3, exp2]
+
+        assert list(profile.get_help_wanted()) == [exp1, exp2, exp3, exp4]
+
+        assert list(profile.get_top_can_help()) == [exp5, exp4, exp3]
+
+        assert list(profile.get_top_help_wanted()) == [exp1, exp2, exp3]
 
 
 class SendBuddyRequestTest(TestCase):
@@ -489,6 +560,9 @@ class SearchTest(TestCase):
             Skill.objects.create(skill="Flask"),
         )
 
+        skill2.display_name = "Something Else"
+        skill2.save()
+
         user = User.objects.create_user(
             email="elizabeth@bennet.org", first_name="Elizabeth", last_name="Bennet",
         )
@@ -511,6 +585,14 @@ class SearchTest(TestCase):
             profile=profile_mentor1,
             skill=skill1,
             level=1,
+            can_help=True,
+            help_wanted=False,
+        )
+
+        Experience.objects.create(
+            profile=profile_mentor1,
+            skill=skill2,
+            level=3,
             can_help=True,
             help_wanted=False,
         )
@@ -576,6 +658,8 @@ class SearchTest(TestCase):
         assert len(search_results) == 2
         assert mentor1_profile in search_results
         assert mentor2_profile in search_results
+        assert bytes("Something Else", "utf-8") in response.content
+        assert bytes("Flask", "utf-8") not in response.content
 
     def test_text_search(self):
         user = User.objects.get(email="elizabeth@bennet.org")
@@ -599,7 +683,9 @@ class CreateSkillTest(TestCase):
     def test_create_skill(self):
         assert not Skill.objects.filter(skill="python")
         Skill.objects.create(skill="python")
-        assert Skill.objects.get(skill="python")
+        python = Skill.objects.get(skill="python")
+        assert python
+        assert python.display_name == "Python"
         with self.assertRaises(IntegrityError):
             Skill.objects.create(skill="python")
 

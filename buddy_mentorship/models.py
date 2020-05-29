@@ -126,13 +126,36 @@ class Profile(models.Model):
             return trunc_bio[: last_sentence + 1]
         return trunc_bio[: trunc_bio.rfind(" ") + 1]
 
+    def get_can_help(self):
+        return Experience.objects.filter(profile=self, can_help=True).order_by(
+            "-level", "skill__skill"
+        )
+
+    def get_help_wanted(self):
+        return Experience.objects.filter(profile=self, help_wanted=True).order_by(
+            "level", "skill__skill"
+        )
+
+    def get_top_can_help(self):
+        return self.get_can_help()[:3]
+
+    def get_top_help_wanted(self):
+        return self.get_help_wanted()[:3]
+
 
 class Skill(models.Model):
     """
-    A list of skills
+    skill: lowercased name of skill (e.g. "python", "mvc", etc.). Must be unique.\n
+    display_name: name showed in UI, e.g. "Python", "MVC", etc.
     """
 
     skill = models.CharField(max_length=30, unique=True)
+    display_name = models.CharField(max_length=30, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.display_name = self.skill.title()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.skill
