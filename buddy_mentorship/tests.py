@@ -126,6 +126,9 @@ class ProfileTest(TransactionTestCase):
         skill3 = Skill.objects.create(skill="numpy")
         skill4 = Skill.objects.create(skill="pandas")
 
+        skill3.display_name = "Abracadabra"
+        skill3.save()
+
         skills = [
             {"skill": skill1, "level": 4, "can_help": True, "help_wanted": False},
             {"skill": skill2, "level": 3, "can_help": True, "help_wanted": True},
@@ -149,6 +152,8 @@ class ProfileTest(TransactionTestCase):
         assert response.context["profile"] == Profile.objects.get(user=user)
         assert response.context["active_page"] == "profile"
         assert response.context["request_type"] == BuddyRequest.RequestType
+        assert bytes("Abracadabra", "utf-8") in response.content
+        assert bytes("numpy", "utf-8") not in response.content
 
     def test_short_bio(self):
         user = User.objects.create_user(email="user@user.com")
@@ -555,6 +560,9 @@ class SearchTest(TestCase):
             Skill.objects.create(skill="Flask"),
         )
 
+        skill2.display_name = "Something Else"
+        skill2.save()
+
         user = User.objects.create_user(
             email="elizabeth@bennet.org", first_name="Elizabeth", last_name="Bennet",
         )
@@ -643,8 +651,6 @@ class SearchTest(TestCase):
         mentor2 = User.objects.get(email="charlotte@lucas.org")
         mentor1_profile = Profile.objects.get(user__email="mr@bennet.org")
         mentor2_profile = Profile.objects.get(user__email="mr@bennet.org")
-        skill1 = Skill.objects.get(skill="pandas")
-        skill2 = Skill.objects.get(skill="Flask")
         c = Client()
         c.force_login(user)
         response = c.get("/search/")
@@ -652,6 +658,8 @@ class SearchTest(TestCase):
         assert len(search_results) == 2
         assert mentor1_profile in search_results
         assert mentor2_profile in search_results
+        assert bytes("Something Else", "utf-8") in response.content
+        assert bytes("Flask", "utf-8") not in response.content
 
     def test_text_search(self):
         user = User.objects.get(email="elizabeth@bennet.org")
