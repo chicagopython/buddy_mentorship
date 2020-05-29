@@ -13,85 +13,89 @@
 
 <!DOCTYPE html>
 <html>
-    {# Modifiable Head Elements #}
-    <head>
-        <title>{% block title %}Home {% endblock title %}</title>
-        {% block head_favicon %}
-            <link rel="icon" type="image/png"
-                  href="{% static "images/favicon.ico" %}">
-        {% endblock head_favicon %}
-        {% block head_meta %}
-            {% block head_meta_charset %}
-                <meta http-equiv="Content-Type"
-                      content="text/html; charset=utf-8" />
-            {% endblock head_meta_charset %}
-            {% block head_meta_contentlanguage %}
-                <meta http-equiv="Content-Language" value="en-US" />
-            {% endblock head_meta_contentlanguage %}
-            {% block head_meta_viewport %}
-                <meta name="viewport"
-                      content="width=device-width, initial-scale=1.0">
-            {% endblock head_meta_viewport %}
-        {% endblock head_meta %}
-        {% block head_extra_css %}
-            <link href="{% static "css/app.css" %}"
-                  rel="stylesheet" media="screen">
-             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-                   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-                   crossorigin=""/>
+{# Modifiable Head Elements #}
 
-        {% endblock head_extra_css %}
-    </head>
+<head>
+  <title>{% block title %}Home {% endblock title %}</title>
+  {% block head_favicon %}
+  <link rel="icon" type="image/png" href="{% static "images/favicon.ico" %}">
+  {% endblock head_favicon %}
+  {% block head_meta %}
+  {% block head_meta_charset %}
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  {% endblock head_meta_charset %}
+  {% block head_meta_contentlanguage %}
+  <meta http-equiv="Content-Language" value="en-US" />
+  {% endblock head_meta_contentlanguage %}
+  {% block head_meta_viewport %}
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% endblock head_meta_viewport %}
+  {% endblock head_meta %}
+  {% block head_extra_css %}
+  <link href="{% static "css/app.css" %}" rel="stylesheet" media="screen">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin="" />
 
-    <body>
-      <header>
-        {# Navigation Menu #}
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-          <a class="navbar-brand" href="#">BuddyMentorship</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item">
-                <a class="nav-link {% if active_page == "home"%}active{% endif %}"  href="{% url 'index' %}">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link{% if active_page == "profile"%} active {% endif %}" href="{% url 'your_profile' %}">Profile</a>
+  {% endblock head_extra_css %}
+</head>
 
-              </li>
-              <li class="nav-item {% if active_page == 'search' %} active {% endif %}">
-                <a class="nav-link" href="{% url 'search' %}">Search</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link{% if active_page == "requests"%} active {% endif %}" href="{% url 'requests' %}">Requests</a>
-              </li>
-            </ul>
-            <button class="btn btn-link my-2 my-sm-0">
-              {% if user.is_authenticated %}
-                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-              {% else %}
-                <a class="nav-link" href="{% url 'login' %}">Login</a>
-            {% endif %}
-            </button>
-          </div>
-        </nav>
-      </header>
+<body>
+  <header>
+    {# Navigation Menu #}
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">ChiPy Mentorship</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link {% if active_page == "home"%}active{% endif %}" href="{% url 'index' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if active_page == "profile"%} active {% endif %}"
+              href="{% url 'your_profile' %}">Profile</a>
 
-      {# Document Body #}
-      <main role="main" class="container">
-          {% block content %}
-              if you see this, something is wrong!
-          {% endblock content %}
-      </main>
+          </li>
+          <li class="nav-item {% if active_page == 'search' %} active {% endif %}">
+            <a class="nav-link" href="{% url 'search' %}">Search</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if active_page == "requests"%} active {% endif %}"
+              href="{% url 'requests' %}">Requests</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://www.chipy.org/contact/">Contact</a>
+          </li>
+        </ul>
+        <button class="btn btn-link my-2 my-sm-0">
+          {% if user.is_authenticated %}
+          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+          {% else %}
+          <a class="nav-link" href="{% url 'login' %}">Login</a>
+          {% endif %}
+        </button>
+      </div>
+    </nav>
+  </header>
 
-      {# Footer #}
-      <footer class="footer text-center">
-        <div class="container">
-          <span class="text-muted">
-            &copy; {% now "Y" %} {% trans "Chicago Python User Group" %}. {% trans "Source code available on " %}<a href="https://github.com/chicagopython/buddy_mentorship">Github</a>.
-          </span>
-        </div>
-      </footer>
+  {# Document Body #}
+  <main role="main" class="container">
+    {% block content %}
+    if you see this, something is wrong!
+    {% endblock content %}
+  </main>
 
-    </body>
+  {# Footer #}
+  <footer class="footer text-center">
+    <div class="container">
+      <span class="text-muted">
+        &copy; {% now "Y" %} {% trans "Chicago Python User Group" %}. {% trans "Source code available on " %}<a
+          href="https://github.com/chicagopython/buddy_mentorship">Github</a>.
+      </span>
+    </div>
+  </footer>
+
+</body>
