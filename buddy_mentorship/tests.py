@@ -678,6 +678,13 @@ class SearchTest(TestCase):
         assert len(search_results) == 1
         assert search_results[0].user == mentor2
 
+        response = c.get("/search/?q=flask")
+        search_results = list(response.context_data["profile_list"])
+        assert len(search_results) == 2
+        search_result_users = [result.user for result in search_results]
+        assert mentor1 in search_result_users
+        assert mentor2 in search_result_users
+
 
 class CreateSkillTest(TestCase):
     def test_create_skill(self):

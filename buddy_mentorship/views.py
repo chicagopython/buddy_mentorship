@@ -164,23 +164,27 @@ class Search(LoginRequiredMixin, ListView):
     queryset = Profile.objects.all().order_by("-id")
 
     def get_queryset(self):
-        all_mentors = self.queryset.filter(experience__can_help=True).distinct()
+        all_mentors = self.queryset.filter(experience__can_help=True)
         search_results = all_mentors.exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", None)
         if query_text is not None:
             if query_text is not "":
                 search_vector = SearchVector(
-                    "user__first_name", "user__last_name", "bio",
+                    "user__first_name",
+                    "user__last_name",
+                    "bio",
+                    "experience__skill__skill",
                 )
                 search_query = SearchQuery(query_text, search_type="plain")
                 search_results = search_results.annotate(search=search_vector).filter(
                     search=search_query
                 )
-                search_results = search_results.annotate(
-                    rank=SearchRank(search_vector, search_query)
-                ).order_by("-rank")
-        return search_results
+                # search_results = search_results.annotate(
+                #     rank=SearchRank(search_vector, search_query)
+                # ).order_by("-rank")
+                search_results = search_results.order_by("-id")
+        return search_results.distinct("id")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
