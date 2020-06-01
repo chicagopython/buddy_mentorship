@@ -630,23 +630,22 @@ class SearchTest(TestCase):
             help_wanted=False,
         )
 
-        another_mentee = User.objects.create_user(
-            email="kitty@bennet.org", first_name="Kitty", last_name="Bennet",
+        create_test_users(
+            1,
+            "mentee0",
+            [
+                {"skill": skill1, "level": 2, "can_help": False, "help_wanted": True},
+                {"skill": skill2, "level": 1, "can_help": False, "help_wanted": True},
+            ],
         )
 
-        profile_another_mentee = Profile.objects.create(
-            user=another_mentee, bio="Likes a man in uniform"
+        create_test_users(
+            1,
+            "mentee1",
+            [{"skill": skill1, "level": 1, "can_help": False, "help_wanted": True},],
         )
 
-        Experience.objects.create(
-            profile=profile_another_mentee,
-            skill=skill1,
-            level=3,
-            can_help=False,
-            help_wanted=True,
-        )
-
-    def test_all_qualified(self):
+    def test_all_mentors(self):
         user = User.objects.get(email="elizabeth@bennet.org")
         mentor1 = User.objects.get(email="mr@bennet.org")
         mentor2 = User.objects.get(email="charlotte@lucas.org")
@@ -662,7 +661,7 @@ class SearchTest(TestCase):
         assert bytes("Something Else", "utf-8") in response.content
         assert bytes("Flask", "utf-8") not in response.content
 
-    def test_text_search(self):
+    def test_mentor_text_search(self):
         user = User.objects.get(email="elizabeth@bennet.org")
         mentor1 = User.objects.get(email="mr@bennet.org")
         mentor2 = User.objects.get(email="charlotte@lucas.org")
@@ -686,7 +685,7 @@ class SearchTest(TestCase):
         assert mentor1 in search_result_users
         assert mentor2 in search_result_users
 
-    def test_text_search_order(self):
+    def test_mentor_text_search_order(self):
         user = User.objects.get(email="elizabeth@bennet.org")
         mentor1 = User.objects.get(email="mr@bennet.org")
         mentor2 = User.objects.get(email="charlotte@lucas.org")
@@ -699,6 +698,19 @@ class SearchTest(TestCase):
         search_result_users = [result.user for result in search_results]
         assert search_result_users[0] == mentor2
         assert search_result_users[1] == mentor1
+
+    def test_all_mentees(self):
+        user = User.objects.get(email="elizabeth@bennet.org")
+        mentee00 = User.objects.get(email="mentee00@buddy.com")
+        mentee10 = User.objects.get(email="mentee10@buddy.com")
+        c = Client()
+        c.force_login(user)
+        response = c.get("/search/?type=mentee")
+        search_results = list(response.context_data["profile_list"])
+        search_result_users = [result.user for result in search_results]
+        assert len(search_results) == 2
+        assert mentee00 in search_result_users
+        assert mentee10 in search_result_users
 
 
 class CreateSkillTest(TestCase):
