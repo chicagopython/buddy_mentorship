@@ -578,7 +578,7 @@ class SearchTest(TestCase):
         )
 
         profile_mentor1 = Profile.objects.create(
-            user=mentor1, bio="Father, country gentleman"
+            user=mentor1, bio="Father, country gentleman. Friend of the Lucas family."
         )
 
         Experience.objects.create(
@@ -602,7 +602,8 @@ class SearchTest(TestCase):
         )
 
         profile_mentor2 = Profile.objects.create(
-            user=mentor2, bio="Sensible, intelligent woman"
+            user=mentor2,
+            bio="Sensible, intelligent woman. Daughter of Sir William Lucas.",
         )
 
         Experience.objects.create(
@@ -684,6 +685,20 @@ class SearchTest(TestCase):
         search_result_users = [result.user for result in search_results]
         assert mentor1 in search_result_users
         assert mentor2 in search_result_users
+
+    def test_text_search_order(self):
+        user = User.objects.get(email="elizabeth@bennet.org")
+        mentor1 = User.objects.get(email="mr@bennet.org")
+        mentor2 = User.objects.get(email="charlotte@lucas.org")
+        c = Client()
+        c.force_login(user)
+
+        response = c.get("/search/?q=lucas")
+        search_results = list(response.context_data["profile_list"])
+        assert len(search_results) == 2
+        search_result_users = [result.user for result in search_results]
+        assert search_result_users[0] == mentor2
+        assert search_result_users[1] == mentor1
 
 
 class CreateSkillTest(TestCase):

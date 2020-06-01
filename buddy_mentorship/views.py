@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
+from django.db.models import OuterRef, Subquery
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
@@ -164,27 +165,38 @@ class Search(LoginRequiredMixin, ListView):
     queryset = Profile.objects.all().order_by("-id")
 
     def get_queryset(self):
-        all_mentors = self.queryset.filter(experience__can_help=True)
-        search_results = all_mentors.exclude(user=self.request.user)
+        all_mentors = self.queryset.filter(experience__can_help=True).exclude(
+            user=self.request.user
+        )
+        # needs to be distinct
 
         query_text = self.request.GET.get("q", None)
-        if query_text is not None:
-            if query_text is not "":
-                search_vector = SearchVector(
-                    "user__first_name",
-                    "user__last_name",
-                    "bio",
-                    "experience__skill__skill",
+        if query_text is not None and query_text is not "":
+            search_vector = SearchVector(
+                "user__first_name",
+                "user__last_name",
+                "bio",
+                "experience__skill__skill",
+            )
+            search_query = SearchQuery(query_text, search_type="plain")
+            search_results = (
+                all_mentors.annotate(
+                    search=search_vector, rank=SearchRank(search_vector, search_query),
                 )
-                search_query = SearchQuery(query_text, search_type="plain")
-                search_results = search_results.annotate(search=search_vector).filter(
-                    search=search_query
-                )
-                # search_results = search_results.annotate(
-                #     rank=SearchRank(search_vector, search_query)
-                # ).order_by("-rank")
-                search_results = search_results.order_by("-id")
-        return search_results.distinct("id")
+                .filter(search=search_query, id=OuterRef("id"))
+                .distinct("id")
+            )
+
+            ranked = (
+                Profile.objects.annotate(rank=Subquery(search_results.values("rank")))
+                .filter(id__in=Subquery(search_results.values("id")))
+                .order_by("-rank")
+            )
+
+            search_results = ranked
+        else:
+            search_results = all_mentors.distinct("id")
+        return search_results
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
