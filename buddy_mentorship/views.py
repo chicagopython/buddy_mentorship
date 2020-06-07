@@ -116,7 +116,8 @@ class AddSkill(LoginRequiredMixin, FormView):
     def form_valid(self, form: SkillForm):
         user = self.request.user
         profile = Profile.objects.get(user=user)
-        help_type = form.cleaned_data.get("help_type")
+        can_help = form.cleaned_data.get("can_help")
+        help_wanted = form.cleaned_data.get("help_wanted")
         skill = form.cleaned_data.get("skill").lower()
         level = form.cleaned_data.get("level")
 
@@ -124,17 +125,17 @@ class AddSkill(LoginRequiredMixin, FormView):
         if existing_skill is None:
             existing_skill = Skill.objects.create(skill=skill, display_name=skill)
 
-        existing_experience = Experience.objects.filter(skill=existing_skill).first()
+        existing_experience = Experience.objects.filter(
+            skill=existing_skill, profile=profile
+        ).first()
         if existing_experience is None:
             existing_experience = Experience.objects.create(
                 skill=existing_skill, profile=profile, level=1
             )
 
         existing_experience.level = level
-        if help_type == "can_help":
-            existing_experience.can_help = True
-        if help_type == "want_help":
-            existing_experience.help_wanted = True
+        existing_experience.can_help = can_help
+        existing_experience.help_wanted = help_wanted
 
         existing_experience.save()
 

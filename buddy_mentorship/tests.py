@@ -744,6 +744,53 @@ class SkillTest(TestCase):
         response = c.post(f"/delete_skill/{exp.id}", follow=True)
         assert not Experience.objects.filter(profile=profile, skill=skill)
 
+    def test_add_skill_view(self):
+        user = User.objects.get(email="user0@buddy.com")
+        profile = Profile.objects.get(user=user)
+        c = Client()
+        c.force_login(user)
+
+        # skill didn't exist
+        response = c.post(
+            f"/add_skill/",
+            {"can_help": False, "help_wanted": True, "skill": "django", "level": 3,},
+        )
+        new_skill = Skill.objects.get(skill="django")
+        exp = Experience.objects.get(skill=new_skill, profile=profile)
+        assert exp.help_wanted == True and exp.can_help == False and exp.level == 3
+
+        # experience existed
+        response = c.post(
+            f"/add_skill/",
+            {"can_help": True, "help_wanted": True, "skill": "django", "level": 4,},
+        )
+        exp = Experience.objects.get(skill=new_skill, profile=profile)
+        assert exp.help_wanted == True and exp.can_help == True and exp.level == 4
+
+        # skill existed
+        new_skill_2 = Skill.objects.create(skill="numpy")
+
+        # check for error where updated first experience of the skill, regardless of user
+        create_test_users(
+            1,
+            "other",
+            [
+                {
+                    "skill": new_skill_2,
+                    "level": 4,
+                    "can_help": True,
+                    "help_wanted": False,
+                }
+            ],
+        )
+
+        response = c.post(
+            f"/add_skill/",
+            {"can_help": False, "help_wanted": False, "skill": "numpy", "level": 2,},
+        )
+        exp = Experience.objects.get(skill=new_skill_2, profile=profile)
+        assert exp.help_wanted == False and exp.can_help == False and exp.level == 2
+
 
 def create_test_users(n, handle, experiences):
     """

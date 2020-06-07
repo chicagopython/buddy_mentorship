@@ -15,6 +15,5 @@ class ProfileEditForm(forms.Form):
 class SkillForm(forms.Form):
     skill = forms.CharField(max_length=30)
     level = forms.ChoiceField(choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
-    help_type = forms.ChoiceField(
-        choices=[("can_help", "Can Help"), ("want_help", "Want Help")]
-    )
+    can_help = forms.BooleanField(required=False)
+    help_wanted = forms.BooleanField(required=False)
