@@ -4,6 +4,7 @@ from django.db.models import OuterRef, Subquery
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
+from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 
@@ -138,6 +139,29 @@ class ProfileEdit(LoginRequiredMixin, FormView):
         profile.can_help = form.cleaned_data.get("can_help")
         profile.help_wanted = form.cleaned_data.get("help_wanted")
         profile.save()
+
+
+class UpdateExperience(LoginRequiredMixin, UpdateView):
+    login_url = "login"
+    model = Experience
+    fields = ["can_help", "help_wanted", "level"]
+    success_url = "/profile/"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user != self.get_object().profile.user:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
+class DeleteExperience(LoginRequiredMixin, DeleteView):
+    login_url = "login"
+    model = Experience
+    success_url = "/profile/"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user != self.get_object().profile.user:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
 
 
 @login_required(login_url="login")

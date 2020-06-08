@@ -25,6 +25,10 @@ urlpatterns = [
     path("profile/", views.profile, name="your_profile"),
     path("profile/<int:profile_id>", views.profile, name="profile"),
     path("profile_edit/", views.ProfileEdit.as_view(), name="edit_profile"),
+    path("edit_skill/<int:pk>", views.UpdateExperience.as_view(), name="edit_skill",),
+    path(
+        "delete_skill/<int:pk>", views.DeleteExperience.as_view(), name="delete_skill",
+    ),
     path("send_request/<uuid:uuid>", views.send_request, name="send_request"),
     path(
         "update_request/<int:buddy_request_id>",
