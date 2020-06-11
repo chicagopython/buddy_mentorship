@@ -701,7 +701,10 @@ class SearchTest(TestCase):
         assert search_result_users[1] == mentor1
 
 
-class CreateSkillTest(TestCase):
+class SkillTest(TestCase):
+    def setUp(self):
+        create_test_users(1, "user", [])
+
     def test_create_skill(self):
         assert not Skill.objects.filter(skill="python")
         Skill.objects.create(skill="python")
@@ -710,6 +713,36 @@ class CreateSkillTest(TestCase):
         assert python.display_name == "Python"
         with self.assertRaises(IntegrityError):
             Skill.objects.create(skill="python")
+
+    def test_update_experience_view(self):
+        user = User.objects.get(email="user0@buddy.com")
+        profile = Profile.objects.get(user=user)
+        skill = Skill.objects.create(skill="pandas")
+        exp = Experience.objects.create(
+            profile=profile, skill=skill, can_help=False, help_wanted=True, level=1
+        )
+        c = Client()
+        c.force_login(user)
+
+        response = c.post(
+            f"/edit_skill/{exp.id}",
+            {"can_help": True, "help_wanted": False, "level": 3},
+        )
+        exp = Experience.objects.get(profile=profile, skill=skill)
+        assert exp.help_wanted == False and exp.can_help == True and exp.level == 3
+
+    def test_delete_experience_view(self):
+        user = User.objects.get(email="user0@buddy.com")
+        profile = Profile.objects.get(user=user)
+        skill = Skill.objects.create(skill="pandas")
+        exp = Experience.objects.create(
+            profile=profile, skill=skill, can_help=False, help_wanted=True, level=1
+        )
+        c = Client()
+        c.force_login(user)
+
+        response = c.post(f"/delete_skill/{exp.id}", follow=True)
+        assert not Experience.objects.filter(profile=profile, skill=skill)
 
 
 def create_test_users(n, handle, experiences):

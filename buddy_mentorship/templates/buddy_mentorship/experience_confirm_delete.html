@@ -1,0 +1,15 @@
+{% extends 'buddy_mentorship/base.html' %}
+
+{% block title %}
+	Delete Skill
+{% endblock title %}
+
+{% block content %}
+
+<form method="post">{% csrf_token %}
+    <p>Are you sure you want to remove the {{ experience.skill.display_name }} skill from your profile?</p>
+    <p>Note that this will remove {{ experience.skill.display_name }} from both your "Want Help" and "Can Help" skill lists; use the Edit Skill form to change whether you want help or can help with this skill.</p>
+    <input type="submit" value="Confirm">
+</form>
+
+{% endblock content %}
