@@ -19,6 +19,7 @@ django-config = "*"
 django-heroku = "*"
 gunicorn = "*"
 django-maintenance-mode = "*"
+django-autocomplete-light = "*"
 
 [requires]
 python_version = "3.7"

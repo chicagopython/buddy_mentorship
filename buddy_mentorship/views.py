@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.db.models import OuterRef, Subquery
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from django.views.generic.edit import DeleteView, UpdateView
@@ -10,8 +10,8 @@ from django.views.generic.edit import FormView
 
 from apps.users.models import User
 
-from .forms import ProfileEditForm
-from .models import BuddyRequest, Profile, Experience
+from .forms import ProfileEditForm, SkillForm
+from .models import BuddyRequest, Profile, Experience, Skill
 
 
 def index(request):
@@ -97,6 +97,52 @@ def can_request(requestor, requestee):
         and not existing_requests
         and not existing_offers
     )
+
+
+@login_required(login_url="login")
+def skill_search(request):
+    term = request.GET.get("term", None)
+
+    skills = Skill.objects.filter(skill__contains=term)
+    return JsonResponse([skill.display_name for skill in skills], safe=False)
+
+
+class AddSkill(LoginRequiredMixin, FormView):
+    login_url = "login"
+    template_name = "buddy_mentorship/add_skill.html"
+    form_class = SkillForm
+    success_url = "/profile"
+
+    def form_valid(self, form: SkillForm):
+        user = self.request.user
+        profile = Profile.objects.get(user=user)
+        can_help = form.cleaned_data.get("can_help")
+        help_wanted = form.cleaned_data.get("help_wanted")
+        skill = form.cleaned_data.get("skill").lower()
+        level = form.cleaned_data.get("level")
+
+        existing_skill = Skill.objects.filter(skill=skill).first()
+        if existing_skill is None:
+            existing_skill = Skill.objects.create(skill=skill, display_name=skill)
+
+        existing_experience = Experience.objects.filter(
+            skill=existing_skill, profile=profile
+        ).first()
+        if existing_experience is None:
+            existing_experience = Experience.objects.create(
+                skill=existing_skill, profile=profile, level=1
+            )
+
+        existing_experience.level = level
+        existing_experience.can_help = can_help
+        existing_experience.help_wanted = help_wanted
+
+        existing_experience.save()
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
 
 
 class ProfileEdit(LoginRequiredMixin, FormView):

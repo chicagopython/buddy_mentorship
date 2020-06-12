@@ -1,0 +1,60 @@
+{% extends 'buddy_mentorship/base.html' %}
+
+{% load static %}
+
+{% block title %}
+	Add Skill
+{% endblock title %}
+
+{% block content %}
+
+
+<form method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="id_skill">Skill:</label>
+    <input class="form-control" type="text" name="skill" maxlength="30" required id="id_skill">
+  </div>
+
+  <div class="form-group">
+    <label for="id_level">Level (1 is the lowest and 5 is the highest):</label>
+    <select class="form-control" name="level" id="id_level">
+        <option value="1">1</option>
+
+        <option value="2">2</option>
+
+        <option value="3">3</option>
+
+        <option value="4">4</option>
+
+        <option value="5">5</option>
+    </select>
+  </div>
+
+  <div class="form-check form-group">
+    <input class="form-check-input" type="checkbox" name ="can_help" id="canHelpCheckbox">
+    <label class="form-check-label" for="canHelpCheckbox">
+      I can help others with this skill
+    </label>
+  </div>
+  <div class="form-check form-group">
+    <input class="form-check-input" type="checkbox" name="help_wanted" id="helpWantedCheckbox">
+    <label class="form-check-label" for="helpWantedCheckbox">
+      I would like help with this skill
+    </label>
+  </div>
+  <button class="btn btn-primary" type="submit">Save</button>
+</form>
+
+{% block autocomplete_js %}
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="{% static "js/autocomplete.js" %}" onload="autocomplete('id_skill')"/>
+  <script>
+  </script>
+
+{% endblock autocomplete_js %}
+
+
+{% endblock content %}
