@@ -142,7 +142,7 @@ class AddSkill(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        print("invalid")
+        return super().form_invalid(form)
 
 
 class ProfileEdit(LoginRequiredMixin, FormView):
