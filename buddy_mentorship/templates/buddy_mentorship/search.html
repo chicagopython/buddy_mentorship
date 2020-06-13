@@ -10,7 +10,8 @@
   <div class="container">
     <div class="starter-template">
       <h1>
-        Find a Mentor
+        {% if search_type == 'mentor' %} Find a Mentor {% endif %}
+        {% if search_type == 'mentee' %} Find a Mentee {% endif %}
       </h1>
       <div class="row mb-2">
         <div class="col">
@@ -23,7 +24,7 @@
                 <div class="card-text">
                   <div class="btn-toolbar justify-content-around" role="toolbar" aria-label="Search toolbar">
                     <div class="input-group">
-                      <input type="search" id="q" name="q" class="form-control">
+                      <input type="search" id="q" name="q" class="form-control" value="{{ query_text }}">
                       <div class="input-group-append">
                         <button class="btn btn-primary" type="submit" form="search">
                           <svg class="bi bi-search" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -34,19 +35,27 @@
                       </div>
                     </div>
                   </div>
-                  <div class="card-body">
+                  Search for:  
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="mentor_search" name="type" value="mentor" {% if search_type == 'mentor' %} checked {% endif %}>
+                    <label class="form-check-label" for="mentor_search">Mentors</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="mentee_search" name="type" value="mentee" {% if search_type == 'mentee' %} checked {% endif %}>
+                    <label class="form-check-label" for="mentee_search">Mentees</label>
+                  </div>
+                  
+{% comment %}                  <div class="card-body">
                     <div class="btn-group mr-2" role="group" aria-label="Filter buttons">
                       <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#skillFilters" aria-expanded="false" aria-controls="skillFilters">
                         Skills
                       </button>
-                      {% comment %} <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#locationFilters" aria-expanded="false" aria-controls="locationFilters">
+                      <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#locationFilters" aria-expanded="false" aria-controls="locationFilters">
                         Locations
                       </button>
                       <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#demographicFilters" aria-expanded="false" aria-controls="demographicFilters">
                         Demographics
-                      </button> {% endcomment %}
-
-                    </div>
+                      </button> 
                   </div>
                   <div class="collapse" id="skillFilters">
                     <div class="card card-body mb-3">
@@ -150,7 +159,7 @@
                           TK
                         </div>
                       </div> 
-                  {% endcomment %}
+                    {% endcomment %}
                 </div>
               </form>
             </div>
@@ -162,7 +171,8 @@
           <div class="profile-list card">
             <div class="card-body">
               <div class="card-title h5">
-                Available Mentors
+                {% if search_type == 'mentor' %} Available Mentors {% endif %}
+                {% if search_type == 'mentee' %} Available Mentees {% endif %}
               </div>
               <div class="card-text">
                 <table class="table table-hover">
@@ -170,7 +180,10 @@
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Bio</th>
-                      <th scope="col">Can Help With</th>
+                      <th scope="col">
+                        {% if search_type == 'mentor' %} Can Help With {% endif %}
+                        {% if search_type == 'mentee' %} Wants Help With {% endif %}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -180,12 +193,22 @@
                         <td>{{profile.get_short_bio}}</td>
                         <td>
                           <ul class="list-group list-group-flush">
-                            {% for experience in profile.get_top_can_help %}
-                              <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{experience.skill.display_name}}
-                                <span class="badge badge-primary badge-pill">{{experience.level}}/5</span>
-                              </li>
-                            {% endfor %} 
+                            {% if search_type == 'mentor' %}
+                              {% for experience in profile.get_top_can_help %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                  {{experience.skill.display_name}}
+                                  <span class="badge badge-primary badge-pill">{{experience.level}}/5</span>
+                                </li>
+                              {% endfor %}
+                            {% endif %}
+                            {% if search_type == 'mentee' %}
+                              {% for experience in profile.get_top_help_wanted %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                  {{experience.skill.display_name}}
+                                  <span class="badge badge-primary badge-pill">{{experience.level}}/5</span>
+                                </li>
+                              {% endfor %}
+                            {% endif %}
                           </ul>
                         </td>
                       </tr>

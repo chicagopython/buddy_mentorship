@@ -235,13 +235,19 @@ class Search(LoginRequiredMixin, ListView):
     queryset = Profile.objects.all().order_by("-id")
 
     def get_queryset(self):
-        all_mentors = self.queryset.filter(experience__can_help=True).exclude(
-            user=self.request.user
-        )
-        # needs to be distinct
 
-        query_text = self.request.GET.get("q", None)
-        if query_text is not None and query_text is not "":
+        search_type = self.request.GET.get("type", "mentor")
+        if search_type == "mentee":
+            all_qualified = self.queryset.filter(experience__help_wanted=True).exclude(
+                user=self.request.user
+            )
+        if search_type == "mentor":
+            all_qualified = self.queryset.filter(experience__can_help=True).exclude(
+                user=self.request.user
+            )
+
+        query_text = self.request.GET.get("q", "")
+        if query_text is not "":
             search_vector = SearchVector(
                 "user__first_name",
                 "user__last_name",
@@ -250,7 +256,7 @@ class Search(LoginRequiredMixin, ListView):
             )
             search_query = SearchQuery(query_text, search_type="plain")
             search_results = (
-                all_mentors.annotate(
+                all_qualified.annotate(
                     search=search_vector, rank=SearchRank(search_vector, search_query),
                 )
                 .filter(search=search_query, id=OuterRef("id"))
@@ -265,11 +271,12 @@ class Search(LoginRequiredMixin, ListView):
 
             search_results = ranked
         else:
-            search_results = all_mentors.distinct("id")
+            search_results = all_qualified.distinct("id")
         return search_results
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_page"] = "search"
-        context["query_text"] = self.request.GET.get("q", None)
+        context["query_text"] = self.request.GET.get("q", "")
+        context["search_type"] = self.request.GET.get("type", "mentor")
         return context
