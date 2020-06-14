@@ -106,7 +106,7 @@ class Profile(models.Model):
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    bio = models.TextField()
+    bio = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"Profile for {self.user.email}"
