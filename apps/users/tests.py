@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from .models import User
 from .views import user_can_access_request
 
-from buddy_mentorship.models import BuddyRequest, Profile, Skill
+from buddy_mentorship.models import BuddyRequest, Profile, Skill, Experience
 from buddy_mentorship.tests import create_test_users
 
 import platform
@@ -144,12 +144,12 @@ class RequestDetailTest(TestCase):
         requestee = create_test_users(
             1,
             "requestee",
-            [{"skill": skill, "level": 4, "can_help": True, "help_wanted": False}],
+            [{"skill": skill, "level": 4, "exp_type": Experience.Type.CAN_HELP}],
         )[0]
         requestor = create_test_users(
             1,
             "requestor",
-            [{"skill": skill, "level": 1, "can_help": False, "help_wanted": True}],
+            [{"skill": skill, "level": 1, "exp_type": Experience.Type.WANT_HELP}],
         )[0]
         BuddyRequest.objects.create(
             requestee=requestee,
@@ -195,17 +195,17 @@ class RequestListTest(TestCase):
         create_test_users(
             1,
             "user",
-            [{"skill": skill, "level": 3, "can_help": True, "help_wanted": True}],
+            [{"skill": skill, "level": 3, "exp_type": Experience.Type.WANT_HELP}],
         )
         create_test_users(
             2,
             "requestee",
-            [{"skill": skill, "level": 4, "can_help": True, "help_wanted": False}],
+            [{"skill": skill, "level": 4, "exp_type": Experience.Type.CAN_HELP}],
         )
         create_test_users(
             2,
             "requestor",
-            [{"skill": skill, "level": 2, "can_help": False, "help_wanted": True}],
+            [{"skill": skill, "level": 2, "exp_type": Experience.Type.WANT_HELP}],
         )[0]
 
     def test_not_logged_in(self):

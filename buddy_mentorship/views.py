@@ -33,6 +33,7 @@ def profile(request, profile_id=""):
         "profile": profile,
         "active_page": "profile",
         "request_type": BuddyRequest.RequestType,
+        "exp_types": Experience.Type,
     }
     return render(request, "buddy_mentorship/profile.html", context)
 
@@ -98,7 +99,7 @@ def can_request(requestor, requestee):
         )
         and any(
             [
-                experience.exp_type == Experience.Type.WANT_HELP
+                experience.exp_type == Experience.Type.CAN_HELP
                 for experience in requestee_experiences
             ]
         )
@@ -123,6 +124,11 @@ class AddSkill(LoginRequiredMixin, FormView):
     form_class = SkillForm
     success_url = "/profile"
 
+    def get_context_data(self, **kwargs):
+        context = super(AddSkill, self).get_context_data(**kwargs)
+        context["exp_type"] = self.kwargs["exp_type"]
+        return context
+
     def form_valid(self, form: SkillForm):
         user = self.request.user
         profile = Profile.objects.get(user=user)
@@ -139,7 +145,10 @@ class AddSkill(LoginRequiredMixin, FormView):
         ).first()
         if existing_experience is None:
             existing_experience = Experience.objects.create(
-                skill=existing_skill, profile=profile, level=1
+                skill=existing_skill,
+                profile=profile,
+                level=1,
+                exp_type=Experience.Type.WANT_HELP,
             )
 
         existing_experience.level = level
@@ -245,11 +254,11 @@ class Search(LoginRequiredMixin, ListView):
         search_type = self.request.GET.get("type", "mentor")
         if search_type == "mentee":
             all_qualified = self.queryset.filter(
-                experience__exp_type=Experience.Type.CAN_HELP
+                experience__exp_type=Experience.Type.WANT_HELP
             ).exclude(user=self.request.user)
         if search_type == "mentor":
             all_qualified = self.queryset.filter(
-                experience__exp_type=Experience.Type.WANT_HELP
+                experience__exp_type=Experience.Type.CAN_HELP
             ).exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", "")

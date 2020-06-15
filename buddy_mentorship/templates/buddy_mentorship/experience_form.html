@@ -23,12 +23,14 @@
         <option value="5" {% if experience.level == 5 %} selected {% endif %}>5</option>
     </select>
   </div>
-
-  <select class="custom-select">
-    <option selected>Select one</option>
-    <option value="0">I want help with this skill</option>
-    <option value="1">I can help with this skill</option>
-  </select>
+  
+  <div class="form-group">
+    <label for="skillTypeSelect">Level (1 is the lowest and 5 is the highest):</label>
+    <select class="form-control" name="exp_type" id="skillTypeSelect">
+      <option value="0" {% if experience.exp_type == 0 %}selected {% endif %}>I want help with this skill</option>
+      <option value="1" {% if experience.exp_type == 1 %}selected {% endif %}>I can help with this skill</option>
+    </select>
+  </div>
   <button class="btn btn-primary" type="submit">Save</button>
 </form>
 
