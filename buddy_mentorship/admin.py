@@ -27,4 +27,4 @@ class SkillAdmin(admin.ModelAdmin):
 
 @admin.register(Experience)
 class ExperienceAdmin(admin.ModelAdmin):
-    fields = ["profile", "skill", "level", "can_help", "help_wanted"]
+    fields = ["profile", "skill", "level", "exp_type"]
