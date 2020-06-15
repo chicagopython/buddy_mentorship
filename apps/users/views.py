@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 from buddy_mentorship.models import BuddyRequest, Profile
+
+from django.urls import reverse
 
 
 @login_required(login_url="login")
@@ -54,3 +56,7 @@ def user_can_access_request(user, buddy_request) -> bool:
         or user == buddy_request.requestor
         or user.is_staff
     ) and user.is_active
+
+
+def temp_login(request):
+    return redirect(reverse("social:begin", args=["github"]))
