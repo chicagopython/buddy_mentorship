@@ -763,24 +763,10 @@ class SkillTest(TestCase):
             f"/add_skill/1", {"exp_type": 1, "skill": "django", "level": 4,},
         )
         exp = Experience.objects.get(skill=new_skill, profile=profile)
-        assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 4
+        response = c.get(f"/edit_skill/{exp.id}")
 
         # skill existed
         new_skill_2 = Skill.objects.create(skill="numpy")
-
-        # check for error where updated first experience of the skill, regardless of user
-        create_test_users(
-            1,
-            "other",
-            [{"skill": new_skill_2, "level": 4, "exp_type": Experience.Type.CAN_HELP}],
-        )
-
-        response = c.post(
-            f"/add_skill/0",
-            {"exp_type": Experience.Type.WANT_HELP, "skill": "numpy", "level": 2,},
-        )
-        exp = Experience.objects.get(skill=new_skill_2, profile=profile)
-        assert exp.exp_type == Experience.Type.WANT_HELP and exp.level == 2
 
 
 def create_test_users(n, handle, experiences):

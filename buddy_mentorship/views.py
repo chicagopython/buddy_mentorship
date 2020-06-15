@@ -145,16 +145,13 @@ class AddSkill(LoginRequiredMixin, FormView):
         ).first()
         if existing_experience is None:
             existing_experience = Experience.objects.create(
-                skill=existing_skill,
-                profile=profile,
-                level=1,
-                exp_type=Experience.Type.WANT_HELP,
+                skill=existing_skill, profile=profile, level=1, exp_type=exp_type,
             )
-
-        existing_experience.level = level
-        existing_experience.exp_type = exp_type
-
-        existing_experience.save()
+            existing_experience.level = level
+            existing_experience.exp_type = exp_type
+            existing_experience.save()
+        else:
+            return redirect(f"/edit_skill/{existing_experience.id}")
 
         return super().form_valid(form)
 
