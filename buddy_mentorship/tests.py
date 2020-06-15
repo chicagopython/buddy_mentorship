@@ -767,6 +767,11 @@ class SkillTest(TestCase):
 
         # skill existed
         new_skill_2 = Skill.objects.create(skill="numpy")
+        response = c.post(
+            f"/add_skill/1", {"exp_type": 1, "skill": "numpy", "level": 4,},
+        )
+        exp = Experience.objects.get(skill=new_skill_2, profile=profile)
+        assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 4
 
 
 def create_test_users(n, handle, experiences):
