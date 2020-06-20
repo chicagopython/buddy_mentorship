@@ -18,28 +18,13 @@
   </div>
   <div class="form-group">
     <label for="id_bio">Bio</label>
-    <textarea class="form-control" rows="5" class="form-control" type="text" name="bio" required id="id_bio">{{bio}}</textarea>
+    <textarea class="form-control" rows="5" class="form-control" type="text" name="bio" id="id_bio">{{bio}}</textarea>
   </div>
   <div class="form-group">
     <label for="id_email">Email</label>
     <input class="form-control" value="{{email}}"type="email" name="email" required id="id_email">
   </div>
-  <div class="form-group">
-    <label for="id_help_wanted">Help wanted</label>
-    {% if help_wanted %}
-      <input class="form-control" checked type="checkbox" name="help_wanted" id="id_help_wanted">
-    {% else %}
-      <input class="form-control" type="checkbox" name="help_wanted" id="id_help_wanted">
-    {% endif %}
-  </div>
-  <div class="form-group">
-    <label for="id_can_help">Can help</label>
-    {% if can_help %}
-      <input class="form-control" checked type="checkbox" name="can_help" id="id_can_help">
-    {% else %}
-      <input class="form-control" type="checkbox" name="can_help" id="id_can_help">
-    {% endif %}
-  </div>
+
   <button class="btn btn-primary" type="submit">Save</button>
 </form>
 

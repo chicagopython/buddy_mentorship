@@ -550,6 +550,24 @@ class ProfileEditTest(TestCase):
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
 
+    def test_edit_profile_no_bio(self):
+        user = User.objects.get(email="me@hariseldon")
+        profile = Profile.objects.create(user=user)
+        c = Client()
+        c.force_login(user)
+
+        response = c.post(
+            f"/profile_edit/",
+            {
+                "first_name": "new name",
+                "last_name": "new last name",
+                "email": "newemail@example.com",
+                "bio": "",
+            },
+        )
+        profile = Profile.objects.get(user=user)
+        assert profile.bio == ""
+
 
 class SearchTest(TestCase):
     def setUp(self):
