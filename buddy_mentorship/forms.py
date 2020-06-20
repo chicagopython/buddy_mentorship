@@ -1,5 +1,6 @@
 from django import forms
 from dal import autocomplete
+from .models import Experience
 
 
 class ProfileEditForm(forms.Form):
@@ -15,5 +16,4 @@ class ProfileEditForm(forms.Form):
 class SkillForm(forms.Form):
     skill = forms.CharField(max_length=30)
     level = forms.ChoiceField(choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
-    can_help = forms.BooleanField(required=False)
-    help_wanted = forms.BooleanField(required=False)
+    exp_type = forms.ChoiceField(choices=[(0, 0), (1, 1)])

@@ -33,6 +33,7 @@ def profile(request, profile_id=""):
         "profile": profile,
         "active_page": "profile",
         "request_type": BuddyRequest.RequestType,
+        "exp_types": Experience.Type,
     }
     return render(request, "buddy_mentorship/profile.html", context)
 
@@ -90,8 +91,18 @@ def can_request(requestor, requestee):
 
     return (
         requestor != requestee
-        and any([experience.help_wanted for experience in requestor_experiences])
-        and any([experience.can_help for experience in requestee_experiences])
+        and any(
+            [
+                experience.exp_type == Experience.Type.WANT_HELP
+                for experience in requestor_experiences
+            ]
+        )
+        and any(
+            [
+                experience.exp_type == Experience.Type.CAN_HELP
+                for experience in requestee_experiences
+            ]
+        )
         and requestor.is_active
         and requestee.is_active
         and not existing_requests
@@ -113,11 +124,15 @@ class AddSkill(LoginRequiredMixin, FormView):
     form_class = SkillForm
     success_url = "/profile"
 
+    def get_context_data(self, **kwargs):
+        context = super(AddSkill, self).get_context_data(**kwargs)
+        context["exp_type"] = self.kwargs["exp_type"]
+        return context
+
     def form_valid(self, form: SkillForm):
         user = self.request.user
         profile = Profile.objects.get(user=user)
-        can_help = form.cleaned_data.get("can_help")
-        help_wanted = form.cleaned_data.get("help_wanted")
+        exp_type = form.cleaned_data.get("exp_type")
         skill = form.cleaned_data.get("skill").lower()
         level = form.cleaned_data.get("level")
 
@@ -130,14 +145,13 @@ class AddSkill(LoginRequiredMixin, FormView):
         ).first()
         if existing_experience is None:
             existing_experience = Experience.objects.create(
-                skill=existing_skill, profile=profile, level=1
+                skill=existing_skill, profile=profile, level=1, exp_type=exp_type,
             )
-
-        existing_experience.level = level
-        existing_experience.can_help = can_help
-        existing_experience.help_wanted = help_wanted
-
-        existing_experience.save()
+            existing_experience.level = level
+            existing_experience.exp_type = exp_type
+            existing_experience.save()
+        else:
+            return redirect(f"/edit_skill/{existing_experience.id}")
 
         return super().form_valid(form)
 
@@ -182,15 +196,13 @@ class ProfileEdit(LoginRequiredMixin, FormView):
 
         profile, _ = Profile.objects.get_or_create(user=self.request.user)
         profile.bio = form.cleaned_data.get("bio")
-        profile.can_help = form.cleaned_data.get("can_help")
-        profile.help_wanted = form.cleaned_data.get("help_wanted")
         profile.save()
 
 
 class UpdateExperience(LoginRequiredMixin, UpdateView):
     login_url = "login"
     model = Experience
-    fields = ["can_help", "help_wanted", "level"]
+    fields = ["exp_type", "level"]
     success_url = "/profile/"
 
     def dispatch(self, request, *args, **kwargs):
@@ -238,13 +250,13 @@ class Search(LoginRequiredMixin, ListView):
 
         search_type = self.request.GET.get("type", "mentor")
         if search_type == "mentee":
-            all_qualified = self.queryset.filter(experience__help_wanted=True).exclude(
-                user=self.request.user
-            )
+            all_qualified = self.queryset.filter(
+                experience__exp_type=Experience.Type.WANT_HELP
+            ).exclude(user=self.request.user)
         if search_type == "mentor":
-            all_qualified = self.queryset.filter(experience__can_help=True).exclude(
-                user=self.request.user
-            )
+            all_qualified = self.queryset.filter(
+                experience__exp_type=Experience.Type.CAN_HELP
+            ).exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", "")
         if query_text is not "":

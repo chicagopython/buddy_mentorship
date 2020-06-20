@@ -127,14 +127,14 @@ class Profile(models.Model):
         return trunc_bio[: trunc_bio.rfind(" ") + 1]
 
     def get_can_help(self):
-        return Experience.objects.filter(profile=self, can_help=True).order_by(
-            "-level", "skill__skill"
-        )
+        return Experience.objects.filter(
+            profile=self, exp_type=Experience.Type.CAN_HELP
+        ).order_by("-level", "skill__skill")
 
     def get_help_wanted(self):
-        return Experience.objects.filter(profile=self, help_wanted=True).order_by(
-            "level", "skill__skill"
-        )
+        return Experience.objects.filter(
+            profile=self, exp_type=Experience.Type.WANT_HELP
+        ).order_by("level", "skill__skill")
 
     def get_top_can_help(self):
         return self.get_can_help()[:3]
@@ -166,13 +166,16 @@ class Experience(models.Model):
     Details an individual user's experience with a skill
     """
 
+    class Type(models.IntegerChoices):
+        WANT_HELP = 0
+        CAN_HELP = 1
+
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
     level = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    can_help = models.BooleanField(default=False)
-    help_wanted = models.BooleanField(default=False)
+    exp_type = models.IntegerField(choices=Type.choices, blank=False)
 
     class Meta:
         constraints = [

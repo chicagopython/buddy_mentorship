@@ -87,11 +87,11 @@ class ProfileTest(TransactionTestCase):
         )
 
         Experience.objects.create(
-            profile=profile, skill=skill1, level=4, can_help=True, help_wanted=False,
+            profile=profile, skill=skill1, level=4, exp_type=Experience.Type.CAN_HELP,
         )
 
         Experience.objects.create(
-            profile=profile, skill=skill2, level=1, can_help=False, help_wanted=True,
+            profile=profile, skill=skill2, level=1, exp_type=Experience.Type.WANT_HELP,
         )
 
         with self.assertRaises(IntegrityError):
@@ -99,20 +99,17 @@ class ProfileTest(TransactionTestCase):
                 profile=profile,
                 skill=skill2,
                 level=1,
-                can_help=False,
-                help_wanted=True,
+                exp_type=Experience.Type.WANT_HELP,
             )
 
         profileRecord = Profile.objects.get(user=user)
         self.assertEqual(profileRecord.bio, "i'm super interested in Python")
 
         experienceRecord1 = Experience.objects.get(profile=profile, skill=skill1)
-        self.assertEqual(experienceRecord1.can_help, True)
-        self.assertEqual(experienceRecord1.help_wanted, False)
+        self.assertEqual(experienceRecord1.exp_type, Experience.Type.CAN_HELP)
 
         experienceRecord2 = Experience.objects.get(profile=profile, skill=skill2)
-        self.assertEqual(experienceRecord2.can_help, False)
-        self.assertEqual(experienceRecord2.help_wanted, True)
+        self.assertEqual(experienceRecord2.exp_type, Experience.Type.WANT_HELP)
 
         skillRecord1 = Skill.objects.get(skill=skill1)
         self.assertEqual(skillRecord1.skill, "Django")
@@ -130,10 +127,10 @@ class ProfileTest(TransactionTestCase):
         skill3.save()
 
         skills = [
-            {"skill": skill1, "level": 4, "can_help": True, "help_wanted": False},
-            {"skill": skill2, "level": 3, "can_help": True, "help_wanted": True},
-            {"skill": skill3, "level": 2, "can_help": False, "help_wanted": True},
-            {"skill": skill4, "level": 1, "can_help": False, "help_wanted": False},
+            {"skill": skill1, "level": 4, "exp_type": Experience.Type.CAN_HELP},
+            {"skill": skill2, "level": 3, "exp_type": Experience.Type.CAN_HELP},
+            {"skill": skill3, "level": 2, "exp_type": Experience.Type.WANT_HELP},
+            {"skill": skill4, "level": 1, "exp_type": Experience.Type.WANT_HELP},
         ]
 
         user = create_test_users(1, "user", skills)[0]
@@ -207,40 +204,54 @@ class ProfileTest(TransactionTestCase):
         assert profile.get_short_bio() == "".join(bio_parts[:4])
 
     def test_get_experiences(self):
-        skill1, skill2, skill3, skill4, skill5 = (
-            Skill.objects.create(skill="pandas"),
-            Skill.objects.create(skill="flask"),
-            Skill.objects.create(skill="numpy"),
-            Skill.objects.create(skill="python"),
-            Skill.objects.create(skill="django"),
-        )
+        skills = [
+            Skill.objects.create(skill=name)
+            for name in [
+                "pandas",
+                "flask",
+                "numpy",
+                "python",
+                "django",
+                "pytorch",
+                "react",
+                "pytest",
+            ]
+        ]
 
         user = create_test_users(
             1,
             "user",
             [
-                {"skill": skill1, "level": 1, "can_help": False, "help_wanted": True},
-                {"skill": skill2, "level": 2, "can_help": True, "help_wanted": True},
-                {"skill": skill3, "level": 3, "can_help": True, "help_wanted": True},
-                {"skill": skill4, "level": 4, "can_help": True, "help_wanted": True},
-                {"skill": skill5, "level": 5, "can_help": True, "help_wanted": False},
+                {
+                    "skill": skills[i],
+                    "level": i + 1,
+                    "exp_type": Experience.Type.WANT_HELP,
+                }
+                for i in range(0, 4)
+            ]
+            + [
+                {
+                    "skill": skills[i],
+                    "level": 9 - i,
+                    "exp_type": Experience.Type.CAN_HELP,
+                }
+                for i in range(4, 8)
             ],
         )[0]
 
         profile = Profile.objects.get(user=user)
-        exp1 = Experience.objects.get(profile=profile, skill=skill1)
-        exp2 = Experience.objects.get(profile=profile, skill=skill2)
-        exp3 = Experience.objects.get(profile=profile, skill=skill3)
-        exp4 = Experience.objects.get(profile=profile, skill=skill4)
-        exp5 = Experience.objects.get(profile=profile, skill=skill5)
 
-        assert list(profile.get_can_help()) == [exp5, exp4, exp3, exp2]
+        exps = [
+            Experience.objects.get(profile=profile, skill=skill) for skill in skills
+        ]
 
-        assert list(profile.get_help_wanted()) == [exp1, exp2, exp3, exp4]
+        assert list(profile.get_help_wanted()) == exps[:4]
 
-        assert list(profile.get_top_can_help()) == [exp5, exp4, exp3]
+        assert list(profile.get_can_help()) == exps[4:8]
 
-        assert list(profile.get_top_help_wanted()) == [exp1, exp2, exp3]
+        assert list(profile.get_top_help_wanted()) == exps[:3]
+
+        assert list(profile.get_top_can_help()) == exps[4:7]
 
 
 class SendBuddyRequestTest(TestCase):
@@ -263,8 +274,7 @@ class SendBuddyRequestTest(TestCase):
             profile=mentor_profile,
             skill=skill1,
             level=2,
-            can_help=True,
-            help_wanted=False,
+            exp_type=Experience.Type.CAN_HELP,
         )
 
         mentee = User.objects.create_user(
@@ -279,8 +289,7 @@ class SendBuddyRequestTest(TestCase):
             profile=mentee_profile,
             skill=skill1,
             level=3,
-            can_help=True,
-            help_wanted=True,
+            exp_type=Experience.Type.WANT_HELP,
         )
 
         someone = User.objects.create_user(
@@ -289,14 +298,6 @@ class SendBuddyRequestTest(TestCase):
 
         someone_profile = Profile.objects.create(
             user=someone, bio="You ever see somebody ruin their own life?"
-        )
-
-        Experience.objects.create(
-            profile=someone_profile,
-            skill=skill2,
-            level=5,
-            can_help=False,
-            help_wanted=False,
         )
 
     def test_can_request(self):
@@ -411,19 +412,17 @@ class SendBuddyOfferTest(TestCase):
         create_test_users(
             1,
             "mentor",
-            [{"skill": skill1, "level": 2, "can_help": True, "help_wanted": False}],
+            [{"skill": skill1, "level": 2, "exp_type": Experience.Type.CAN_HELP}],
         )
 
         create_test_users(
             1,
             "mentee",
-            [{"skill": skill1, "level": 3, "can_help": False, "help_wanted": True,}],
+            [{"skill": skill1, "level": 3, "exp_type": Experience.Type.WANT_HELP}],
         )
 
         create_test_users(
-            1,
-            "someone",
-            [{"skill": skill2, "level": 5, "can_help": False, "help_wanted": False,}],
+            1, "someone", [],
         )
 
     def test_send_offer(self):
@@ -570,7 +569,10 @@ class SearchTest(TestCase):
         profile_user = Profile.objects.create(user=user, bio="")
 
         Experience.objects.create(
-            profile=profile_user, skill=skill2, level=5, can_help=True, help_wanted=True
+            profile=profile_user,
+            skill=skill2,
+            level=5,
+            exp_type=Experience.Type.WANT_HELP,
         )
 
         mentor1 = User.objects.create_user(
@@ -585,16 +587,14 @@ class SearchTest(TestCase):
             profile=profile_mentor1,
             skill=skill1,
             level=1,
-            can_help=True,
-            help_wanted=False,
+            exp_type=Experience.Type.CAN_HELP,
         )
 
         Experience.objects.create(
             profile=profile_mentor1,
             skill=skill2,
             level=3,
-            can_help=True,
-            help_wanted=False,
+            exp_type=Experience.Type.CAN_HELP,
         )
 
         mentor2 = User.objects.create_user(
@@ -610,8 +610,7 @@ class SearchTest(TestCase):
             profile=profile_mentor2,
             skill=skill2,
             level=3,
-            can_help=True,
-            help_wanted=False,
+            exp_type=Experience.Type.CAN_HELP,
         )
 
         not_a_mentor = User.objects.create_user(
@@ -622,27 +621,19 @@ class SearchTest(TestCase):
             user=not_a_mentor, bio="Mother of five, host of nerves"
         )
 
-        Experience.objects.create(
-            profile=profile_not_a_mentor,
-            skill=skill2,
-            level=1,
-            can_help=False,
-            help_wanted=False,
-        )
-
         create_test_users(
             1,
             "mentee0",
             [
-                {"skill": skill1, "level": 2, "can_help": False, "help_wanted": True},
-                {"skill": skill2, "level": 1, "can_help": False, "help_wanted": True},
+                {"skill": skill1, "level": 2, "exp_type": Experience.Type.WANT_HELP},
+                {"skill": skill2, "level": 1, "exp_type": Experience.Type.WANT_HELP},
             ],
         )
 
         create_test_users(
             1,
             "mentee1",
-            [{"skill": skill1, "level": 1, "can_help": False, "help_wanted": True},],
+            [{"skill": skill1, "level": 1, "exp_type": Experience.Type.WANT_HELP},],
         )
 
     def test_all_mentors(self):
@@ -731,24 +722,21 @@ class SkillTest(TestCase):
         profile = Profile.objects.get(user=user)
         skill = Skill.objects.create(skill="pandas")
         exp = Experience.objects.create(
-            profile=profile, skill=skill, can_help=False, help_wanted=True, level=1
+            profile=profile, skill=skill, exp_type=Experience.Type.WANT_HELP, level=1
         )
         c = Client()
         c.force_login(user)
 
-        response = c.post(
-            f"/edit_skill/{exp.id}",
-            {"can_help": True, "help_wanted": False, "level": 3},
-        )
+        response = c.post(f"/edit_skill/{exp.id}", {"exp_type": 1, "level": 3},)
         exp = Experience.objects.get(profile=profile, skill=skill)
-        assert exp.help_wanted == False and exp.can_help == True and exp.level == 3
+        assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 3
 
     def test_delete_experience_view(self):
         user = User.objects.get(email="user0@buddy.com")
         profile = Profile.objects.get(user=user)
         skill = Skill.objects.create(skill="pandas")
         exp = Experience.objects.create(
-            profile=profile, skill=skill, can_help=False, help_wanted=True, level=1
+            profile=profile, skill=skill, exp_type=Experience.Type.CAN_HELP, level=1
         )
         c = Client()
         c.force_login(user)
@@ -764,51 +752,33 @@ class SkillTest(TestCase):
 
         # skill didn't exist
         response = c.post(
-            f"/add_skill/",
-            {"can_help": False, "help_wanted": True, "skill": "django", "level": 3,},
+            f"/add_skill/0", {"exp_type": 0, "skill": "django", "level": 3,},
         )
         new_skill = Skill.objects.get(skill="django")
         exp = Experience.objects.get(skill=new_skill, profile=profile)
-        assert exp.help_wanted == True and exp.can_help == False and exp.level == 3
+        assert exp.exp_type == Experience.Type.WANT_HELP and exp.level == 3
 
         # experience existed
         response = c.post(
-            f"/add_skill/",
-            {"can_help": True, "help_wanted": True, "skill": "django", "level": 4,},
+            f"/add_skill/1", {"exp_type": 1, "skill": "django", "level": 4,},
         )
         exp = Experience.objects.get(skill=new_skill, profile=profile)
-        assert exp.help_wanted == True and exp.can_help == True and exp.level == 4
+        response = c.get(f"/edit_skill/{exp.id}")
 
         # skill existed
         new_skill_2 = Skill.objects.create(skill="numpy")
-
-        # check for error where updated first experience of the skill, regardless of user
-        create_test_users(
-            1,
-            "other",
-            [
-                {
-                    "skill": new_skill_2,
-                    "level": 4,
-                    "can_help": True,
-                    "help_wanted": False,
-                }
-            ],
-        )
-
         response = c.post(
-            f"/add_skill/",
-            {"can_help": False, "help_wanted": False, "skill": "numpy", "level": 2,},
+            f"/add_skill/1", {"exp_type": 1, "skill": "numpy", "level": 4,},
         )
         exp = Experience.objects.get(skill=new_skill_2, profile=profile)
-        assert exp.help_wanted == False and exp.can_help == False and exp.level == 2
+        assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 4
 
 
 def create_test_users(n, handle, experiences):
     """
     n: number of users to create \n
     handle: e.g. "mentor" to create "mentor0@buddy.com", "mentor1@buddy.com", etc. Also populates first name \n
-    experiences: list of dictionaries with keys for skill (object), level, can_help and help_wanted
+    experiences: list of dictionaries with keys for skill (object), level, exp_type (takes enum)
     """
 
     users = []
@@ -831,7 +801,6 @@ def create_test_users(n, handle, experiences):
                 profile=profile,
                 skill=exp["skill"],
                 level=exp["level"],
-                can_help=exp["can_help"],
-                help_wanted=exp["help_wanted"],
+                exp_type=exp["exp_type"],
             )
     return users
