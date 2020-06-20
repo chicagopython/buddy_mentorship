@@ -5,6 +5,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from apps.users.models import User
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -126,15 +127,25 @@ class Profile(models.Model):
             return trunc_bio[: last_sentence + 1]
         return trunc_bio[: trunc_bio.rfind(" ") + 1]
 
-    def get_can_help(self):
-        return Experience.objects.filter(
+    def get_can_help(self, query=""):
+        results = Experience.objects.filter(
             profile=self, exp_type=Experience.Type.CAN_HELP
-        ).order_by("-level", "skill__skill")
+        ).order_by("-level")
+        if query:
+            vector = SearchVector("skill__skill")
+            results = results.annotate(rank=SearchRank(vector, query))
+            results = results.order_by("-rank")
+        return results
 
-    def get_help_wanted(self):
-        return Experience.objects.filter(
+    def get_help_wanted(self, query=""):
+        results = Experience.objects.filter(
             profile=self, exp_type=Experience.Type.WANT_HELP
-        ).order_by("level", "skill__skill")
+        ).order_by("-level")
+        if query:
+            vector = SearchVector("skill__skill")
+            results = results.annotate(rank=SearchRank(vector, query))
+            results = results.order_by("-rank")
+        return results
 
     def get_top_can_help(self):
         return self.get_can_help()[:3]
