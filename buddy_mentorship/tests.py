@@ -754,6 +754,7 @@ class SearchTest(TestCase):
     def test_mentor_search_skill_order(self):
         user = User.objects.get(email="elizabeth@bennet.org")
         mentor1 = User.objects.get(email="mr@bennet.org")
+        mentor2 = User.objects.get(email="charlotte@lucas.org")
         flask_exp = Experience.objects.get(profile__user=mentor1, skill__skill="Flask")
         pandas_exp = Experience.objects.get(
             profile__user=mentor1, skill__skill="pandas"
@@ -769,10 +770,13 @@ class SearchTest(TestCase):
 
         response = c.get("/search/?type=mentor&q=gentleman+flask")
         search_results = list(response.context_data["results"])
-        assert len(search_results) == 1
-        result = search_results[0]
-        assert result["profile"].user == mentor1
-        assert list(result["can_help"]) == [flask_exp, pandas_exp]
+        assert len(search_results) == 2
+        assert search_results[0]["profile"].user == mentor1
+        assert list(search_results[0]["can_help"]) == [flask_exp, pandas_exp]
+        assert search_results[1]["profile"].user == mentor2
+        assert list(search_results[1]["can_help"]) == [
+            Experience.objects.get(profile__user=mentor2, skill__skill="Flask")
+        ]
 
 
 class SkillTest(TestCase):

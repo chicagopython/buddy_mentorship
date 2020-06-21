@@ -266,7 +266,9 @@ class Search(LoginRequiredMixin, ListView):
                 "bio",
                 "experience__skill__skill",
             )
-            search_query = SearchQuery(query_text, search_type="plain")
+            search_query = SearchQuery(
+                query_text.replace(" ", " | "), search_type="raw"
+            )
             search_results = (
                 all_qualified.annotate(
                     search=search_vector, rank=SearchRank(search_vector, search_query),
