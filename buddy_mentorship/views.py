@@ -289,6 +289,15 @@ class Search(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_page"] = "search"
-        context["query_text"] = self.request.GET.get("q", "")
         context["search_type"] = self.request.GET.get("type", "mentor")
+        query_text = self.request.GET.get("q", "")
+        context["query_text"] = query_text
+        results = []
+        for profile in context["page_obj"].object_list:
+            result = {}
+            result["profile"] = profile
+            result["can_help"] = profile.get_top_can_help(query_text)
+            result["want_help"] = profile.get_top_want_help(query_text)
+            results.append(result)
+        context["results"] = results
         return context

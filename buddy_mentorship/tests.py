@@ -249,9 +249,39 @@ class ProfileTest(TransactionTestCase):
 
         assert list(profile.get_can_help()) == exps[4:8]
 
-        assert list(profile.get_top_help_wanted()) == exps[:3]
+        assert list(profile.get_top_want_help()) == exps[:3]
 
         assert list(profile.get_top_can_help()) == exps[4:7]
+
+
+def test_get_experiences_with_query(self):
+    pandas, flask = (
+        Skill.objects.create(skill=name) for name in ["pandas", "flask",]
+    )
+
+    user = create_test_users(
+        1,
+        "user",
+        [
+            {"skill": pandas, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
+            {"skill": flask, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
+        ],
+    )[0]
+
+    profile = Profile.objects.get(user=user)
+
+    pandas_exp = Experience.objects.get(profile=profile, skill=pandas)
+    flask_exp = Experience.objects.get(profile=profile, skill=flask)
+
+    assert list(profile.get_can_help("pandas")) == [pandas_exp, flask_exp]
+
+    assert list(profile.get_can_help("flask")) == [flask_exp, pandas_exp]
+
+    assert list(profile.get_top_can_help("pandas")) == [pandas_exp, flask_exp]
+
+    assert list(profile.get_top_can_help("flask")) == [flask_exp, pandas_exp]
+
+    assert list(profile.get_top_can_help("user flask")) == [flask_exp, pandas_exp]
 
 
 class SendBuddyRequestTest(TestCase):
@@ -720,6 +750,29 @@ class SearchTest(TestCase):
         assert len(search_results) == 2
         assert mentee00 in search_result_users
         assert mentee10 in search_result_users
+
+    def test_mentor_search_skill_order(self):
+        user = User.objects.get(email="elizabeth@bennet.org")
+        mentor1 = User.objects.get(email="mr@bennet.org")
+        flask_exp = Experience.objects.get(profile__user=mentor1, skill__skill="Flask")
+        pandas_exp = Experience.objects.get(
+            profile__user=mentor1, skill__skill="pandas"
+        )
+        c = Client()
+        c.force_login(user)
+        response = c.get("/search/?q=gentleman+pandas&type=mentor")
+        search_results = list(response.context_data["results"])
+        assert len(search_results) == 1
+        result = search_results[0]
+        assert result["profile"].user == mentor1
+        assert list(result["can_help"]) == [pandas_exp, flask_exp]
+
+        response = c.get("/search/?type=mentor&q=gentleman+flask")
+        search_results = list(response.context_data["results"])
+        assert len(search_results) == 1
+        result = search_results[0]
+        assert result["profile"].user == mentor1
+        assert list(result["can_help"]) == [flask_exp, pandas_exp]
 
 
 class SkillTest(TestCase):

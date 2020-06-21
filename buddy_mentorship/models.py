@@ -133,25 +133,26 @@ class Profile(models.Model):
         ).order_by("-level")
         if query:
             vector = SearchVector("skill__skill")
-            results = results.annotate(rank=SearchRank(vector, query))
+            or_query = SearchQuery(query.replace(" ", " | "), search_type="raw")
+            results = results.annotate(rank=SearchRank(vector, or_query))
             results = results.order_by("-rank")
         return results
 
     def get_help_wanted(self, query=""):
         results = Experience.objects.filter(
             profile=self, exp_type=Experience.Type.WANT_HELP
-        ).order_by("-level")
+        ).order_by("level")
         if query:
             vector = SearchVector("skill__skill")
             results = results.annotate(rank=SearchRank(vector, query))
             results = results.order_by("-rank")
         return results
 
-    def get_top_can_help(self):
-        return self.get_can_help()[:3]
+    def get_top_can_help(self, query=""):
+        return self.get_can_help(query)[:3]
 
-    def get_top_help_wanted(self):
-        return self.get_help_wanted()[:3]
+    def get_top_want_help(self, query=""):
+        return self.get_help_wanted(query)[:3]
 
 
 class Skill(models.Model):
