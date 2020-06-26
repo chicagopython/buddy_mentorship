@@ -34,72 +34,11 @@ class CustomUserManagerTest(TransactionTestCase):
         assert user.last_name == "Snow"
 
 
-class UserLoginTest(StaticLiveServerTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        chrome_options = Options()
-        if settings.CHROME_HEADLESS:
-            chrome_options.add_argument("--headless")
-
-        if not settings.CHROME_SANDBOX:
-            chrome_options.add_argument("--no-sandbox")
-
-        cls.selenium = WebDriver(chrome_options=chrome_options)
-        cls.selenium.implicitly_wait(5)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.selenium.quit()
-        super().tearDownClass()
-
+class DjangoLoginRedirectTest(TestCase):
     def test_login(self):
-        User.objects.create_superuser(
-            username="myuser", password="secret", email="myuser@example.com"
-        )
-        self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element(By.NAME, "username")
-        username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element(By.NAME, "password")
-        password_input.send_keys("secret")
-        login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
-        login_button.click()
-
-        assert "Logout</a>" in self.selenium.page_source
-
-    def test_bad_login(self):
-        User.objects.create_superuser(
-            username="myuser", password="secret", email="myuser@example.com"
-        )
-        self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element(By.NAME, "username")
-        username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element(By.NAME, "password")
-        password_input.send_keys("wrongsecret")
-        login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
-        login_button.click()
-
-        assert "Login</a>" in self.selenium.page_source
-
-    def test_logout(self):
-        User.objects.create_superuser(
-            username="myuser", password="secret", email="myuser@example.com"
-        )
-        self.selenium.get("%s%s" % (self.live_server_url, "/login/"))
-        username_input = self.selenium.find_element(By.NAME, "username")
-        username_input.send_keys("myuser@example.com")
-        password_input = self.selenium.find_element(By.NAME, "password")
-        password_input.send_keys("secret")
-        login_button = self.selenium.find_element(By.XPATH, '//input[@value="login"]')
-        login_button.click()
-
-        self.selenium.get("%s%s" % (self.live_server_url, "/logout/"))
-
-        assert "Logged out!" in self.selenium.page_source
-
-        self.selenium.get("%s%s" % (self.live_server_url, "/"))
-
-        assert "Login</a>" in self.selenium.page_source
+        c = Client()
+        response = c.get("/login")
+        assert response.status_code == 301
 
 
 class UserCanAccessRequestTest(TestCase):
@@ -211,7 +150,8 @@ class RequestListTest(TestCase):
     def test_not_logged_in(self):
         c = Client()
         response = c.get("/requests/")
-        self.assertRedirects(response, "/login/?next=/requests/")
+        assert response.status_code == 302
+        assert response.url == "/login/?next=/requests/"
 
     def test_no_requests(self):
         user = User.objects.get(email="user0@buddy.com")
