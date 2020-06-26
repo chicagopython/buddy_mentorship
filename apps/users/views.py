@@ -1,8 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
+from django.views.generic.base import RedirectView
+from django.urls import reverse
 
 from buddy_mentorship.models import BuddyRequest, Profile
+
+
+class GithubRedirect(RedirectView):
+    permanent = False
+
+    def get_redirect_url(self, *args, **kargs):
+        return reverse("social:begin", args=("github",))
 
 
 @login_required(login_url="login")
