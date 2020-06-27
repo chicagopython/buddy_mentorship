@@ -5,7 +5,7 @@ from .models import Experience
 
 class ProfileEditForm(forms.Form):
     first_name = forms.CharField(max_length=255)
-    last_name = forms.CharField(max_length=255)
+    last_name = forms.CharField(max_length=255, required=False)
     bio = forms.CharField(widget=forms.Textarea)
     email = forms.EmailField()
     bio = forms.CharField(required=False)
