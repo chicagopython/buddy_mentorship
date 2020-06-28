@@ -598,6 +598,27 @@ class ProfileEditTest(TestCase):
         profile = Profile.objects.get(user=user)
         assert profile.bio == ""
 
+    def test_edit_profile_no_last_name(self):
+        user = User.objects.create_user(email="hari@hariseldon", first_name="Hari")
+        user.last_name = "Seldon"
+        user.save()
+
+        profile = Profile.objects.create(user=user)
+        c = Client()
+        c.force_login(user)
+
+        response = c.post(
+            f"/profile_edit/",
+            {
+                "first_name": "new name",
+                "last_name": "",
+                "email": "newemail@example.com",
+                "bio": "this is a bio",
+            },
+        )
+        user.refresh_from_db()
+        assert user.last_name == ""
+
 
 class SearchTest(TestCase):
     def setUp(self):
