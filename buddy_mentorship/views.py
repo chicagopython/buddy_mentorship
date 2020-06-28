@@ -114,7 +114,7 @@ def can_request(requestor, requestee):
 def skill_search(request):
     term = request.GET.get("term", None)
 
-    skills = Skill.objects.filter(skill__contains=term)
+    skills = Skill.objects.filter(skill__icontains=term)
     return JsonResponse([skill.display_name for skill in skills], safe=False)
 
 
