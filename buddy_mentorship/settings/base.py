@@ -137,6 +137,7 @@ LOGIN_REDIRECT_URL = "/profile/"
 
 # Social Auth
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
 
 AUTHENTICATION_BACKENDS = [
     "social_core.backends.github.GithubOAuth2",
