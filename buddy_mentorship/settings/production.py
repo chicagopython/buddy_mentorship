@@ -25,3 +25,5 @@ ADMINS = [tuple(os.getenv("ADMINS").split(","))] if os.getenv("ADMINS") else []
 django_heroku.settings(locals())
 
 DEBUG_PROPAGATE_EXCEPTIONS = True
+
+SECURE_SSL_REDIRECT = True
