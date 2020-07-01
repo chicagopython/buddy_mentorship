@@ -52,10 +52,6 @@ def request_detail(request, request_id: int):
         "buddy_request": buddy_request,
         "requestor_profile": Profile.objects.get(user=buddy_request.requestor).id,
         "requestee_profile": Profile.objects.get(user=buddy_request.requestee).id,
-        "request_types": {
-            "REQUEST": int(BuddyRequest.RequestType.REQUEST),
-            "OFFER": BuddyRequest.RequestType.OFFER,
-        },
     }
     return render(request, "users/request.html", context)
 
