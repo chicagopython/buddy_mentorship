@@ -804,6 +804,22 @@ class SkillTest(TestCase):
     def setUp(self):
         create_test_users(1, "user", [])
 
+    def test_skill_search(self):
+        Skill.objects.create(skill="python", display_name="Python")
+        Skill.objects.create(skill="django", display_name="Django")
+        c = Client()
+        user = User.objects.get(email="user0@buddy.com")
+        c.force_login(user)
+
+        response = c.get("/skill?term=o")
+        assert response.json() == ["Python", "Django"]
+
+        response = c.get("/skill?term=thon")
+        assert response.json() == ["Python"]
+
+        response = c.get("/skill?term=PyT")
+        assert response.json() == ["Python"]
+
     def test_create_skill(self):
         assert not Skill.objects.filter(skill="python")
         Skill.objects.create(skill="python")

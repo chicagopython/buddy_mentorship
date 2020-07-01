@@ -29,7 +29,7 @@ urlpatterns = [
     path(
         "delete_skill/<int:pk>", views.DeleteExperience.as_view(), name="delete_skill",
     ),
-    path("skill/", views.skill_search, name="skill_search"),
+    path("skill", views.skill_search, name="skill_search"),
     path("add_skill/<int:exp_type>", views.AddSkill.as_view(), name="add_skill"),
     path("send_request/<uuid:uuid>", views.send_request, name="send_request"),
     path(
