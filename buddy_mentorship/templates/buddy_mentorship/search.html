@@ -3,7 +3,8 @@
 {% load static %}
 
 {% block title %}
-	Mentor Search
+	{% if search_type == 'mentor' %} Mentor Search {% endif %}
+  {% if search_type == 'mentee' %} Mentee Search {% endif %}
 {% endblock title %}
 
 {% block content %}
