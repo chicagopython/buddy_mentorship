@@ -13,7 +13,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import BuddyRequest, Profile, Skill, Experience
+from .models import BuddyRequest, BuddyRequestmanager, Profile, Skill, Experience
 from .views import can_request, send_request
 
 from apps.users.models import User
@@ -533,6 +533,116 @@ class SendBuddyOfferTest(TestCase):
 
         # right now this doesn't do anything
         assert len(mail.outbox) == 1
+
+
+class BuddyRequestModelTest(TestCase):
+    def setUp(self):
+        hari = User.objects.create_user(
+            email="me@hariseldon", first_name="Hari", last_name="Seldon",
+        )
+        elizabeth = User.objects.create_user(
+            email="elizabeth@bennet.org", first_name="Elizabeth", last_name="Bennet",
+        )
+        Profile.objects.create(user=hari)
+        Profile.objects.create(user=elizabeth)
+
+    def test_no_requests(self):
+        hari = User.objects.get(email="me@hariseldon")
+        elizabeth = User.objects.get(email="elizabeth@bennet.org")
+        assert (
+            BuddyRequest.objects.find_by_users(
+                hari, elizabeth, BuddyRequest.RequestType.REQUEST
+            )
+            is None
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                elizabeth, hari, BuddyRequest.RequestType.REQUEST
+            )
+            is None
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                hari, elizabeth, BuddyRequest.RequestType.OFFER
+            )
+            is None
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                elizabeth, hari, BuddyRequest.RequestType.OFFER
+            )
+            is None
+        )
+
+    def test_mentor_request(self):
+        hari = User.objects.get(email="me@hariseldon")
+        elizabeth = User.objects.get(email="elizabeth@bennet.org")
+        request = BuddyRequest.objects.create(
+            requestor=hari,
+            requestee=elizabeth,
+            message="",
+            request_type=BuddyRequest.RequestType.REQUEST,
+            status=BuddyRequest.Status.NEW,
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                hari, elizabeth, BuddyRequest.RequestType.REQUEST
+            )
+            == request
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                elizabeth, hari, BuddyRequest.RequestType.REQUEST
+            )
+            is None
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                hari, elizabeth, BuddyRequest.RequestType.OFFER
+            )
+            is None
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                elizabeth, hari, BuddyRequest.RequestType.OFFER
+            )
+            is None
+        )
+
+    def test_mentor_offer(self):
+        hari = User.objects.get(email="me@hariseldon")
+        elizabeth = User.objects.get(email="elizabeth@bennet.org")
+        request = BuddyRequest.objects.create(
+            requestor=hari,
+            requestee=elizabeth,
+            message="",
+            request_type=BuddyRequest.RequestType.OFFER,
+            status=BuddyRequest.Status.NEW,
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                hari, elizabeth, BuddyRequest.RequestType.REQUEST
+            )
+            is None
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                elizabeth, hari, BuddyRequest.RequestType.REQUEST
+            )
+            is None
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                hari, elizabeth, BuddyRequest.RequestType.OFFER
+            )
+            == request
+        )
+        assert (
+            BuddyRequest.objects.find_by_users(
+                elizabeth, hari, BuddyRequest.RequestType.OFFER
+            )
+            is None
+        )
 
 
 class ProfileEditTest(TestCase):
