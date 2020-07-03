@@ -1,10 +1,14 @@
 {% extends 'buddy_mentorship/base.html' %}
-{% block title %} Request Detail {% endblock %}
+{% block title %} 
+  {% if buddy_request.request_type == buddy_request.RequestType.REQUEST %}Request Detail{%endif%}
+  {% if buddy_request.request_type == buddy_request.RequestType.OFFER %}Offer Detail{%endif%}
+{% endblock %}
 {% block content %}
 <div class="container">
   <div class="starter-template">
     <h1>
-      Request
+      {% if buddy_request.request_type == buddy_request.RequestType.REQUEST %}Request Detail{%endif%}
+      {% if buddy_request.request_type == buddy_request.RequestType.OFFER %}Offer Detail{%endif%}
     </h1>
     <div class="row mb-2">
       <div class="col">
@@ -29,14 +33,19 @@
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="acceptModalLabel">Accept Buddy Request</h5>
+                      <h5 class="modal-title" id="acceptModalLabel">
+                        {% if buddy_request.request_type == buddy_request.RequestType.REQUEST %}Accept Mentorship Request{%endif%}
+                        {% if buddy_request.request_type == buddy_request.RequestType.OFFER %}Accept Mentorship Offer{%endif%}
+                      </h5>
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                       </button>
                     </div>
                     <div class="modal-body">
                       Please confirm you want to accept {{buddy_request.requestor.first_name}}
-                      {{buddy_request.requestor.last_name}}'s request.
+                      {{buddy_request.requestor.last_name}}'s mentorship 
+                      {% if buddy_request.request_type == buddy_request.RequestType.REQUEST %}request.{%endif%}
+                      {% if buddy_request.request_type == buddy_request.RequestType.OFFER %}offer.{%endif%}
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -50,14 +59,19 @@
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="ignoreModalLabel">Ignore Buddy Request</h5>
+                      <h5 class="modal-title" id="ignoreModalLabel">
+                        {% if buddy_request.request_type == buddy_request.RequestType.REQUEST %}Ignore Mentorship Request{%endif%}
+                        {% if buddy_request.request_type == buddy_request.RequestType.OFFER %}Ignore Mentorship Offer{%endif%}
+                      </h5>
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                       </button>
                     </div>
                     <div class="modal-body">
                       Please confirm you want to ignore {{buddy_request.requestor.first_name}}
-                      {{buddy_request.requestor.last_name}}'s request.
+                      {{buddy_request.requestor.last_name}}'s mentorship
+                      {% if buddy_request.request_type == buddy_request.RequestType.REQUEST %}request.{%endif%}
+                      {% if buddy_request.request_type == buddy_request.RequestType.OFFER %}offer.{%endif%}
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -78,7 +92,10 @@
         <div class="card">
           <div class="card-body">
             <div class="card-title h5">
-              <span class="badge badge-success">Request Accepted!</span>
+              <span class="badge badge-success">
+                {% if buddy_request.request_type == buddy_request.RequestType.REQUEST %}Request Accepted!{%endif%}
+                {% if buddy_request.request_type == buddy_request.RequestType.OFFER %}Offer Accepted!{%endif%}
+              </span>
             </div>
             <div class="card-text">
               {% if user == buddy_request.requestee %}
