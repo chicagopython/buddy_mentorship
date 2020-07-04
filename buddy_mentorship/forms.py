@@ -13,6 +13,6 @@ class ProfileEditForm(forms.Form):
 
 
 class SkillForm(forms.Form):
-    skill = forms.CharField(max_length=30)
+    skill = forms.CharField(max_length=50)
     level = forms.ChoiceField(choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
     exp_type = forms.ChoiceField(choices=[(0, 0), (1, 1)])
