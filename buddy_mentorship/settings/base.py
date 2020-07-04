@@ -165,6 +165,7 @@ EMAIL_PORT = os.environ["EMAIL_PORT"]
 EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_SSL = True
+SERVER_EMAIL = EMAIL_ADDRESS
 
 # used for selenium tests
 CHROME_HEADLESS = os.getenv("CHROME_HEADLESS") == "true"
