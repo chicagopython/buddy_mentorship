@@ -374,7 +374,7 @@ class SendBuddyRequestTest(TestCase):
         assert BuddyRequest.objects.get(requestor=mentee)
 
         assert len(mail.outbox) == 1
-        assert mail.outbox[0].subject == "Cassie sent you a Buddy Request"
+        assert mail.outbox[0].subject == "New ChiPy Mentorship Request!"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
         mentee_name = f"{mentee.first_name} {mentee.last_name}"
         sent_message = mail.outbox[0].alternatives[0][0]
@@ -407,7 +407,7 @@ class SendBuddyRequestTest(TestCase):
         buddy_request.save()
 
         assert len(mail.outbox) == 2
-        assert mail.outbox[1].subject == "Frank accepted your Buddy Request"
+        assert mail.outbox[1].subject == "ChiPy Mentorship Request Accepted!"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
         mentor_name = f"{mentor.first_name} {mentor.last_name}"
         sent_message = mail.outbox[1].alternatives[0][0]
@@ -478,7 +478,7 @@ class SendBuddyOfferTest(TestCase):
         assert BuddyRequest.objects.get(requestor=mentor)
 
         assert len(mail.outbox) == 1
-        assert mail.outbox[0].subject == "mentor0 sent you a Buddy Offer"
+        assert mail.outbox[0].subject == "New ChiPy Mentorship Offer!"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
         mentor_name = f"{mentor.first_name} {mentor.last_name}"
         sent_message = mail.outbox[0].alternatives[0][0]
@@ -511,7 +511,7 @@ class SendBuddyOfferTest(TestCase):
         buddy_request.save()
 
         assert len(mail.outbox) == 2
-        assert mail.outbox[1].subject == "mentee0 accepted your Buddy Offer"
+        assert mail.outbox[1].subject == "ChiPy Mentorship Offer Accepted!"
         profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
         mentee_name = f"{mentee.first_name} {mentee.last_name}"
         sent_message = mail.outbox[1].alternatives[0][0]

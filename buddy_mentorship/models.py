@@ -58,7 +58,7 @@ class BuddyRequest(models.Model):
             plain_message = "".join(
                 [
                     f"{self.requestor.first_name} {self.requestor.last_name} ",
-                    f"sent you a Buddy {request_type_str} ",
+                    f"sent you a {request_type_str} ",
                     "with the following message: \n",
                     f"{self.message}",
                 ]
@@ -68,13 +68,13 @@ class BuddyRequest(models.Model):
                     f"<p><a href='{os.getenv('APP_URL')}{profile_url}'>",
                     f"{self.requestor.first_name} {self.requestor.last_name}</a> ",
                     f"sent you a <a href='{os.getenv('APP_URL')}{request_detail_url}''>",
-                    f"Buddy {request_type_str}</a> ",
+                    f"{request_type_str}</a> ",
                     "with the following message:</p>",
                     f"{self.message}",
                 ]
             )
             send_mail(
-                f"{self.requestor.first_name} sent you a Buddy {request_type_str}",
+                f"New ChiPy Mentorship {request_type_str}!",
                 plain_message,
                 settings.EMAIL_ADDRESS,
                 [self.requestee.email],
@@ -86,7 +86,7 @@ class BuddyRequest(models.Model):
             plain_message = "".join(
                 [
                     f"{self.requestee.first_name} {self.requestee.last_name} ",
-                    f"has accepted your Buddy {request_type_str} . Contact them at ",
+                    f"has accepted your {request_type_str} . Contact them at ",
                     f"{self.requestee.email} to begin your mentorship!",
                 ]
             )
@@ -94,14 +94,13 @@ class BuddyRequest(models.Model):
                 [
                     f"<p><a href='{os.getenv('APP_URL')}{profile_url}'>",
                     f"{self.requestee.first_name} {self.requestee.last_name}</a> ",
-                    f"has accepted your Buddy {request_type_str}. Contact them at ",
+                    f"has accepted your {request_type_str}. Contact them at ",
                     f"<a href='mailto:{self.requestee.email}'>",
                     f"{self.requestee.email}</a> to begin your mentorship!</p>",
                 ]
             )
             send_mail(
-                f"{self.requestee.first_name} accepted your "
-                f"Buddy {request_type_str}",
+                f"ChiPy Mentorship {request_type_str} Accepted!",
                 plain_message,
                 settings.EMAIL_ADDRESS,
                 [self.requestor.email],
