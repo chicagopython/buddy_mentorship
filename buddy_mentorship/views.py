@@ -21,30 +21,44 @@ def index(request):
 @login_required(login_url="login")
 def profile(request, profile_id=""):
     user = request.user
-    user_profile = profile = Profile.objects.filter(user=user).first()
+    user_profile = Profile.objects.filter(user=user).first()
     if not profile_id:
         profile = user_profile
         profile_id = profile.id if profile else None
     if profile_id is None:
         return redirect("edit_profile")
     profile = Profile.objects.get(id=profile_id)
-    existing_request = None
-    existing_offer = None
+    existing_request_to_user = None
+    existing_offer_to_user = None
+    existing_request_from_user = None
+    existing_offer_from_user = None
     if user_profile != profile:
-        existing_request = BuddyRequest.objects.find_by_users(
+        existing_request_from_user = BuddyRequest.objects.find_by_users(
             requestor=user_profile.user,
             requestee=profile.user,
             request_type=BuddyRequest.RequestType.REQUEST,
         )
-        existing_offer = BuddyRequest.objects.find_by_users(
+        existing_offer_to_user = BuddyRequest.objects.find_by_users(
+            requestor=profile.user,
+            requestee=user_profile.user,
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        existing_offer_from_user = BuddyRequest.objects.find_by_users(
             requestor=user_profile.user,
             requestee=profile.user,
             request_type=BuddyRequest.RequestType.OFFER,
         )
+        existing_request_to_user = BuddyRequest.objects.find_by_users(
+            requestor=profile.user,
+            requestee=user_profile.user,
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
 
     context = {
-        "existing_request": existing_request,
-        "existing_offer": existing_offer,
+        "existing_request_to_user": existing_request_to_user,
+        "existing_offer_to_user": existing_offer_to_user,
+        "existing_request_from_user": existing_request_from_user,
+        "existing_offer_from_user": existing_offer_from_user,
         "can_request": can_request(request.user, profile.user),
         "can_offer": can_request(profile.user, request.user),
         "profile": profile,

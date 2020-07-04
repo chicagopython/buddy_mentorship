@@ -25,7 +25,7 @@
                         <p class="card-text">
                             {{profile.bio|linebreaks}}
                             {% if profile.user == request.user %}
-                                {% if profile.bio == None or profile.bio == "" %}
+                                {% if profile.bio == None and user_profile != profile or profile.bio == "" %}
                                     <div class="alert alert-warning" role="alert">
                                         <a href="{% url "edit_profile" %}">Add a bio</a> to tell potential mentors and mentees about yourself.
                                     </div>
@@ -171,15 +171,26 @@
 
         </div>
 
-        {% if existing_request %}
+        {% if existing_request_from_user %}
             <div class="alert alert-info" role="alert">
-                <p>You have sent this user a <a href="{% url "request_detail" existing_request.id %}">request</a></p>
+                <p>You have sent this user a <a href="{% url "request_detail" existing_request_from_user.id %}">request</a></p>
             </div>
         {% endif %}
 
-        {% if existing_offer %}
+        {% if existing_offer_from_user %}
             <div class="alert alert-info" role="alert">
-                <p>You have sent this user an <a href="{% url "request_detail" existing_offer.id %}">offer</a></p>
+                <p>You have sent this user an <a href="{% url "request_detail" existing_offer_from_user.id %}">offer</a></p>
+            </div>
+        {% endif %}
+        {% if existing_request_to_user %}
+            <div class="alert alert-info" role="alert">
+                <p>This user has sent you a <a href="{% url "request_detail" existing_request_to_user.id %}">request</a></p>
+            </div>
+        {% endif %}
+
+        {% if existing_offer_to_user %}
+            <div class="alert alert-info" role="alert">
+                <p>This user has sent you an <a href="{% url "request_detail" existing_offer_to_user.id %}">offer</a></p>
             </div>
         {% endif %}
 
@@ -199,8 +210,9 @@
                     </div>
                 </div>
             </div>
+        {% endif %}
 
-        {% elif existing_request == None %}
+        {% if not can_request and existing_request_from_user is None and existing_offer_to_user is None and user_profile != profile %}
             <div class="alert alert-info" role="alert">
                 <p>
                     You are not able to request help from this user. This may be because you have not added a skill you want help with or
@@ -226,7 +238,9 @@
             </div>
         </div>
 
-        {% elif existing_offer == None %}
+        {% endif %}
+
+        {% if not can_offer and existing_request_to_user is None and existing_offer_from_user is None and user_profile != profile %}
             <div class="alert alert-info" role="alert">
                 <p>
                     You are not able to offer to mentor this user. This may be because you have not added a skill you can help with or
