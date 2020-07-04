@@ -155,6 +155,8 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.user.user_details",
 )
 
+SOCIAL_AUTH_PROTECTED_USER_FIELDS = ["email", "first_name", "last_name"]
+
 SOCIAL_AUTH_GITHUB_KEY = os.getenv("GITHUB_APP_ID")
 SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_API_SECRET")
 
