@@ -25,7 +25,7 @@
                         <p class="card-text">
                             {{profile.bio|linebreaks}}
                             {% if profile.user == request.user %}
-                                {% if profile.bio == None or profile.bio == "" %}
+                                {% if profile.bio == None and user_profile != profile or profile.bio == "" %}
                                     <div class="alert alert-warning" role="alert">
                                         <a href="{% url "edit_profile" %}">Add a bio</a> to tell potential mentors and mentees about yourself.
                                     </div>
@@ -36,7 +36,7 @@
                 </div>
             </div>
         </div>
-{% comment %} 
+{% comment %}
         <div class="row mb-2">
             <div class="col">
                 <div class="demographics card">
@@ -90,7 +90,7 @@
                                 {% if request.user == profile.user %}
                                     {% if not profile.get_help_wanted %}
                                         <div class="alert alert-warning" role="alert">
-                                            <p>Your profile has no skills you want help with.</p> 
+                                            <p>Your profile has no skills you want help with.</p>
                                             <p>Adding skills that you want help with allows you to <b>send mentorship offers</b> and allows people looking for mentees to <b>find you via search</b> and <b>send you mentorship offers</b>.</p>
                                         </div>
                                     {% endif %}
@@ -149,7 +149,7 @@
                                 {% if request.user == profile.user %}
                                     {% if not profile.get_can_help %}
                                         <div class="alert alert-warning" role="alert">
-                                            <p>Your profile has no skills you can help with.</p> 
+                                            <p>Your profile has no skills you can help with.</p>
                                             <p>Adding skills that you can help with allows people looking for mentors to <b>find you via search</b> and <b>send you mentorship requests</b>, and allows you to <b>send mentorship offers</b>.</p>
                                         </div>
                                     {% endif %}
@@ -171,30 +171,56 @@
 
         </div>
 
-        {% comment %} <div class="row">
-             <div class="col d-flex justify-content-center">
-                <div id="mapid"></div>
-             </div>
-        </div> {% endcomment %}
+        {% if existing_request_from_user %}
+            <div class="alert alert-info" role="alert">
+                <p>You have sent this user a <a href="{% url "request_detail" existing_request_from_user.id %}">request</a></p>
+            </div>
+        {% endif %}
+
+        {% if existing_offer_from_user %}
+            <div class="alert alert-info" role="alert">
+                <p>You have sent this user an <a href="{% url "request_detail" existing_offer_from_user.id %}">offer</a></p>
+            </div>
+        {% endif %}
+        {% if existing_request_to_user %}
+            <div class="alert alert-info" role="alert">
+                <p>This user has sent you a <a href="{% url "request_detail" existing_request_to_user.id %}">request</a></p>
+            </div>
+        {% endif %}
+
+        {% if existing_offer_to_user %}
+            <div class="alert alert-info" role="alert">
+                <p>This user has sent you an <a href="{% url "request_detail" existing_offer_to_user.id %}">offer</a></p>
+            </div>
+        {% endif %}
 
         {% if can_request %}
-        <div class="row mb-2">
-            <div class="col">
-                <div class="send-request card">
-                    <div class="card-body">
-                        <p><button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="collapse" data-target="#requestForm">Request</button></p>
-                        <form class="collapse" id="requestForm" action="{% url "send_request" profile.user.uuid %}" method="post">
-                            {% csrf_token %}
-                            <p><textarea class="form-control" id="requestMessage" name="message" rows="3">Hi! Will you be my Python mentor?</textarea></p>
-                            <p><button type="submit" class="btn btn-primary btn-block" form="requestForm">Submit Request</button></p>
-                            <input type="hidden" name="request_type" value={{ request_type.REQUEST }}>
-                        </form>
-                    <div>
+            <div class="row mb-2">
+                <div class="col">
+                    <div class="send-request card">
+                        <div class="card-body">
+                            <p><button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="collapse" data-target="#requestForm">Request</button></p>
+                            <form class="collapse" id="requestForm" action="{% url "send_request" profile.user.uuid %}" method="post">
+                                {% csrf_token %}
+                                <p><textarea class="form-control" id="requestMessage" name="message" rows="3">Hi! Will you be my Python mentor?</textarea></p>
+                                <p><button type="submit" class="btn btn-primary btn-block" form="requestForm">Submit Request</button></p>
+                                <input type="hidden" name="request_type" value={{ request_type.REQUEST }}>
+                            </form>
+                        <div>
+                    </div>
                 </div>
             </div>
-        </div>
         {% endif %}
-        
+
+        {% if not can_request and existing_request_from_user is None and existing_offer_to_user is None and user_profile != profile %}
+            <div class="alert alert-info" role="alert">
+                <p>
+                    You are not able to request help from this user. This may be because you have not added a skill you want help with or
+                    they have not added a skill they can help with.
+                </p>
+            </div>
+        {% endif %}
+
         {% if can_offer %}
         <div class="row mb-2">
             <div class="col">
@@ -211,6 +237,16 @@
                 </div>
             </div>
         </div>
+
+        {% endif %}
+
+        {% if not can_offer and existing_request_to_user is None and existing_offer_from_user is None and user_profile != profile %}
+            <div class="alert alert-info" role="alert">
+                <p>
+                    You are not able to offer to mentor this user. This may be because you have not added a skill you can help with or
+                    they have not added a skill they want help with.
+                </p>
+            </div>
         {% endif %}
     </div>
   </div>

@@ -9,6 +9,15 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
+class BuddyRequestmanager(models.Manager):
+    def find_by_users(
+        self, requestor: User, requestee: User, request_type: "RequestType"
+    ):
+        return self.filter(
+            requestor=requestor, requestee=requestee, request_type=request_type
+        ).first()
+
+
 class BuddyRequest(models.Model):
     class Status(models.IntegerChoices):
         NEW = 0
@@ -29,6 +38,7 @@ class BuddyRequest(models.Model):
         User, on_delete=models.CASCADE, related_name="requestor"
     )
     message = models.TextField()
+    objects = BuddyRequestmanager()
 
     def __str__(self):
         request_type_str = ["Request", "Offer"][int(self.request_type)]
