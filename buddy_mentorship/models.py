@@ -41,7 +41,6 @@ class BuddyRequest(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         request_type_str = ["Request", "Offer"][int(self.request_type)]
-        requestee_type_str = ["Mentor", "Mentee"][int(self.request_type)]
         if self.status == 0:
             profile = Profile.objects.get(user=self.requestor)
             profile_url = reverse("profile", args=[profile.id])
@@ -65,7 +64,7 @@ class BuddyRequest(models.Model):
                 ]
             )
             send_mail(
-                f"New ChiPy {requestee_type_str} Request!",
+                f"New ChiPy Mentorship {request_type_str}!",
                 plain_message,
                 settings.EMAIL_ADDRESS,
                 [self.requestee.email],
@@ -91,7 +90,7 @@ class BuddyRequest(models.Model):
                 ]
             )
             send_mail(
-                f"{requestee_type_str} Request Accepted!",
+                f"ChiPy Mentorship {request_type_str} Accepted!",
                 plain_message,
                 settings.EMAIL_ADDRESS,
                 [self.requestor.email],
