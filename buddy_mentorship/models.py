@@ -170,8 +170,8 @@ class Skill(models.Model):
     display_name: name showed in UI, e.g. "Python", "MVC", etc.
     """
 
-    skill = models.CharField(max_length=30, unique=True)
-    display_name = models.CharField(max_length=30, null=True)
+    skill = models.CharField(max_length=50, unique=True)
+    display_name = models.CharField(max_length=50, null=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:
