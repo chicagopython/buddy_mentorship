@@ -13,7 +13,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import BuddyRequest, BuddyRequestmanager, Profile, Skill, Experience
+from .models import BuddyRequest, BuddyRequestManager, Profile, Skill, Experience
 from .views import can_request, send_request
 
 from apps.users.models import User

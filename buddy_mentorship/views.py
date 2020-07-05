@@ -59,17 +59,15 @@ def profile(request, profile_id=""):
         "existing_offer_to_user": existing_offer_to_user,
         "existing_request_from_user": existing_request_from_user,
         "existing_offer_from_user": existing_offer_from_user,
-        "can_request": False,
-        "can_offer": False,
+        "can_request": can_request(request.user, profile.user),
+        "can_offer": can_request(profile.user, request.user),
         "profile": profile,
         "user_profile": user_profile,
         "active_page": "profile",
         "request_type": BuddyRequest.RequestType,
         "exp_types": Experience.Type,
     }
-    if user_profile:
-        context["can_request"] = can_request(request.user, profile.user)
-        context["can_offer"] = can_request(profile.user, request.user)
+
     return render(request, "buddy_mentorship/profile.html", context)
 
 
@@ -107,8 +105,11 @@ def send_request(request, uuid):
 
 # needs to be updated as we expand profile model
 def can_request(requestor, requestee):
-    requestor_profile = Profile.objects.get(user=requestor)
-    requestee_profile = Profile.objects.get(user=requestee)
+    requestor_profile = Profile.objects.filter(user=requestor).first()
+    requestee_profile = Profile.objects.filter(user=requestee).first()
+
+    if (not requestor_profile) or (not requestee_profile):
+        return False
 
     requestor_experiences = Experience.objects.filter(profile=requestor_profile).all()
     requestee_experiences = Experience.objects.filter(profile=requestee_profile).all()
