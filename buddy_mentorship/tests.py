@@ -13,7 +13,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import BuddyRequest, BuddyRequestmanager, Profile, Skill, Experience
+from .models import BuddyRequest, BuddyRequestManager, Profile, Skill, Experience
 from .views import can_request, send_request
 
 from apps.users.models import User
@@ -117,6 +117,26 @@ class ProfileTest(TransactionTestCase):
         skillRecord2 = Skill.objects.get(skill=skill2)
         self.assertEqual(skillRecord2.skill, "seaborn")
 
+    def test_profile_without_own(self):
+        user = User.objects.create_user(email="no_profile@user.com")
+        profile_user = create_test_users(1, "profile_user", [])[0]
+        profile = Profile.objects.get(user=profile_user)
+        c = Client()
+        c.force_login(user)
+        response = c.get(f"/profile/{profile.id}",)
+        assert response.status_code == 200
+
+    def test_nonexistent_profile(self):
+        user = User.objects.create_user(email="no_profile@user.com")
+        if len(Profile.objects.all()) == 0:
+            invalid_id = 1
+        else:
+            invalid_id = max([profile.id for profile in Profile.objects.all()]) + 100
+        c = Client()
+        c.force_login(user)
+        response = c.get(f"/profile/{invalid_id}",)
+        assert response.status_code == 404
+
     def test_profile_view(self):
         skill1 = Skill.objects.create(skill="python")
         skill2 = Skill.objects.create(skill="django")
@@ -142,7 +162,7 @@ class ProfileTest(TransactionTestCase):
 
         c = Client()
         c.force_login(user)
-        response = c.get(f"/profile/",)
+        response = c.get("/profile/",)
         assert response.status_code == 200
         assert response.context["can_request"] == False
         assert response.context["can_offer"] == False

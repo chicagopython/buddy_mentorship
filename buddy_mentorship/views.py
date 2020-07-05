@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.db.models import OuterRef, Subquery
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView
 from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -27,12 +27,12 @@ def profile(request, profile_id=""):
         profile_id = profile.id if profile else None
     if profile_id is None:
         return redirect("edit_profile")
-    profile = Profile.objects.get(id=profile_id)
+    profile = get_object_or_404(Profile, id=profile_id)
     existing_request_to_user = None
     existing_offer_to_user = None
     existing_request_from_user = None
     existing_offer_from_user = None
-    if user_profile != profile:
+    if user_profile != profile and user_profile != None:
         existing_request_from_user = BuddyRequest.objects.find_by_users(
             requestor=user_profile.user,
             requestee=profile.user,
@@ -67,6 +67,7 @@ def profile(request, profile_id=""):
         "request_type": BuddyRequest.RequestType,
         "exp_types": Experience.Type,
     }
+
     return render(request, "buddy_mentorship/profile.html", context)
 
 
@@ -104,8 +105,11 @@ def send_request(request, uuid):
 
 # needs to be updated as we expand profile model
 def can_request(requestor, requestee):
-    requestor_profile = Profile.objects.get(user=requestor)
-    requestee_profile = Profile.objects.get(user=requestee)
+    requestor_profile = Profile.objects.filter(user=requestor).first()
+    requestee_profile = Profile.objects.filter(user=requestee).first()
+
+    if (not requestor_profile) or (not requestee_profile):
+        return False
 
     requestor_experiences = Experience.objects.filter(profile=requestor_profile).all()
     requestee_experiences = Experience.objects.filter(profile=requestee_profile).all()
