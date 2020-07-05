@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.db.models import OuterRef, Subquery
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView
 from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -27,12 +27,12 @@ def profile(request, profile_id=""):
         profile_id = profile.id if profile else None
     if profile_id is None:
         return redirect("edit_profile")
-    profile = Profile.objects.get(id=profile_id)
+    profile = get_object_or_404(Profile, id=profile_id)
     existing_request_to_user = None
     existing_offer_to_user = None
     existing_request_from_user = None
     existing_offer_from_user = None
-    if user_profile != profile:
+    if user_profile != profile and user_profile != None:
         existing_request_from_user = BuddyRequest.objects.find_by_users(
             requestor=user_profile.user,
             requestee=profile.user,
@@ -59,14 +59,17 @@ def profile(request, profile_id=""):
         "existing_offer_to_user": existing_offer_to_user,
         "existing_request_from_user": existing_request_from_user,
         "existing_offer_from_user": existing_offer_from_user,
-        "can_request": can_request(request.user, profile.user),
-        "can_offer": can_request(profile.user, request.user),
+        "can_request": False,
+        "can_offer": False,
         "profile": profile,
         "user_profile": user_profile,
         "active_page": "profile",
         "request_type": BuddyRequest.RequestType,
         "exp_types": Experience.Type,
     }
+    if user_profile:
+        context["can_request"] = can_request(request.user, profile.user)
+        context["can_offer"] = can_request(profile.user, request.user)
     return render(request, "buddy_mentorship/profile.html", context)
 
 
