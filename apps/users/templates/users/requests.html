@@ -11,7 +11,7 @@
 
 <ul>
   {% if not requests_received %}
-    <li> You have not received any requests </li>
+    <li> You have no pending or accepted requests </li>
   {% endif %}
   {% for request in requests_received %}
     {% if request.status != 2 %}
@@ -59,7 +59,7 @@
 
 <ul>
   {% if not offers_received %}
-    <li> You have not received any offers </li>
+    <li> You have no pending or accepted offers </li>
   {% endif %}
   {% for request in offers_received %}
     {% if request.status != 2 %}
