@@ -11,4 +11,3 @@ urlpatterns = [
     path("requests/<int:request_id>", views.request_detail, name="request_detail"),
     path("requests/", views.requests_list, name="requests"),
 ]
-list
