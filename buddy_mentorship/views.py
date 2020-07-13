@@ -274,7 +274,7 @@ def update_request(request, buddy_request_id):
 
 
 class Search(LoginRequiredMixin, ListView):
-    login_url = "/login/?next=search/"
+    login_url = "login"
 
     template_name = "buddy_mentorship/search.html"
 
