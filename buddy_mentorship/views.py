@@ -59,8 +59,8 @@ def profile(request, profile_id=""):
         "existing_offer_to_user": existing_offer_to_user,
         "existing_request_from_user": existing_request_from_user,
         "existing_offer_from_user": existing_offer_from_user,
-        "can_request": can_request(request.user, profile.user),
-        "can_offer": can_request(profile.user, request.user),
+        "can_request": can_request_as_mentor(request.user, profile.user),
+        "can_offer": can_offer_to_mentor(profile.user, request.user),
         "profile": profile,
         "user_profile": user_profile,
         "active_page": "profile",
@@ -82,11 +82,11 @@ def send_request(request, uuid):
 
     can_send_request = int(request_type) == int(
         BuddyRequest.RequestType.REQUEST
-    ) and can_request(user, requestee)
+    ) and can_request_as_mentor(user, requestee)
 
     can_send_offer = int(request_type) == int(
         BuddyRequest.RequestType.OFFER
-    ) and can_request(requestee, user)
+    ) and can_offer_to_mentor(user, requestee)
 
     if can_send_request or can_send_offer:
         BuddyRequest.objects.create(
@@ -104,45 +104,69 @@ def send_request(request, uuid):
 
 
 # needs to be updated as we expand profile model
-def can_request(requestor, requestee):
-    requestor_profile = Profile.objects.filter(user=requestor).first()
-    requestee_profile = Profile.objects.filter(user=requestee).first()
+def can_request_as_mentor(mentee, mentor):
+    mentee_profile = Profile.objects.filter(user=mentee).first()
+    mentor_profile = Profile.objects.filter(user=mentor).first()
 
-    if (not requestor_profile) or (not requestee_profile):
+    if (not mentee_profile) or (not mentor_profile):
         return False
 
-    requestor_experiences = Experience.objects.filter(profile=requestor_profile).all()
-    requestee_experiences = Experience.objects.filter(profile=requestee_profile).all()
+    return (
+        mentee != mentor
+        and mentee.is_active
+        and mentor.is_active
+        and required_experiences(mentee, mentor)
+        and mentor_profile.looking_for_mentees
+        and not existing_requests(mentee, mentor)
+    )
 
+
+def can_offer_to_mentor(mentor, mentee):
+    mentor_profile = Profile.objects.filter(user=mentor).first()
+    mentee_profile = Profile.objects.filter(user=mentee).first()
+
+    if (not mentor_profile) or (not mentee_profile):
+        return False
+
+    return (
+        mentor != mentee
+        and mentor.is_active
+        and mentee.is_active
+        and required_experiences(mentee, mentor)
+        and mentee_profile.looking_for_mentors
+        and not existing_requests(mentee, mentor)
+    )
+
+
+# helper function for can_request_as_mentor and can_offer_to_mentor
+# checks if there are existing requests for a specific mentor/mentee pair, regardless of who initiated
+def existing_requests(mentee, mentor):
     existing_requests = BuddyRequest.objects.filter(
-        requestor=requestor,
-        requestee=requestee,
+        requestor=mentee,
+        requestee=mentor,
         request_type=BuddyRequest.RequestType.REQUEST,
     )
     existing_offers = BuddyRequest.objects.filter(
-        requestor=requestee,
-        requestee=requestor,
-        request_type=BuddyRequest.RequestType.OFFER,
+        requestor=mentor, requestee=mentee, request_type=BuddyRequest.RequestType.OFFER,
     )
+    return existing_requests or existing_offers
 
-    return (
-        requestor != requestee
-        and any(
-            [
-                experience.exp_type == Experience.Type.WANT_HELP
-                for experience in requestor_experiences
-            ]
-        )
-        and any(
-            [
-                experience.exp_type == Experience.Type.CAN_HELP
-                for experience in requestee_experiences
-            ]
-        )
-        and requestor.is_active
-        and requestee.is_active
-        and not existing_requests
-        and not existing_offers
+
+# helper function for can_request_as_mentor and can_offer_to_mentor
+# checks mentee has skills they want help with and mentor has skills they need help with
+def required_experiences(mentee, mentor):
+    mentee_experiences = Experience.objects.filter(profile__user=mentee).all()
+    mentor_experiences = Experience.objects.filter(profile__user=mentor).all()
+    return any(
+        [
+            experience.exp_type == Experience.Type.WANT_HELP
+            for experience in mentee_experiences
+        ]
+    ) and any(
+        [
+            experience.exp_type == Experience.Type.CAN_HELP
+            for experience in mentor_experiences
+        ]
     )
 
 

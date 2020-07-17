@@ -14,7 +14,13 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import BuddyRequest, BuddyRequestManager, Profile, Skill, Experience
-from .views import can_request, send_request
+from .views import (
+    can_request_as_mentor,
+    can_offer_to_mentor,
+    send_request,
+    existing_requests,
+    required_experiences,
+)
 
 from apps.users.models import User
 
@@ -317,7 +323,9 @@ class SendBuddyRequestTest(TestCase):
         )
 
         mentor_profile = Profile.objects.create(
-            user=mentor, bio="Experienced Undercover detective."
+            user=mentor,
+            bio="Experienced Undercover detective.",
+            looking_for_mentees=True,
         )
 
         Experience.objects.create(
@@ -350,15 +358,11 @@ class SendBuddyRequestTest(TestCase):
             user=someone, bio="You ever see somebody ruin their own life?"
         )
 
-    def test_can_request(self):
+    def test_existing_requests(self):
         mentee = User.objects.get(email="mentee@user.com")
         mentor = User.objects.get(email="mentor@user.com")
-        someone = User.objects.get(email="someone@user.com")
-        assert can_request(mentee, mentor)
 
-        mentor.is_active = False
-        assert not can_request(mentee, mentor)
-        mentor.is_active = True
+        assert not existing_requests(mentee, mentor)
 
         buddy_request = BuddyRequest.objects.create(
             requestor=mentee,
@@ -366,9 +370,89 @@ class SendBuddyRequestTest(TestCase):
             message="Please help me!",
             request_type=BuddyRequest.RequestType.REQUEST,
         )
-        assert not can_request(mentee, someone)
-        assert not can_request(someone, mentor)
-        assert not can_request(mentee, mentor)
+
+        assert existing_requests(mentee, mentor)
+
+        buddy_request.delete()
+        assert not existing_requests(mentee, mentor)
+        buddy_offer = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            message="I can help you!",
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+
+        assert existing_requests(mentee, mentor)
+
+    def test_required_experiences(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        someone = User.objects.get(email="someone@user.com")
+        assert required_experiences(mentee, mentor)
+        assert not required_experiences(mentor, mentee)
+        assert not required_experiences(mentee, someone)
+        assert not required_experiences(someone, mentee)
+        assert not required_experiences(someone, mentor)
+        assert not required_experiences(mentor, someone)
+        
+
+
+    def test_can_request_as_mentor(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentee_profile = Profile.objects.get(user=mentee)
+        mentor = User.objects.get(email="mentor@user.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        someone = User.objects.get(email="someone@user.com")
+        assert can_request_as_mentor(mentee, mentor)
+
+        mentor.is_active = False
+        assert not can_request_as_mentor(mentee, mentor)
+        mentor.is_active = True
+
+        mentor_profile.looking_for_mentees = False
+        mentor_profile.save()
+        assert not can_request_as_mentor(mentee, mentor)
+
+        mentor_profile.looking_for_mentees = True
+
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            message="Please help me!",
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
+        assert not can_request_as_mentor(mentee, someone)
+        assert not can_request_as_mentor(someone, mentor)
+        assert not can_request_as_mentor(mentee, mentor)
+        buddy_request.delete()
+
+    def test_can_offer_to_mentor(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentee_profile = Profile.objects.get(user=mentee)
+        mentor = User.objects.get(email="mentor@user.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        someone = User.objects.get(email="someone@user.com")
+        assert can_offer_to_mentor(mentor, mentee)
+
+        mentee.is_active = False
+        assert not can_offer_to_mentor(mentor, mentee)
+        mentee.is_active = True
+
+        mentee_profile.looking_for_mentors = False
+        mentee_profile.save()
+        assert not can_offer_to_mentor(mentor, mentee)
+
+        mentee_profile.looking_for_mentors = True
+
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            message="I can help you!",
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        assert not can_offer_to_mentor(mentor, someone)
+        assert not can_offer_to_mentor(someone, mentor)
+        assert not can_offer_to_mentor(mentor, mentee)
         buddy_request.delete()
 
     def test_send_request(self):
