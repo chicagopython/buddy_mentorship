@@ -14,6 +14,30 @@
         {% if search_type == 'mentor' %} Find a Mentor {% endif %}
         {% if search_type == 'mentee' %} Find a Mentee {% endif %}
       </h1>
+      {% if search_type == 'mentor' and not looking_for_mentors %}
+      <div class="row mb-2">
+        <div class="col">
+          <div class="alert alert-info" role="alert">
+            Looking for a mentor? Consider 
+            <a href="{%url 'edit_profile' %}" class="alert-link">editing your profile</a> 
+            to say you are <b>actively looking for mentors</b>. Potential 
+            mentors will then be able to find you in search and send you mentorship offers.
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if search_type == 'mentee' and not looking_for_mentees %}
+      <div class="row mb-2">
+        <div class="col">
+          <div class="alert alert-info" role="alert">
+            Looking for a mentee? Consider 
+            <a href="{%url 'edit_profile' %}" class="alert-link">editing your profile</a> 
+            to say you are <b>actively looking for mentees</b>. 
+            Potential mentees will then be able to find you in search and send you mentorship requests.
+          </div>
+        </div>
+      </div>
+      {% endif %}
       <div class="row mb-2">
         <div class="col">
           <div class="filter card">

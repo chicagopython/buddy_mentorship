@@ -317,9 +317,7 @@ class ProfileTest(TransactionTestCase):
         user = create_test_users(
             1,
             "user",
-            [
-                {"skill": pandas, "level": 1, "exp_type": Experience.Type.WANT_HELP,},
-            ],
+            [{"skill": pandas, "level": 1, "exp_type": Experience.Type.WANT_HELP,},],
         )[0]
 
         profile_user = create_test_users(
@@ -359,9 +357,7 @@ class ProfileTest(TransactionTestCase):
         user = create_test_users(
             1,
             "user",
-            [
-                {"skill": pandas, "level": 4, "exp_type": Experience.Type.CAN_HELP,},
-            ],
+            [{"skill": pandas, "level": 4, "exp_type": Experience.Type.CAN_HELP,},],
         )[0]
 
         profile_user = create_test_users(
@@ -1148,6 +1144,33 @@ class SearchTest(TestCase):
         assert list(search_results[1]["can_help"]) == [
             Experience.objects.get(profile__user=mentor2, skill__skill="Flask")
         ]
+
+    def test_user_status(self):
+        user = User.objects.get(email="elizabeth@bennet.org")
+        c = Client()
+        c.force_login(user)
+
+        response = c.get("/search/")
+        assert response.context_data["looking_for_mentors"] == False
+        assert response.context_data["looking_for_mentees"] == False
+
+        profile = Profile.objects.get(user=user)
+
+        response = c.get("/search/")
+        assert response.context_data["looking_for_mentors"] == False
+        assert response.context_data["looking_for_mentees"] == False
+
+        profile.looking_for_mentors = True
+        profile.save()
+        response = c.get("/search/?type=mentee")
+        assert response.context_data["looking_for_mentors"] == True
+        assert response.context_data["looking_for_mentees"] == False
+
+        profile.looking_for_mentees = True
+        profile.save()
+        response = c.get("/search/?q=hi")
+        assert response.context_data["looking_for_mentors"] == True
+        assert response.context_data["looking_for_mentees"] == True
 
 
 class SkillTest(TestCase):

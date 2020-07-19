@@ -389,8 +389,10 @@ class Search(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["active_page"] = "search"
         context["search_type"] = self.request.GET.get("type", "mentor")
+
         query_text = self.request.GET.get("q", "")
         context["query_text"] = query_text
+
         results = []
         for profile in context["page_obj"].object_list:
             result = {}
@@ -399,4 +401,13 @@ class Search(LoginRequiredMixin, ListView):
             result["want_help"] = profile.get_top_want_help(query_text)
             results.append(result)
         context["results"] = results
+
+        profile = Profile.objects.filter(user=self.request.user).first()
+        context["looking_for_mentors"] = (
+            profile.looking_for_mentors if profile else False
+        )
+        context["looking_for_mentees"] = (
+            profile.looking_for_mentees if profile else False
+        )
+
         return context
