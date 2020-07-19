@@ -282,35 +282,82 @@ class ProfileTest(TransactionTestCase):
 
         assert list(profile.get_top_can_help()) == exps[4:7]
 
+    def test_get_experiences_with_query(self):
+        pandas, flask = (
+            Skill.objects.create(skill=name) for name in ["pandas", "flask",]
+        )
 
-def test_get_experiences_with_query(self):
-    pandas, flask = (
-        Skill.objects.create(skill=name) for name in ["pandas", "flask",]
-    )
+        user = create_test_users(
+            1,
+            "user",
+            [
+                {"skill": pandas, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
+                {"skill": flask, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
+            ],
+        )[0]
 
-    user = create_test_users(
-        1,
-        "user",
-        [
-            {"skill": pandas, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
-            {"skill": flask, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
-        ],
-    )[0]
+        profile = Profile.objects.get(user=user)
 
-    profile = Profile.objects.get(user=user)
+        pandas_exp = Experience.objects.get(profile=profile, skill=pandas)
+        flask_exp = Experience.objects.get(profile=profile, skill=flask)
 
-    pandas_exp = Experience.objects.get(profile=profile, skill=pandas)
-    flask_exp = Experience.objects.get(profile=profile, skill=flask)
+        assert list(profile.get_can_help("pandas")) == [pandas_exp, flask_exp]
 
-    assert list(profile.get_can_help("pandas")) == [pandas_exp, flask_exp]
+        assert list(profile.get_can_help("flask")) == [flask_exp, pandas_exp]
 
-    assert list(profile.get_can_help("flask")) == [flask_exp, pandas_exp]
+        assert list(profile.get_top_can_help("pandas")) == [pandas_exp, flask_exp]
 
-    assert list(profile.get_top_can_help("pandas")) == [pandas_exp, flask_exp]
+        assert list(profile.get_top_can_help("flask")) == [flask_exp, pandas_exp]
 
-    assert list(profile.get_top_can_help("flask")) == [flask_exp, pandas_exp]
+        assert list(profile.get_top_can_help("user flask")) == [flask_exp, pandas_exp]
 
-    assert list(profile.get_top_can_help("user flask")) == [flask_exp, pandas_exp]
+    def test_why_no_request(self):
+        pandas, flask = (
+            Skill.objects.create(skill=name) for name in ["pandas", "flask",]
+        )
+
+        user = create_test_users(
+            1,
+            "user",
+            [
+                {"skill": pandas, "level": 1, "exp_type": Experience.Type.WANT_HELP,},
+                {"skill": flask, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
+            ],
+        )[0]
+
+        profile_user = create_test_users(
+            1, "profile_user", [], looking_for_mentees=True,
+        )[0]
+
+        profile = Profile.objects.get(user=profile_user)
+
+        c = Client()
+        c.force_login(user)
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_request"]
+        assert not response.context["cannot_request_not_looking"]
+        assert response.context["cannot_request_no_skills"]
+
+        Experience.objects.create(
+            profile=profile, skill=pandas, level=4, exp_type=Experience.Type.CAN_HELP
+        )
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert response.context["can_request"]
+        assert not response.context["cannot_request_not_looking"]
+        assert not response.context["cannot_request_no_skills"]
+
+        profile.looking_for_mentees = False
+        profile.save()
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_request"]
+        assert response.context["cannot_request_not_looking"]
+        assert not response.context["cannot_request_no_skills"]
+
+    def test_why_no_offer(self):
+        pass
 
 
 class SendBuddyRequestTest(TestCase):

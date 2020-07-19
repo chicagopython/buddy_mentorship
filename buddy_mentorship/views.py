@@ -54,13 +54,43 @@ def profile(request, profile_id=""):
             request_type=BuddyRequest.RequestType.REQUEST,
         )
 
+    can_request = can_request_as_mentor(request.user, profile.user)
+    can_offer = can_offer_to_mentor(request.user, profile.user)
     context = {
         "existing_request_to_user": existing_request_to_user,
         "existing_offer_to_user": existing_offer_to_user,
         "existing_request_from_user": existing_request_from_user,
         "existing_offer_from_user": existing_offer_from_user,
-        "can_request": can_request_as_mentor(request.user, profile.user),
-        "can_offer": can_offer_to_mentor(profile.user, request.user),
+        "can_request": can_request,
+        "can_offer": can_offer,
+        "cannot_request_not_looking": (
+            not can_request
+            and not existing_request_from_user
+            and not existing_offer_to_user
+            and user != user_profile
+            and not profile.looking_for_mentees
+        ),
+        "cannot_offer_not_looking": (
+            not can_offer
+            and not existing_request_to_user
+            and not existing_offer_from_user
+            and user != user_profile
+            and not profile.looking_for_mentors
+        ),
+        "cannot_request_no_skills": (
+            not can_request
+            and not existing_request_from_user
+            and not existing_offer_to_user
+            and user != user_profile
+            and profile.looking_for_mentees
+        ),
+        "cannot_offer_no_skills": (
+            not can_offer
+            and not existing_request_to_user
+            and not existing_offer_from_user
+            and user != user_profile
+            and profile.looking_for_mentors
+        ),
         "profile": profile,
         "user_profile": user_profile,
         "active_page": "profile",
