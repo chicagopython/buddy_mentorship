@@ -318,11 +318,11 @@ class Search(LoginRequiredMixin, ListView):
         search_type = self.request.GET.get("type", "mentor")
         if search_type == "mentee":
             all_qualified = self.queryset.filter(
-                experience__exp_type=Experience.Type.WANT_HELP
+                experience__exp_type=Experience.Type.WANT_HELP, looking_for_mentors=True
             ).exclude(user=self.request.user)
         if search_type == "mentor":
             all_qualified = self.queryset.filter(
-                experience__exp_type=Experience.Type.CAN_HELP
+                experience__exp_type=Experience.Type.CAN_HELP, looking_for_mentees=True
             ).exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", "")

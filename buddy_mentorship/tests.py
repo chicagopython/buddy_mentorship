@@ -85,7 +85,10 @@ class ProfileTest(TransactionTestCase):
         new_user = User.objects.create_user(email="testprofile@user.com")
         user = User.objects.first()
         profile = Profile.objects.create(
-            user=user, bio="i'm super interested in Python"
+            user=user,
+            bio="i'm super interested in Python",
+            looking_for_mentors=True,
+            looking_for_mentees=False,
         )
         skill1, skill2 = (
             Skill.objects.create(skill="Django"),
@@ -326,6 +329,7 @@ class SendBuddyRequestTest(TestCase):
             user=mentor,
             bio="Experienced Undercover detective.",
             looking_for_mentees=True,
+            looking_for_mentors=False,
         )
 
         Experience.objects.create(
@@ -340,7 +344,10 @@ class SendBuddyRequestTest(TestCase):
         )
 
         mentee_profile = Profile.objects.create(
-            user=mentee, bio="Aspiring Undercover detective with background in Murder."
+            user=mentee,
+            bio="Aspiring Undercover detective with background in Murder.",
+            looking_for_mentors=True,
+            looking_for_mentees=False,
         )
 
         Experience.objects.create(
@@ -355,7 +362,10 @@ class SendBuddyRequestTest(TestCase):
         )
 
         someone_profile = Profile.objects.create(
-            user=someone, bio="You ever see somebody ruin their own life?"
+            user=someone,
+            bio="You ever see somebody ruin their own life?",
+            looking_for_mentors=False,
+            looking_for_mentees=False,
         )
 
     def test_existing_requests(self):
@@ -765,6 +775,8 @@ class ProfileEditTest(TestCase):
                 "last_name": "new last name",
                 "email": "newemail@example.com",
                 "bio": "predicting the future",
+                "looking_for_mentors": True,
+                "looking_for_mentees": False,
             },
         )
         user.refresh_from_db()
@@ -773,6 +785,8 @@ class ProfileEditTest(TestCase):
         assert user.email == "newemail@example.com"
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
+        assert profile.looking_for_mentors
+        assert not profile.looking_for_mentees
 
     def test_edit_my_profile(self):
         user = User.objects.get(email="me@hariseldon")
@@ -788,13 +802,13 @@ class ProfileEditTest(TestCase):
                 "email": "newemail@example.com",
                 "bio": "predicting the future",
                 "looking_for_mentors": False,
-                "looking_for_mentees": False,
+                "looking_for_mentees": True,
             },
         )
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
         assert not profile.looking_for_mentors
-        assert not profile.looking_for_mentees
+        assert profile.looking_for_mentees
 
     def test_edit_profile_no_bio(self):
         user = User.objects.get(email="me@hariseldon")
@@ -851,7 +865,9 @@ class SearchTest(TestCase):
             email="elizabeth@bennet.org", first_name="Elizabeth", last_name="Bennet",
         )
 
-        profile_user = Profile.objects.create(user=user, bio="")
+        profile_user = Profile.objects.create(
+            user=user, bio="", looking_for_mentors=False, looking_for_mentees=False
+        )
 
         Experience.objects.create(
             profile=profile_user,
@@ -865,7 +881,10 @@ class SearchTest(TestCase):
         )
 
         profile_mentor1 = Profile.objects.create(
-            user=mentor1, bio="Father, country gentleman. Friend of the Lucas family."
+            user=mentor1,
+            bio="Father, country gentleman. Friend of the Lucas family.",
+            looking_for_mentors=False,
+            looking_for_mentees=True,
         )
 
         Experience.objects.create(
@@ -889,10 +908,30 @@ class SearchTest(TestCase):
         profile_mentor2 = Profile.objects.create(
             user=mentor2,
             bio="Sensible, intelligent woman. Daughter of Sir William Lucas.",
+            looking_for_mentors=False,
+            looking_for_mentees=True,
         )
 
         Experience.objects.create(
             profile=profile_mentor2,
+            skill=skill2,
+            level=3,
+            exp_type=Experience.Type.CAN_HELP,
+        )
+
+        inactive_mentor = User.objects.create_user(
+            email="mary@crawford.com", first_name="Mary", last_name="Crawford",
+        )
+
+        profile_inactive_mentor = Profile.objects.create(
+            user=inactive_mentor,
+            bio="I mentor, but am too busy right now.",
+            looking_for_mentees=False,
+            looking_for_mentors=False,
+        )
+
+        Experience.objects.create(
+            profile=profile_inactive_mentor,
             skill=skill2,
             level=3,
             exp_type=Experience.Type.CAN_HELP,
@@ -913,12 +952,24 @@ class SearchTest(TestCase):
                 {"skill": skill1, "level": 2, "exp_type": Experience.Type.WANT_HELP},
                 {"skill": skill2, "level": 1, "exp_type": Experience.Type.WANT_HELP},
             ],
+            looking_for_mentees=False,
+            looking_for_mentors=True,
         )
 
         create_test_users(
             1,
             "mentee1",
             [{"skill": skill1, "level": 1, "exp_type": Experience.Type.WANT_HELP},],
+            looking_for_mentees=False,
+            looking_for_mentors=True,
+        )
+
+        create_test_users(
+            1,
+            "inactive_mentee",
+            [{"skill": skill1, "level": 1, "exp_type": Experience.Type.WANT_HELP},],
+            looking_for_mentees=False,
+            looking_for_mentors=False,
         )
 
     def test_all_mentors(self):
@@ -1102,11 +1153,15 @@ class SkillTest(TestCase):
         assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 4
 
 
-def create_test_users(n, handle, experiences):
+def create_test_users(
+    n, handle, experiences, looking_for_mentors=True, looking_for_mentees=True
+):
     """
     n: number of users to create \n
     handle: e.g. "mentor" to create "mentor0@buddy.com", "mentor1@buddy.com", etc. Also populates first name \n
     experiences: list of dictionaries with keys for skill (object), level, exp_type (takes enum)
+    looking_for_mentors: defaults to True \n
+    looking_for_mentees: defaults to True \n
     """
 
     users = []
@@ -1121,7 +1176,10 @@ def create_test_users(n, handle, experiences):
 
     for user in users:
         profile = Profile.objects.create(
-            user=user, bio=f"I am {user.first_name} {user.last_name}."
+            user=user,
+            bio=f"I am {user.first_name} {user.last_name}.",
+            looking_for_mentees=looking_for_mentees,
+            looking_for_mentors=looking_for_mentors,
         )
 
         for exp in experiences:
