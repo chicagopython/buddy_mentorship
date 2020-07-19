@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.views.generic import TemplateView
 from django.urls import include, path
 
 from . import views
@@ -39,4 +40,9 @@ urlpatterns = [
     ),
     path("social/", include("social_django.urls", namespace="social")),
     path("search/", views.Search.as_view(), name="search"),
+    path(
+        "release_notes/",
+        TemplateView.as_view(template_name="buddy_mentorship/release_notes.html"),
+        name="release_notes",
+    ),
 ]

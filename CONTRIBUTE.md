@@ -46,12 +46,13 @@ Don’t be afraid to ask questions if something is unclear!
 4. Create a feature branch.
    Pull requests should be limited to one change only, where possible, and reference an existing issue.
    Contributing through short-lived feature branches ensures contributions can get merged quickly and easily.
-5. Rebase on master and squash any unnecessary commits.
+5. Add a line to the unreleased section of `release_notes.html` explaining the change to a user.
+6. Rebase on master and squash any unnecessary commits.
    We do not automatically squash on merge, because we trust our contributors to decide which commits within a feature are worth breaking out.
-6. Always add tests and docs for your code.
-7. Make sure your changes pass our CI.
+7. Always add tests and docs for your code.
+8. Make sure your changes pass our CI.
    You won’t get any feedback until it’s green unless you ask for it.
-8. Once you’ve addressed review feedback, make sure to bump the pull request with a short note, so we know you’re done.
+9. Once you’ve addressed review feedback, make sure to bump the pull request with a short note, so we know you’re done.
 
 Each of these abbreviated workflow steps has additional instructions in sections below.
 
