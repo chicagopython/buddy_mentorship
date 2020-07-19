@@ -312,16 +312,13 @@ class ProfileTest(TransactionTestCase):
         assert list(profile.get_top_can_help("user flask")) == [flask_exp, pandas_exp]
 
     def test_why_no_request(self):
-        pandas, flask = (
-            Skill.objects.create(skill=name) for name in ["pandas", "flask",]
-        )
+        pandas = Skill.objects.create(skill="pandas")
 
         user = create_test_users(
             1,
             "user",
             [
                 {"skill": pandas, "level": 1, "exp_type": Experience.Type.WANT_HELP,},
-                {"skill": flask, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
             ],
         )[0]
 
@@ -357,7 +354,46 @@ class ProfileTest(TransactionTestCase):
         assert not response.context["cannot_request_no_skills"]
 
     def test_why_no_offer(self):
-        pass
+        pandas = Skill.objects.create(skill="pandas")
+
+        user = create_test_users(
+            1,
+            "user",
+            [
+                {"skill": pandas, "level": 4, "exp_type": Experience.Type.CAN_HELP,},
+            ],
+        )[0]
+
+        profile_user = create_test_users(
+            1, "profile_user", [], looking_for_mentors=True,
+        )[0]
+
+        profile = Profile.objects.get(user=profile_user)
+
+        c = Client()
+        c.force_login(user)
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_offer"]
+        assert not response.context["cannot_offer_not_looking"]
+        assert response.context["cannot_offer_no_skills"]
+
+        Experience.objects.create(
+            profile=profile, skill=pandas, level=1, exp_type=Experience.Type.WANT_HELP
+        )
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert response.context["can_offer"]
+        assert not response.context["cannot_offer_not_looking"]
+        assert not response.context["cannot_offer_no_skills"]
+
+        profile.looking_for_mentors = False
+        profile.save()
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_offer"]
+        assert response.context["cannot_offer_not_looking"]
+        assert not response.context["cannot_offer_no_skills"]
 
 
 class SendBuddyRequestTest(TestCase):
