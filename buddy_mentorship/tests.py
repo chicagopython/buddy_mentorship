@@ -394,8 +394,6 @@ class SendBuddyRequestTest(TestCase):
         assert not required_experiences(someone, mentee)
         assert not required_experiences(someone, mentor)
         assert not required_experiences(mentor, someone)
-        
-
 
     def test_can_request_as_mentor(self):
         mentee = User.objects.get(email="mentee@user.com")
@@ -789,10 +787,14 @@ class ProfileEditTest(TestCase):
                 "last_name": "new last name",
                 "email": "newemail@example.com",
                 "bio": "predicting the future",
+                "looking_for_mentors": False,
+                "looking_for_mentees": False,
             },
         )
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
+        assert not profile.looking_for_mentors
+        assert not profile.looking_for_mentees
 
     def test_edit_profile_no_bio(self):
         user = User.objects.get(email="me@hariseldon")

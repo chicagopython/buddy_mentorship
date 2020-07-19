@@ -235,7 +235,12 @@ class ProfileEdit(LoginRequiredMixin, FormView):
         context["last_name"] = user.last_name
         context["bio"] = profile.bio if profile else ""
         context["email"] = user.email
-
+        context["looking_for_mentors"] = (
+            profile.looking_for_mentors if profile else True
+        )
+        context["looking_for_mentees"] = (
+            profile.looking_for_mentees if profile else True
+        )
         return context
 
     def form_valid(self, form: ProfileEditForm):
@@ -256,6 +261,8 @@ class ProfileEdit(LoginRequiredMixin, FormView):
 
         profile, _ = Profile.objects.get_or_create(user=self.request.user)
         profile.bio = form.cleaned_data.get("bio")
+        profile.looking_for_mentors = form.cleaned_data.get("looking_for_mentors")
+        profile.looking_for_mentees = form.cleaned_data.get("looking_for_mentees")
         profile.save()
 
 
