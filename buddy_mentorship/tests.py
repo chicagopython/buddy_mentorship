@@ -14,7 +14,13 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import BuddyRequest, BuddyRequestManager, Profile, Skill, Experience
-from .views import can_request, send_request
+from .views import (
+    can_request_as_mentor,
+    can_offer_to_mentor,
+    send_request,
+    existing_requests,
+    required_experiences,
+)
 
 from apps.users.models import User
 
@@ -79,7 +85,10 @@ class ProfileTest(TransactionTestCase):
         new_user = User.objects.create_user(email="testprofile@user.com")
         user = User.objects.first()
         profile = Profile.objects.create(
-            user=user, bio="i'm super interested in Python"
+            user=user,
+            bio="i'm super interested in Python",
+            looking_for_mentors=True,
+            looking_for_mentees=False,
         )
         skill1, skill2 = (
             Skill.objects.create(skill="Django"),
@@ -273,35 +282,118 @@ class ProfileTest(TransactionTestCase):
 
         assert list(profile.get_top_can_help()) == exps[4:7]
 
+    def test_get_experiences_with_query(self):
+        pandas, flask = (
+            Skill.objects.create(skill=name) for name in ["pandas", "flask",]
+        )
 
-def test_get_experiences_with_query(self):
-    pandas, flask = (
-        Skill.objects.create(skill=name) for name in ["pandas", "flask",]
-    )
+        user = create_test_users(
+            1,
+            "user",
+            [
+                {"skill": pandas, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
+                {"skill": flask, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
+            ],
+        )[0]
 
-    user = create_test_users(
-        1,
-        "user",
-        [
-            {"skill": pandas, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
-            {"skill": flask, "level": 3, "exp_type": Experience.Type.CAN_HELP,},
-        ],
-    )[0]
+        profile = Profile.objects.get(user=user)
 
-    profile = Profile.objects.get(user=user)
+        pandas_exp = Experience.objects.get(profile=profile, skill=pandas)
+        flask_exp = Experience.objects.get(profile=profile, skill=flask)
 
-    pandas_exp = Experience.objects.get(profile=profile, skill=pandas)
-    flask_exp = Experience.objects.get(profile=profile, skill=flask)
+        assert list(profile.get_can_help("pandas")) == [pandas_exp, flask_exp]
 
-    assert list(profile.get_can_help("pandas")) == [pandas_exp, flask_exp]
+        assert list(profile.get_can_help("flask")) == [flask_exp, pandas_exp]
 
-    assert list(profile.get_can_help("flask")) == [flask_exp, pandas_exp]
+        assert list(profile.get_top_can_help("pandas")) == [pandas_exp, flask_exp]
 
-    assert list(profile.get_top_can_help("pandas")) == [pandas_exp, flask_exp]
+        assert list(profile.get_top_can_help("flask")) == [flask_exp, pandas_exp]
 
-    assert list(profile.get_top_can_help("flask")) == [flask_exp, pandas_exp]
+        assert list(profile.get_top_can_help("user flask")) == [flask_exp, pandas_exp]
 
-    assert list(profile.get_top_can_help("user flask")) == [flask_exp, pandas_exp]
+    def test_why_no_request(self):
+        pandas = Skill.objects.create(skill="pandas")
+
+        user = create_test_users(
+            1,
+            "user",
+            [
+                {"skill": pandas, "level": 1, "exp_type": Experience.Type.WANT_HELP,},
+            ],
+        )[0]
+
+        profile_user = create_test_users(
+            1, "profile_user", [], looking_for_mentees=True,
+        )[0]
+
+        profile = Profile.objects.get(user=profile_user)
+
+        c = Client()
+        c.force_login(user)
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_request"]
+        assert not response.context["cannot_request_not_looking"]
+        assert response.context["cannot_request_no_skills"]
+
+        Experience.objects.create(
+            profile=profile, skill=pandas, level=4, exp_type=Experience.Type.CAN_HELP
+        )
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert response.context["can_request"]
+        assert not response.context["cannot_request_not_looking"]
+        assert not response.context["cannot_request_no_skills"]
+
+        profile.looking_for_mentees = False
+        profile.save()
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_request"]
+        assert response.context["cannot_request_not_looking"]
+        assert not response.context["cannot_request_no_skills"]
+
+    def test_why_no_offer(self):
+        pandas = Skill.objects.create(skill="pandas")
+
+        user = create_test_users(
+            1,
+            "user",
+            [
+                {"skill": pandas, "level": 4, "exp_type": Experience.Type.CAN_HELP,},
+            ],
+        )[0]
+
+        profile_user = create_test_users(
+            1, "profile_user", [], looking_for_mentors=True,
+        )[0]
+
+        profile = Profile.objects.get(user=profile_user)
+
+        c = Client()
+        c.force_login(user)
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_offer"]
+        assert not response.context["cannot_offer_not_looking"]
+        assert response.context["cannot_offer_no_skills"]
+
+        Experience.objects.create(
+            profile=profile, skill=pandas, level=1, exp_type=Experience.Type.WANT_HELP
+        )
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert response.context["can_offer"]
+        assert not response.context["cannot_offer_not_looking"]
+        assert not response.context["cannot_offer_no_skills"]
+
+        profile.looking_for_mentors = False
+        profile.save()
+
+        response = c.get(f"/profile/{profile.id}",)
+        assert not response.context["can_offer"]
+        assert response.context["cannot_offer_not_looking"]
+        assert not response.context["cannot_offer_no_skills"]
 
 
 class SendBuddyRequestTest(TestCase):
@@ -317,7 +409,10 @@ class SendBuddyRequestTest(TestCase):
         )
 
         mentor_profile = Profile.objects.create(
-            user=mentor, bio="Experienced Undercover detective."
+            user=mentor,
+            bio="Experienced Undercover detective.",
+            looking_for_mentees=True,
+            looking_for_mentors=False,
         )
 
         Experience.objects.create(
@@ -332,7 +427,10 @@ class SendBuddyRequestTest(TestCase):
         )
 
         mentee_profile = Profile.objects.create(
-            user=mentee, bio="Aspiring Undercover detective with background in Murder."
+            user=mentee,
+            bio="Aspiring Undercover detective with background in Murder.",
+            looking_for_mentors=True,
+            looking_for_mentees=False,
         )
 
         Experience.objects.create(
@@ -347,18 +445,17 @@ class SendBuddyRequestTest(TestCase):
         )
 
         someone_profile = Profile.objects.create(
-            user=someone, bio="You ever see somebody ruin their own life?"
+            user=someone,
+            bio="You ever see somebody ruin their own life?",
+            looking_for_mentors=False,
+            looking_for_mentees=False,
         )
 
-    def test_can_request(self):
+    def test_existing_requests(self):
         mentee = User.objects.get(email="mentee@user.com")
         mentor = User.objects.get(email="mentor@user.com")
-        someone = User.objects.get(email="someone@user.com")
-        assert can_request(mentee, mentor)
 
-        mentor.is_active = False
-        assert not can_request(mentee, mentor)
-        mentor.is_active = True
+        assert not existing_requests(mentee, mentor)
 
         buddy_request = BuddyRequest.objects.create(
             requestor=mentee,
@@ -366,9 +463,87 @@ class SendBuddyRequestTest(TestCase):
             message="Please help me!",
             request_type=BuddyRequest.RequestType.REQUEST,
         )
-        assert not can_request(mentee, someone)
-        assert not can_request(someone, mentor)
-        assert not can_request(mentee, mentor)
+
+        assert existing_requests(mentee, mentor)
+
+        buddy_request.delete()
+        assert not existing_requests(mentee, mentor)
+        buddy_offer = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            message="I can help you!",
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+
+        assert existing_requests(mentee, mentor)
+
+    def test_required_experiences(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentor = User.objects.get(email="mentor@user.com")
+        someone = User.objects.get(email="someone@user.com")
+        assert required_experiences(mentee, mentor)
+        assert not required_experiences(mentor, mentee)
+        assert not required_experiences(mentee, someone)
+        assert not required_experiences(someone, mentee)
+        assert not required_experiences(someone, mentor)
+        assert not required_experiences(mentor, someone)
+
+    def test_can_request_as_mentor(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentee_profile = Profile.objects.get(user=mentee)
+        mentor = User.objects.get(email="mentor@user.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        someone = User.objects.get(email="someone@user.com")
+        assert can_request_as_mentor(mentee, mentor)
+
+        mentor.is_active = False
+        assert not can_request_as_mentor(mentee, mentor)
+        mentor.is_active = True
+
+        mentor_profile.looking_for_mentees = False
+        mentor_profile.save()
+        assert not can_request_as_mentor(mentee, mentor)
+
+        mentor_profile.looking_for_mentees = True
+
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            message="Please help me!",
+            request_type=BuddyRequest.RequestType.REQUEST,
+        )
+        assert not can_request_as_mentor(mentee, someone)
+        assert not can_request_as_mentor(someone, mentor)
+        assert not can_request_as_mentor(mentee, mentor)
+        buddy_request.delete()
+
+    def test_can_offer_to_mentor(self):
+        mentee = User.objects.get(email="mentee@user.com")
+        mentee_profile = Profile.objects.get(user=mentee)
+        mentor = User.objects.get(email="mentor@user.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        someone = User.objects.get(email="someone@user.com")
+        assert can_offer_to_mentor(mentor, mentee)
+
+        mentee.is_active = False
+        assert not can_offer_to_mentor(mentor, mentee)
+        mentee.is_active = True
+
+        mentee_profile.looking_for_mentors = False
+        mentee_profile.save()
+        assert not can_offer_to_mentor(mentor, mentee)
+
+        mentee_profile.looking_for_mentors = True
+
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            message="I can help you!",
+            request_type=BuddyRequest.RequestType.OFFER,
+        )
+        assert not can_offer_to_mentor(mentor, someone)
+        assert not can_offer_to_mentor(someone, mentor)
+        assert not can_offer_to_mentor(mentor, mentee)
         buddy_request.delete()
 
     def test_send_request(self):
@@ -683,6 +858,8 @@ class ProfileEditTest(TestCase):
                 "last_name": "new last name",
                 "email": "newemail@example.com",
                 "bio": "predicting the future",
+                "looking_for_mentors": True,
+                "looking_for_mentees": False,
             },
         )
         user.refresh_from_db()
@@ -691,6 +868,8 @@ class ProfileEditTest(TestCase):
         assert user.email == "newemail@example.com"
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
+        assert profile.looking_for_mentors
+        assert not profile.looking_for_mentees
 
     def test_edit_my_profile(self):
         user = User.objects.get(email="me@hariseldon")
@@ -705,10 +884,14 @@ class ProfileEditTest(TestCase):
                 "last_name": "new last name",
                 "email": "newemail@example.com",
                 "bio": "predicting the future",
+                "looking_for_mentors": False,
+                "looking_for_mentees": True,
             },
         )
         profile = Profile.objects.get(user=user)
         assert profile.bio == "predicting the future"
+        assert not profile.looking_for_mentors
+        assert profile.looking_for_mentees
 
     def test_edit_profile_no_bio(self):
         user = User.objects.get(email="me@hariseldon")
@@ -765,7 +948,9 @@ class SearchTest(TestCase):
             email="elizabeth@bennet.org", first_name="Elizabeth", last_name="Bennet",
         )
 
-        profile_user = Profile.objects.create(user=user, bio="")
+        profile_user = Profile.objects.create(
+            user=user, bio="", looking_for_mentors=False, looking_for_mentees=False
+        )
 
         Experience.objects.create(
             profile=profile_user,
@@ -779,7 +964,10 @@ class SearchTest(TestCase):
         )
 
         profile_mentor1 = Profile.objects.create(
-            user=mentor1, bio="Father, country gentleman. Friend of the Lucas family."
+            user=mentor1,
+            bio="Father, country gentleman. Friend of the Lucas family.",
+            looking_for_mentors=False,
+            looking_for_mentees=True,
         )
 
         Experience.objects.create(
@@ -803,10 +991,30 @@ class SearchTest(TestCase):
         profile_mentor2 = Profile.objects.create(
             user=mentor2,
             bio="Sensible, intelligent woman. Daughter of Sir William Lucas.",
+            looking_for_mentors=False,
+            looking_for_mentees=True,
         )
 
         Experience.objects.create(
             profile=profile_mentor2,
+            skill=skill2,
+            level=3,
+            exp_type=Experience.Type.CAN_HELP,
+        )
+
+        inactive_mentor = User.objects.create_user(
+            email="mary@crawford.com", first_name="Mary", last_name="Crawford",
+        )
+
+        profile_inactive_mentor = Profile.objects.create(
+            user=inactive_mentor,
+            bio="I mentor, but am too busy right now.",
+            looking_for_mentees=False,
+            looking_for_mentors=False,
+        )
+
+        Experience.objects.create(
+            profile=profile_inactive_mentor,
             skill=skill2,
             level=3,
             exp_type=Experience.Type.CAN_HELP,
@@ -827,12 +1035,24 @@ class SearchTest(TestCase):
                 {"skill": skill1, "level": 2, "exp_type": Experience.Type.WANT_HELP},
                 {"skill": skill2, "level": 1, "exp_type": Experience.Type.WANT_HELP},
             ],
+            looking_for_mentees=False,
+            looking_for_mentors=True,
         )
 
         create_test_users(
             1,
             "mentee1",
             [{"skill": skill1, "level": 1, "exp_type": Experience.Type.WANT_HELP},],
+            looking_for_mentees=False,
+            looking_for_mentors=True,
+        )
+
+        create_test_users(
+            1,
+            "inactive_mentee",
+            [{"skill": skill1, "level": 1, "exp_type": Experience.Type.WANT_HELP},],
+            looking_for_mentees=False,
+            looking_for_mentors=False,
         )
 
     def test_all_mentors(self):
@@ -1016,11 +1236,15 @@ class SkillTest(TestCase):
         assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 4
 
 
-def create_test_users(n, handle, experiences):
+def create_test_users(
+    n, handle, experiences, looking_for_mentors=True, looking_for_mentees=True
+):
     """
     n: number of users to create \n
     handle: e.g. "mentor" to create "mentor0@buddy.com", "mentor1@buddy.com", etc. Also populates first name \n
     experiences: list of dictionaries with keys for skill (object), level, exp_type (takes enum)
+    looking_for_mentors: defaults to True \n
+    looking_for_mentees: defaults to True \n
     """
 
     users = []
@@ -1035,7 +1259,10 @@ def create_test_users(n, handle, experiences):
 
     for user in users:
         profile = Profile.objects.create(
-            user=user, bio=f"I am {user.first_name} {user.last_name}."
+            user=user,
+            bio=f"I am {user.first_name} {user.last_name}.",
+            looking_for_mentees=looking_for_mentees,
+            looking_for_mentors=looking_for_mentors,
         )
 
         for exp in experiences:

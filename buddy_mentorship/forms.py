@@ -8,8 +8,8 @@ class ProfileEditForm(forms.Form):
     last_name = forms.CharField(max_length=255, required=False)
     email = forms.EmailField()
     bio = forms.CharField(required=False, widget=forms.Textarea)
-    help_wanted = forms.BooleanField(required=False)
-    can_help = forms.BooleanField(required=False)
+    looking_for_mentors = forms.BooleanField(required=False)
+    looking_for_mentees = forms.BooleanField(required=False)
 
 
 class SkillForm(forms.Form):

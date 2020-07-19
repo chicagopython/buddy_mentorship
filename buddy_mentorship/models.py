@@ -117,6 +117,8 @@ class Profile(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     bio = models.TextField(null=True, blank=True)
+    looking_for_mentors = models.BooleanField(null=False, default=True)
+    looking_for_mentees = models.BooleanField(null=False, default=True)
 
     def __str__(self):
         return f"Profile for {self.user.email}"

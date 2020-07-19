@@ -58,6 +58,13 @@
                         <div class="card-title h5">
                             Want Help
                         </div>
+                        {% if profile.looking_for_mentors %}
+                            <span class="badge badge-success" id="lookingForMentorsBadge">Actively Looking for Mentors</span>
+                        {% endif %}
+                        {% if not profile.looking_for_mentors %}
+                            <span class="badge badge-secondary" id="notLookingForMentorsBadge">Not Actively Looking for Mentors</span>
+                        {% endif %}
+                        {% comment %} </div> {% endcomment %}
                         <div class="card-text">
                             <ul class="list-group list-group-flush">
                                 {% for experience in profile.get_help_wanted %}
@@ -89,9 +96,10 @@
                                 {% endfor %}
                                 {% if request.user == profile.user %}
                                     {% if not profile.get_help_wanted %}
+                                        <p></p>
                                         <div class="alert alert-warning" role="alert">
                                             <p>Your profile has no skills you want help with.</p>
-                                            <p>Adding skills that you want help with allows you to <b>send mentorship offers</b> and allows people looking for mentees to <b>find you via search</b> and <b>send you mentorship offers</b>.</p>
+                                            <p>Adding skills that you want help with allows you to <b>send mentorship offers</b> and is needed for people looking for mentees to <b>find you via search</b> and <b>send you mentorship offers</b>.</p>
                                         </div>
                                     {% endif %}
                                     <li class="list-group-item d-flex align-items-left">
@@ -117,6 +125,12 @@
                         <div class="card-title h5">
                             Can Help
                         </div>
+                        {% if profile.looking_for_mentees %}
+                            <span class="badge badge-success" id="lookingForMenteesBadge">Actively Looking for Mentees</span>
+                        {% endif %}
+                        {% if not profile.looking_for_mentees %}
+                            <span class="badge badge-secondary" id="notLookingForMenteesBadge">Not Actively Looking for Mentees</span>
+                        {% endif %}
                         <div class="card-text">
                             <ul class="list-group list-group-flush">
                                 {% for experience in profile.get_can_help %}
@@ -148,9 +162,10 @@
                                 {% endfor %}
                                 {% if request.user == profile.user %}
                                     {% if not profile.get_can_help %}
+                                    <p></p>
                                         <div class="alert alert-warning" role="alert">
                                             <p>Your profile has no skills you can help with.</p>
-                                            <p>Adding skills that you can help with allows people looking for mentors to <b>find you via search</b> and <b>send you mentorship requests</b>, and allows you to <b>send mentorship offers</b>.</p>
+                                            <p>Adding skills that you can help with is needed for people looking for mentors to <b>find you via search</b> and <b>send you mentorship requests</b>, and allows you to <b>send mentorship offers</b>.</p>
                                         </div>
                                     {% endif %}
                                     <li class="list-group-item d-flex align-items-left">
@@ -212,7 +227,15 @@
             </div>
         {% endif %}
 
-        {% if not can_request and existing_request_from_user is None and existing_offer_to_user is None and user_profile != profile %}
+        {% if cannot_request_not_looking  %}
+            <div class="alert alert-info" role="alert">
+                <p>
+                    You are not able to request help from this user because they are not actively looking for mentees.
+                </p>
+            </div>
+        {% endif %}
+
+        {% if cannot_request_no_skills %}
             <div class="alert alert-info" role="alert">
                 <p>
                     You are not able to request help from this user. This may be because you have not added a skill you want help with or
@@ -240,7 +263,15 @@
 
         {% endif %}
 
-        {% if not can_offer and existing_request_to_user is None and existing_offer_from_user is None and user_profile != profile %}
+        {% if cannot_offer_not_looking %}
+            <div class="alert alert-info" role="alert">
+                <p>
+                    You are not able to offer to mentor this user because they are not actively looking for mentors.
+                </p>
+            </div>
+        {% endif %}
+
+        {% if cannot_offer_no_skills %}
             <div class="alert alert-info" role="alert">
                 <p>
                     You are not able to offer to mentor this user. This may be because you have not added a skill you can help with or
@@ -250,6 +281,7 @@
         {% endif %}
     </div>
   </div>
+
 {% block map_js %}
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
     integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="

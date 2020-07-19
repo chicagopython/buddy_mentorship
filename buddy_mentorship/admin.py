@@ -17,7 +17,7 @@ class BuddyRequestAdmin(admin.ModelAdmin):
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    fields = ["user", "bio"]
+    fields = ["user", "bio", "looking_for_mentors", "looking_for_mentees"]
 
 
 @admin.register(Skill)
