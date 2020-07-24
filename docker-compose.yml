@@ -3,10 +3,10 @@ version: "3.8"
 services:
   web:
     build: .
-    command: bash -c "python manage.py runserver 0.0.0.0:8000 --settings=buddy_mentorship.settings.local"
     container_name: chipymentorship-webserver
     environment:
       DJANGO_LOG_LEVEL: DEBUG
+      PORT: 8000
 
     volumes:
       - .:/app
