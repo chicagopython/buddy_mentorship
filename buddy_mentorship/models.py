@@ -2,8 +2,10 @@ import os
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import models
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import strip_tags
 from apps.users.models import User
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -50,29 +52,27 @@ class BuddyRequest(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+
         request_type_str = ["Request", "Offer"][int(self.request_type)]
+
+        def email_context(self):
+            return {
+                "request_type_str": request_type_str,
+                "requestor": self.requestor,
+                "requestee": self.requestee,
+                "message": self.message,
+                "profile_url": reverse("profile", args=[profile.id]),
+                "request_detail_url": reverse("request_detail", args=[self.id]),
+                "APP_URL": os.getenv("APP_URL"),
+            }
+
         if self.status == 0:
             profile = Profile.objects.get(user=self.requestor)
-            profile_url = reverse("profile", args=[profile.id])
-            request_detail_url = reverse("request_detail", args=[self.id])
-            plain_message = "".join(
-                [
-                    f"{self.requestor.first_name} {self.requestor.last_name} ",
-                    f"sent you a {request_type_str} ",
-                    "with the following message: \n",
-                    f"{self.message}",
-                ]
+            html_message = render_to_string(
+                "buddy_mentorship/email/new_request.html", context=email_context(self)
             )
-            html_message = "".join(
-                [
-                    f"<p><a href='{os.getenv('APP_URL')}{profile_url}'>",
-                    f"{self.requestor.first_name} {self.requestor.last_name}</a> ",
-                    f"sent you a <a href='{os.getenv('APP_URL')}{request_detail_url}''>",
-                    f"{request_type_str}</a> ",
-                    "with the following message:</p>",
-                    f"{self.message}",
-                ]
-            )
+            plain_message = strip_tags(html_message)
+
             send_mail(
                 f"New ChiPy Mentorship {request_type_str}!",
                 plain_message,
@@ -80,25 +80,15 @@ class BuddyRequest(models.Model):
                 [self.requestee.email],
                 html_message=html_message,
             )
+
         elif self.status == 1:
             profile = Profile.objects.get(user=self.requestee)
             profile_url = reverse("profile", args=[profile.id])
-            plain_message = "".join(
-                [
-                    f"{self.requestee.first_name} {self.requestee.last_name} ",
-                    f"has accepted your {request_type_str} . Contact them at ",
-                    f"{self.requestee.email} to begin your mentorship!",
-                ]
+            html_message = render_to_string(
+                "buddy_mentorship/email/request_accepted.html",
+                context=email_context(self),
             )
-            html_message = "".join(
-                [
-                    f"<p><a href='{os.getenv('APP_URL')}{profile_url}'>",
-                    f"{self.requestee.first_name} {self.requestee.last_name}</a> ",
-                    f"has accepted your {request_type_str}. Contact them at ",
-                    f"<a href='mailto:{self.requestee.email}'>",
-                    f"{self.requestee.email}</a> to begin your mentorship!</p>",
-                ]
-            )
+            plain_message = strip_tags(html_message)
             send_mail(
                 f"ChiPy Mentorship {request_type_str} Accepted!",
                 plain_message,
@@ -106,6 +96,7 @@ class BuddyRequest(models.Model):
                 [self.requestor.email],
                 html_message=html_message,
             )
+
         elif self.status == 2:
             pass
 
