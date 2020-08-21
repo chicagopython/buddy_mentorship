@@ -63,7 +63,7 @@ Each of these abbreviated workflow steps has additional instructions in sections
   E.g. `n_samples` rather than `nsamples`.
 - Don't ever use wildcard imports (`from module import *`).
   It's considered to be a bad practice by the [official Python recommendations](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package).
-  The reasons it's undesireable are that it
+  The reasons it's undesirable are that it
   pollutes the namespace,
   makes it harder to identify the origin of code,
   and, most importantly, prevents using a static analysis tool like pyflakes to automatically find bugs.
@@ -99,10 +99,10 @@ Each of these abbreviated workflow steps has additional instructions in sections
    ```bash
    pipenv install --dev
    ```
-   If you run into an error install postgres on Mac, you may need to do one/more of the following:
+   If you run into an error installing postgres (psycopg2) on Mac, you may need to do one/more of the following:
    - Confirm you have CommandLineTools installed, or install them with `xcode-select --install`
    - Reset CommandLineTools' settings with `xcode-select --reset`
-   - run the following command instead of the above one:
+   - Run the following command instead of the above one:
    ```bash
    env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pipenv install --dev
    ```
@@ -158,7 +158,7 @@ git rebase -i master
 
 [Create a pull request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork)
 to the master branch of Buddy Mentorship.
-Tests will be be triggered to run via xxx.
+Tests will be be triggered to run via Github Actions.
 Check that your PR passes CI,
 since it won't be reviewed for inclusion until it passes all steps.
 
@@ -167,7 +167,7 @@ since it won't be reviewed for inclusion until it passes all steps.
 Steps for maintainers are largely the same,
 with a few additional steps before releasing a new version:
 
-- Update version in xxx.
+- Update version in Github.
 - Update the CHANGELOG.md and the main README.md (as appropriate).
 - Rebuild the docs in your local version to verify how they render using:
 
