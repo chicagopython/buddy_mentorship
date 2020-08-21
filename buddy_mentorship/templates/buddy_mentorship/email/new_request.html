@@ -1,0 +1,16 @@
+<p>
+    <a href='{{APP_URL}}{{profile_url}}'>
+        {{requestor.first_name}} {{requestor.last_name}}
+    </a>
+    has sent you a Mentorship
+    <a href='{{APP_URL}}{{request_detail_url}}'>{{request_type_str}}</a>
+    with the following message:
+</p>
+
+<blockquote>
+    {{message}}
+</blockquote>
+
+<p>
+    You can go to the <a href='{{APP_URL}}{{request_detail_url}}'>request detail page</a> to respond to {{requestor.first_name}}'s request.
+</p>
