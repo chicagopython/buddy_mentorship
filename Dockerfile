@@ -6,7 +6,7 @@ RUN pip install pipenv
 # to the terminal with out buffering it first
 ENV PYTHONUNBUFFERED 1
 
-ENV PORT=8000
+# ENV PORT=8000
 
 WORKDIR /app
 
@@ -16,6 +16,9 @@ RUN pipenv install --system --deploy
 
 RUN useradd -m chipyuser
 
+# RUN chown -R chipyuser:chipyuser /app
+RUN ["chmod", "+x", "/app/start.sh"]
+
 USER chipyuser
 
-CMD gunicorn buddy_mentorship.wsgi:application -w 4 --bind 0.0.0.0:$PORT
+CMD bash /app/start.sh

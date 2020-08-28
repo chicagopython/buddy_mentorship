@@ -4,6 +4,7 @@ services:
   web:
     build: .
     container_name: chipymentorship-webserver
+    command: "python manage.py runserver 0.0.0.0:8000"
     environment:
       DJANGO_LOG_LEVEL: DEBUG
       PORT: 8000
@@ -12,6 +13,16 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+    networks:
+      - chipy
+    depends_on:
+      - db
+
+  migration:
+    build: .
+    command: python manage.py migrate
+    volumes:
+      - .:/app
     networks:
       - chipy
     depends_on:
@@ -27,6 +38,11 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buddy_mentorship"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - chipy
 
