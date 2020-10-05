@@ -248,19 +248,19 @@
       <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
             <li class="page-item {% if not page_obj.has_previous %} disabled {% endif %}">
-              <a class="page-link" href="?{% if query_text %}q={{ query_text }}&{% endif %}type={{ search_type }}&page=1">&laquo;</a>
+              <a class="page-link" {% if page_obj.has_previous %} href="{{ first_page_url }}" {% endif %}>&laquo;</a>
             </li>
             <li class="page-item {% if not page_obj.has_previous %} disabled {% endif %}">
-              <a class="page-link" {% if page_obj.has_previous %} href="?{% if query_text %}q={{ query_text }}&{% endif %}type={{ search_type }}&page={{ page_obj.previous_page_number }}" {% endif %}><</a>
+              <a class="page-link" {% if page_obj.has_previous %} href="{{ prev_page_url }}" {% endif %}><</a>
             </li>
             <li class="page-item">
               <a class="page-link"> Page {{ page_obj.number }} of {{page_obj.paginator.num_pages }}</a>
             </li>
             <li class="page-item {% if not page_obj.has_next %} disabled {% endif %}">
-              <a class="page-link" {% if page_obj.has_next %} href="?{% if query_text %}q={{ query_text }}&{% endif %}type={{ search_type }}&page={{ page_obj.next_page_number }}" {% endif %}>></a>
+              <a class="page-link" {% if page_obj.has_next %} href="{{ next_page_url }}" {% endif %}>></a>
             </li>
             <li class="page-item {% if not page_obj.has_next %} disabled {% endif %}">
-              <a class="page-link" href="?{% if query_text %}q={{ query_text }}&{% endif %}type={{ search_type }}&page=last">&raquo;</a>
+              <a class="page-link" {% if page_obj.has_next %} href="{{ last_page_url }}" {% endif %}>&raquo;</a>
             </li>
         </ul>
       </nav>

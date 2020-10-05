@@ -13,6 +13,8 @@ from apps.users.models import User
 from .forms import ProfileEditForm, SkillForm
 from .models import BuddyRequest, Profile, Experience, Skill
 
+import urllib.parse
+
 
 def index(request):
     return render(request, "buddy_mentorship/home.html", {"active_page": "home"})
@@ -392,6 +394,7 @@ class Search(LoginRequiredMixin, ListView):
 
         query_text = self.request.GET.get("q", "")
         context["query_text"] = query_text
+        quoted_query_text = urllib.parse.quote_plus(query_text)
 
         results = []
         for profile in context["page_obj"].object_list:
@@ -409,5 +412,22 @@ class Search(LoginRequiredMixin, ListView):
         context["looking_for_mentees"] = (
             profile.looking_for_mentees if profile else False
         )
+
+        if context["page_obj"].has_previous():
+            context[
+                "first_page_url"
+            ] = f"?q={ quoted_query_text }&type={ context['search_type'] }&page=1"
+            context["prev_page_url"] = (
+                f"?q={ quoted_query_text }&type={ context['search_type'] }"
+                f"&page={ context['page_obj'].previous_page_number()}"
+            )
+        if context["page_obj"].has_next():
+            context["next_page_url"] = (
+                f"?q={ quoted_query_text }&type={ context['search_type'] }"
+                f"&page={ context['page_obj'].next_page_number()}"
+            )
+            context[
+                "last_page_url"
+            ] = f"?q={ quoted_query_text }&type={ context['search_type'] }&page=last"
 
         return context
