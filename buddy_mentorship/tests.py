@@ -1172,6 +1172,41 @@ class SearchTest(TestCase):
         assert response.context_data["looking_for_mentors"] == True
         assert response.context_data["looking_for_mentees"] == True
 
+    def test_page_navigation(self):
+        user = User.objects.get(email="elizabeth@bennet.org")
+        weird_char_skill = Skill.objects.create(skill="data+")
+        create_test_users(
+            15,
+            "page_tester",
+            [
+                {
+                    "skill": weird_char_skill,
+                    "level": 5,
+                    "exp_type": Experience.Type.CAN_HELP,
+                }
+            ],
+        )
+        c = Client()
+        c.force_login(user)
+        response = c.get("/search/?q=data%2B&type=mentor&page=2")
+        assert response.status_code == 200
+
+        first_page_url = response.context_data["first_page_url"]
+        assert first_page_url == "?q=data%2B&type=mentor&page=1"
+        prev_page_url = response.context_data["prev_page_url"]
+        assert prev_page_url == "?q=data%2B&type=mentor&page=1"
+        next_page_url = response.context_data["next_page_url"]
+        assert next_page_url == "?q=data%2B&type=mentor&page=3"
+        last_page_url = response.context_data["last_page_url"]
+        assert last_page_url == "?q=data%2B&type=mentor&page=last"
+
+        response = c.get(f"/search/{prev_page_url}")
+        assert response.status_code == 200
+        response = c.get(f"/search/{next_page_url}")
+        assert response.status_code == 200
+        response = c.get(f"/search/{last_page_url}")
+        assert response.status_code == 200
+
 
 class SkillTest(TestCase):
     def setUp(self):
