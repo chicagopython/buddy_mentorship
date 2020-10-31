@@ -25,6 +25,7 @@ class BuddyRequest(models.Model):
         NEW = 0
         ACCEPTED = 1
         REJECTED = 2
+        COMPLETED = 3
 
     class RequestType(models.IntegerChoices):
         REQUEST = 0
