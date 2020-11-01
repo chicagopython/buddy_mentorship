@@ -25,6 +25,9 @@
         {% if request.status == 1 %}
           <span class="badge badge-success badge-pill">Accepted</span>
         {% endif %}
+        {% if request.status == 3 %}
+          <span class="badge badge-primary badge-pill">Completed</span>
+        {% endif %}
       </li>
     {% endif %}
   {% endfor %}
@@ -39,17 +42,22 @@
     <li> You have not sent any requests </li>
   {% endif %}
   {% for request in requests_sent %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="/requests/{{ request.id }}">
-        To: {{ request.requestee.first_name }} {{ request.requestee.last_name }}
-      </a>
+    {% if request.status != 2 %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="/requests/{{ request.id }}">
+          To: {{ request.requestee.first_name }} {{ request.requestee.last_name }}
+        </a>
       {% if request.status == 0 %}
         <span class="badge badge-secondary badge-pill">Pending</span>
       {% endif %}
       {% if request.status == 1 %}
         <span class="badge badge-success badge-pill">Accepted</span>
       {% endif %}
+      {% if request.status == 3 %}
+        <span class="badge badge-primary badge-pill">Completed</span>
+      {% endif %}
     </li>
+    {% endif %}
   {% endfor %}
 </ul>
 
@@ -65,14 +73,17 @@
     {% if request.status != 2 %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <a href="/requests/{{ request.id }}">
-          From: {{ request.requestor.first_name }} {{ request.requestor.last_name }}
+          To: {{ request.requestee.first_name }} {{ request.requestee.last_name }}
         </a>
-        {% if request.status == 0 %}
-          <span class="badge badge-secondary badge-pill">Pending</span>
-        {% endif %}
-        {% if request.status == 1 %}
-          <span class="badge badge-success badge-pill">Accepted</span>
-        {% endif %}
+      {% if request.status == 0 %}
+        <span class="badge badge-secondary badge-pill">Pending</span>
+      {% endif %}
+      {% if request.status == 1 %}
+        <span class="badge badge-success badge-pill">Accepted</span>
+      {% endif %}
+      {% if request.status == 3 %}
+        <span class="badge badge-primary badge-pill">Completed</span>
+      {% endif %}
       </li>
     {% endif %}
   {% endfor %}
@@ -87,17 +98,22 @@
     <li> You have not sent any offers </li>
   {% endif %}
   {% for request in offers_sent %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="/requests/{{ request.id }}">
-        To: {{ request.requestee.first_name }} {{ request.requestee.last_name }}
-      </a>
+    {% if request.status != 2 %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="/requests/{{ request.id }}">
+          To: {{ request.requestee.first_name }} {{ request.requestee.last_name }}
+        </a>
       {% if request.status == 0 %}
         <span class="badge badge-secondary badge-pill">Pending</span>
       {% endif %}
       {% if request.status == 1 %}
         <span class="badge badge-success badge-pill">Accepted</span>
       {% endif %}
-    </li>
+      {% if request.status == 3 %}
+        <span class="badge badge-primary badge-pill">Completed</span>
+      {% endif %}
+      </li>
+    {% endif %}
   {% endfor %}
 </ul>
 

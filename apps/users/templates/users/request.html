@@ -108,6 +108,64 @@
               <a href="mailto:{{ buddy_request.requestee.email }}">
                 {{ buddy_request.requestee.email }}</a>.</p>
               {% endif %}
+              <p>
+                Has your mentorship run its course?
+                <form action="{% url 'complete_mentorship' buddy_request.id %}" method="post" id="complete_mentorship">
+                  {% csrf_token %}
+                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#completeModal">Complete Mentorship</button>
+              </p>
+
+              <div class="modal fade" id="completeModal" tabindex="-1" role="dialog" aria-labelledby="completeModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="acceptModalLabel">
+                        Complete Mentorship
+                      </h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      Please confirm you want to complete this mentorship.
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary" name="status" value="complete">Complete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if buddy_request.status == 3 %}
+    <div class="row mb-2">
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <div class="card-title h5">
+              <span class="badge badge-primary">
+                Mentorship Complete
+              </span>
+            </div>
+            <div class="card-text">
+              {% if user == buddy_request.requestee %}
+              Reconnect with {{buddy_request.requestor.first_name}} at
+              <a href="mailto:{{ buddy_request.requestor.email }}">
+                {{ buddy_request.requestor.email }}</a>.</p>
+              {% endif %}
+              {% if user == buddy_request.requestor %}
+              Reconnect with {{buddy_request.requestee.first_name}} at
+              <a href="mailto:{{ buddy_request.requestee.email }}">
+                {{ buddy_request.requestee.email }}</a>.</p>
+              {% endif %}
             </div>
           </div>
         </div>

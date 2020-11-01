@@ -10,6 +10,7 @@ from django.test import (
 )
 from django.core import mail
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.db import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
 
@@ -23,8 +24,6 @@ from .views import (
 )
 
 from apps.users.models import User
-
-from django.db import IntegrityError
 
 
 class CreateBuddyRequestTest(TransactionTestCase):
@@ -591,7 +590,6 @@ class SendBuddyRequestTest(TestCase):
         buddy_request.status = BuddyRequest.Status.REJECTED
         buddy_request.save()
 
-        # right now this doesn't do anything
         assert len(mail.outbox) == 1
 
     def test_complete_request(self):

@@ -334,6 +334,22 @@ def update_request(request, buddy_request_id):
     return redirect("request_detail", request_id=buddy_request_id)
 
 
+@login_required(login_url="login")
+def complete_mentorship(request, buddy_request_id):
+    buddy_request = BuddyRequest.objects.get(id=buddy_request_id)
+    if (
+        request.user != buddy_request.requestee
+        and request.user != buddy_request.requestor
+    ):
+        return HttpResponseForbidden("You cannot mark this mentorship complete.")
+    if request.method != "POST":
+        return HttpResponseForbidden("Error - page accessed incorrectly")
+    if request.POST["status"] == "complete":
+        buddy_request.status = 3
+    buddy_request.save()
+    return redirect("request_detail", request_id=buddy_request_id)
+
+
 class Search(LoginRequiredMixin, ListView):
     login_url = "login"
 

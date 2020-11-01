@@ -38,6 +38,11 @@ urlpatterns = [
         views.update_request,
         name="update_request",
     ),
+    path(
+        "complete/<int:buddy_request_id>",
+        views.complete_mentorship,
+        name="complete_mentorship",
+    ),
     path("social/", include("social_django.urls", namespace="social")),
     path("search/", views.Search.as_view(), name="search"),
     path(
