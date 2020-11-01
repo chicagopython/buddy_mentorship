@@ -55,6 +55,8 @@ class BuddyRequest(models.Model):
         super().save(*args, **kwargs)
 
         request_type_str = ["Request", "Offer"][int(self.request_type)]
+        requestor_profile = Profile.objects.get(user=self.requestor)
+        requestee_profile = Profile.objects.get(user=self.requestee)
 
         def email_context(self):
             return {
@@ -62,13 +64,17 @@ class BuddyRequest(models.Model):
                 "requestor": self.requestor,
                 "requestee": self.requestee,
                 "message": self.message,
-                "profile_url": reverse("profile", args=[profile.id]),
+                "requestor_profile_url": reverse(
+                    "profile", args=[requestor_profile.id]
+                ),
+                "requestee_profile_url": reverse(
+                    "profile", args=[requestee_profile.id]
+                ),
                 "request_detail_url": reverse("request_detail", args=[self.id]),
                 "APP_URL": os.getenv("APP_URL"),
             }
 
         if self.status == 0:
-            profile = Profile.objects.get(user=self.requestor)
             html_message = render_to_string(
                 "buddy_mentorship/email/new_request.html", context=email_context(self)
             )
@@ -83,8 +89,7 @@ class BuddyRequest(models.Model):
             )
 
         elif self.status == 1:
-            profile = Profile.objects.get(user=self.requestee)
-            profile_url = reverse("profile", args=[profile.id])
+            requestee_profile_url = reverse("profile", args=[requestee_profile.id])
             html_message = render_to_string(
                 "buddy_mentorship/email/request_accepted.html",
                 context=email_context(self),
@@ -100,6 +105,35 @@ class BuddyRequest(models.Model):
 
         elif self.status == 2:
             pass
+
+        elif self.status == 3:
+            requestor_profile_url = reverse("profile", args=[requestor_profile.id])
+            requestee_html_message = render_to_string(
+                "buddy_mentorship/email/requestee_mentorship_completed.html",
+                context=email_context(self),
+            )
+            requestee_plain_message = strip_tags(requestee_html_message)
+            send_mail(
+                f"ChiPy Mentorship Completed",
+                requestee_plain_message,
+                settings.EMAIL_ADDRESS,
+                [self.requestee.email],
+                html_message=requestee_html_message,
+            )
+
+            requestee_profile_url = reverse("profile", args=[requestee_profile.id])
+            requestor_html_message = render_to_string(
+                "buddy_mentorship/email/requestor_mentorship_completed.html",
+                context=email_context(self),
+            )
+            requestor_plain_message = strip_tags(requestor_html_message)
+            send_mail(
+                f"ChiPy Mentorship Completed",
+                requestor_plain_message,
+                settings.EMAIL_ADDRESS,
+                [self.requestor.email],
+                html_message=requestor_html_message,
+            )
 
 
 class Profile(models.Model):

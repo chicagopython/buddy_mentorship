@@ -1,0 +1,6 @@
+{% extends 'buddy_mentorship/email/mentorship_completed.html'%}
+{% block name_link %}
+    <a href='{{APP_URL}}{{requestor_profile_url}}'>
+        {{requestor.first_name}} {{requestor.last_name}}
+    </a>
+{% endblock name_link %}

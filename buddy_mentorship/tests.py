@@ -598,15 +598,39 @@ class SendBuddyRequestTest(TestCase):
         c = Client()
         mentee = User.objects.get(email="mentee0@buddy.com")
         mentor = User.objects.get(email="mentor0@buddy.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        mentee_profile = Profile.objects.get(user=mentee)
         buddy_request = BuddyRequest.objects.create(
             requestor=mentee,
             requestee=mentor,
             request_type=BuddyRequest.RequestType.REQUEST,
+            status=BuddyRequest.Status.ACCEPTED,
         )
+
+        assert len(mail.outbox) == 1
+
         buddy_request.status = BuddyRequest.Status.COMPLETED
         buddy_request.save()
 
-        assert len
+        assert len(mail.outbox) == 3
+
+        email_to_mentor = mail.outbox[1]
+        assert email_to_mentor.subject == "ChiPy Mentorship Completed"
+        mentee_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
+        mentee_name = f"{mentee.first_name} {mentee.last_name}"
+        message_to_mentor = email_to_mentor.alternatives[0][0]
+        assert mentee_profile_link in message_to_mentor
+        assert mentee_name in message_to_mentor
+        assert mentor.email in email_to_mentor.recipients()
+
+        email_to_mentee = mail.outbox[2]
+        assert email_to_mentee.subject == "ChiPy Mentorship Completed"
+        mentor_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
+        mentor_name = f"{mentor.first_name} {mentor.last_name}"
+        message_to_mentee = email_to_mentee.alternatives[0][0]
+        assert mentor_profile_link in message_to_mentee
+        assert mentor_name in message_to_mentee
+        assert mentee.email in email_to_mentee.recipients()
 
 
 class SendBuddyOfferTest(TestCase):
