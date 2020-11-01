@@ -109,7 +109,7 @@
                 {{ buddy_request.requestee.email }}</a>.</p>
               {% endif %}
               <p>
-                Has your mentorship run its course?
+                <b>Have you completed your mentorship?</b>
                 <form action="{% url 'complete_mentorship' buddy_request.id %}" method="post" id="complete_mentorship">
                   {% csrf_token %}
                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#completeModal">Complete Mentorship</button>
