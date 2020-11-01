@@ -733,6 +733,44 @@ class SendBuddyOfferTest(TestCase):
         # right now this doesn't do anything
         assert len(mail.outbox) == 1
 
+    def test_complete_offer(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        mentee_profile = Profile.objects.get(user=mentee)
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            request_type=BuddyRequest.RequestType.OFFER,
+            status=BuddyRequest.Status.ACCEPTED,
+        )
+
+        assert len(mail.outbox) == 1
+
+        buddy_request.status = BuddyRequest.Status.COMPLETED
+        buddy_request.save()
+
+        assert len(mail.outbox) == 3
+
+        email_to_mentee = mail.outbox[1]
+        assert email_to_mentee.subject == "ChiPy Mentorship Completed"
+        mentor_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
+        mentor_name = f"{mentor.first_name} {mentor.last_name}"
+        message_to_mentee = email_to_mentee.alternatives[0][0]
+        assert mentor_profile_link in message_to_mentee
+        assert mentor_name in message_to_mentee
+        assert mentee.email in email_to_mentee.recipients()
+
+        email_to_mentor = mail.outbox[2]
+        assert email_to_mentor.subject == "ChiPy Mentorship Completed"
+        mentee_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
+        mentee_name = f"{mentee.first_name} {mentee.last_name}"
+        message_to_mentor = email_to_mentor.alternatives[0][0]
+        assert mentee_profile_link in message_to_mentor
+        assert mentee_name in message_to_mentor
+        assert mentor.email in email_to_mentor.recipients()
+
 
 class BuddyRequestModelTest(TestCase):
     def setUp(self):
@@ -1265,6 +1303,70 @@ class SkillTest(TestCase):
         )
         exp = Experience.objects.get(skill=new_skill_2, profile=profile)
         assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 4
+
+
+class CompleteMentorshipViewTest(TestCase):
+    def setUp(self):
+        skill1 = Skill.objects.create(skill="pandas")
+
+        mentor = create_test_users(
+            1,
+            "mentor",
+            [{"skill": skill1, "level": 2, "exp_type": Experience.Type.CAN_HELP}],
+            looking_for_mentees=True,
+            looking_for_mentors=False,
+        )[0]
+
+        mentee = create_test_users(
+            1,
+            "mentee",
+            [{"skill": skill1, "level": 3, "exp_type": Experience.Type.WANT_HELP}],
+            looking_for_mentors=True,
+            looking_for_mentees=False,
+        )[0]
+
+        create_test_users(
+            1, "someone", [],
+        )
+
+        BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            message="",
+            request_type=BuddyRequest.RequestType.REQUEST,
+            status=BuddyRequest.Status.ACCEPTED
+        )
+
+    def test_requestor_complete_mentorship(self):
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        request = BuddyRequest.objects.get(requestor=mentee)
+        c = Client()
+        c.force_login(mentee)
+        response = c.post(f"/complete/{request.id}", {"status": "complete",})
+        assert response.status_code == 302
+        request = BuddyRequest.objects.get(requestor=mentee)
+        assert request.status == BuddyRequest.Status.COMPLETED
+
+    def test_requestee_complete_mentorship(self):
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        request = BuddyRequest.objects.get(requestee=mentor)
+        c = Client()
+        c.force_login(mentor)
+        response = c.post(f"/complete/{request.id}", {"status": "complete",})
+        assert response.status_code == 302
+        request = BuddyRequest.objects.get(requestee=mentor)
+        assert request.status == BuddyRequest.Status.COMPLETED
+    
+    def test_unauthorized_complete_mentorship(self):
+        someone = User.objects.get(email="someone0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        request = BuddyRequest.objects.get(requestee=mentor)
+        c = Client()
+        c.force_login(someone)
+        response = c.post(f"/complete/{request.id}", {"status": "complete",})
+        assert response.status_code == 403
+        request = BuddyRequest.objects.get(requestee=mentor)
+        assert request.status == BuddyRequest.Status.ACCEPTED
 
 
 def create_test_users(
