@@ -9,5 +9,5 @@ function Welcome(props) {
 const element = <Welcome name="world" />;
 ReactDOM.render(
     element,
-    document.getElementById("new_react")
+    document.getElementById('react')
 );
