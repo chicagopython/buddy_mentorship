@@ -92,7 +92,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "buddy_mentorship",
         "USER": "buddy_mentorship",
-        "HOST": "127.0.0.1",
+        "HOST": os.getenv("DATABASE_URL"),
     }
 }
 

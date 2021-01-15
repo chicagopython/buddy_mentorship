@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: chipymentorship-webserver
+    command: "python manage.py runserver 0.0.0.0:8000"
+    environment:
+      DJANGO_LOG_LEVEL: DEBUG
+      PORT: 8000
+
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - chipy
+    depends_on:
+      - db
+
+  migration:
+    build: .
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; python manage.py migrate'
+    volumes:
+      - .:/app
+    networks:
+      - chipy
+    depends_on:
+      - db
+
+  db:
+    image: postgres:12.3
+    container_name: chipymentorship-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: buddy_mentorship
+      POSTGRES_DB: buddy_mentorship
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buddy_mentorship"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chipy
+
+networks:
+  chipy:
+    driver: bridge

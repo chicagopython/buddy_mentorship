@@ -12,6 +12,6 @@ import os
 from django.core.wsgi import get_wsgi_application
 from dotenv import load_dotenv
 
-load_dotenv(override=True, verbose=True)
+load_dotenv(override=False)
 
 application = get_wsgi_application()

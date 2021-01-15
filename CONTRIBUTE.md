@@ -94,43 +94,15 @@ Each of these abbreviated workflow steps has additional instructions in sections
 
 ## Set up a Development Environment
 
-1. Ensure you you have `pipenv` [installed](https://pipenv.kennethreitz.org/en/latest/#install-pipenv-today)
-2. Install the dependencies
+1. Create your .env file with your local environment variables by copying `.env.dist` to `.env` and filling in the appropriate settings
+2. Install [docker](https://docs.docker.com/get-docker/)
+3. Run the app with `docker-compose up -d`
+4. Make sure to configure your [editor to use black](https://github.com/psf/black#editor-integration)
+5. Open `http://127.0.0.1:8000/` in your browser
+6. Optional: Create a local superuser (interactively)
    ```bash
-   pipenv install --dev
+   docker-compose exec web python manage.py createsuperuser
    ```
-   If you run into an error installing postgres (psycopg2) on Mac, you may need to do one/more of the following:
-   - Confirm you have CommandLineTools installed, or install them with `xcode-select --install`
-   - Reset CommandLineTools' settings with `xcode-select --reset`
-   - Run the following command instead of the above one:
-   ```bash
-   env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pipenv install --dev
-   ```
-3. Make sure to configure your [editor to use black](https://github.com/psf/black#editor-integration)
-4. Ensure you have a local instance of postgres running that matches the settings in `buddy_mentorship/settings/local.py`.
-   If you have docker, you can achieve this by running
-   ```bash
-   docker run --name postgres -e POSTGRES_USER=buddy_mentorship  -e POSTGRES_DB='buddy_mentorship' -p 5432:5432 -d postgres
-   ```
-5. Optional: Confirm access to the database by running
-   ```bash
-   docker exec -it my-postgres bash
-   psql -U buddy_mentorship
-   ```
-6. Create your .env file with your local environment variables by copying `.env.dist` to `.env` and filling in the appropriate settings
-7. Run all migrations
-   ```bash
-   python manage.py migrate --settings=buddy_mentorship.settings.local
-   ```
-8. Run the local server
-   ```bash
-   python manage.py runserver --settings=buddy_mentorship.settings.local
-   ```
-9. Open `http://127.0.0.1:8000/` in your browser
-10. Optional: Create a local superuser (interactively)
-    ```bash
-    python manage.py createsuperuser --settings=buddy_mentorship.settings.local
-    ```
 
 ## Create a Feature Branch
 
