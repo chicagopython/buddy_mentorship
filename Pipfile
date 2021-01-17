@@ -20,6 +20,7 @@ django-heroku = "*"
 gunicorn = "*"
 django-maintenance-mode = "*"
 django-autocomplete-light = "*"
+django-webpack-loader = "*"
 
 [requires]
 python_version = "3.7"
