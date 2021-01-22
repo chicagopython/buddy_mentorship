@@ -12,7 +12,7 @@ WORKDIR /app
 
 COPY . /app/
 
-RUN pipenv install --system --deploy
+RUN pipenv install --dev --system --deploy
 
 RUN useradd -m chipyuser
 
