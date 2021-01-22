@@ -46,6 +46,15 @@ services:
     networks:
       - chipy
 
+  workspace:
+    build: .
+    volumes:
+      - .:/app
+    networks:
+      - chipy
+    depends_on:
+      - db
+
 networks:
   chipy:
     driver: bridge
