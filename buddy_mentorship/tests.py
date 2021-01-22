@@ -10,6 +10,7 @@ from django.test import (
 )
 from django.core import mail
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.db import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
 
@@ -23,8 +24,6 @@ from .views import (
 )
 
 from apps.users.models import User
-
-from django.db import IntegrityError
 
 
 class CreateBuddyRequestTest(TransactionTestCase):
@@ -400,56 +399,29 @@ class SendBuddyRequestTest(TestCase):
             Skill.objects.create(skill="Flask"),
         )
 
-        mentor = User.objects.create_user(
-            first_name="Frank", last_name="Mackey", email="mentor@user.com"
-        )
-
-        mentor_profile = Profile.objects.create(
-            user=mentor,
-            bio="Experienced Undercover detective.",
+        create_test_users(
+            1,
+            "mentor",
+            [{"skill": skill1, "level": 2, "exp_type": Experience.Type.CAN_HELP}],
             looking_for_mentees=True,
             looking_for_mentors=False,
         )
 
-        Experience.objects.create(
-            profile=mentor_profile,
-            skill=skill1,
-            level=2,
-            exp_type=Experience.Type.CAN_HELP,
-        )
-
-        mentee = User.objects.create_user(
-            first_name="Cassie", last_name="Maddox", email="mentee@user.com"
-        )
-
-        mentee_profile = Profile.objects.create(
-            user=mentee,
-            bio="Aspiring Undercover detective with background in Murder.",
+        create_test_users(
+            1,
+            "mentee",
+            [{"skill": skill1, "level": 3, "exp_type": Experience.Type.WANT_HELP}],
             looking_for_mentors=True,
             looking_for_mentees=False,
         )
 
-        Experience.objects.create(
-            profile=mentee_profile,
-            skill=skill1,
-            level=3,
-            exp_type=Experience.Type.WANT_HELP,
-        )
-
-        someone = User.objects.create_user(
-            first_name="Rob", last_name="Ryan", email="someone@user.com"
-        )
-
-        someone_profile = Profile.objects.create(
-            user=someone,
-            bio="You ever see somebody ruin their own life?",
-            looking_for_mentors=False,
-            looking_for_mentees=False,
+        create_test_users(
+            1, "someone", [], looking_for_mentors=False, looking_for_mentees=False,
         )
 
     def test_existing_requests(self):
-        mentee = User.objects.get(email="mentee@user.com")
-        mentor = User.objects.get(email="mentor@user.com")
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
 
         assert not existing_requests(mentee, mentor)
 
@@ -474,9 +446,9 @@ class SendBuddyRequestTest(TestCase):
         assert existing_requests(mentee, mentor)
 
     def test_required_experiences(self):
-        mentee = User.objects.get(email="mentee@user.com")
-        mentor = User.objects.get(email="mentor@user.com")
-        someone = User.objects.get(email="someone@user.com")
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        someone = User.objects.get(email="someone0@buddy.com")
         assert required_experiences(mentee, mentor)
         assert not required_experiences(mentor, mentee)
         assert not required_experiences(mentee, someone)
@@ -485,11 +457,11 @@ class SendBuddyRequestTest(TestCase):
         assert not required_experiences(mentor, someone)
 
     def test_can_request_as_mentor(self):
-        mentee = User.objects.get(email="mentee@user.com")
+        mentee = User.objects.get(email="mentee0@buddy.com")
         mentee_profile = Profile.objects.get(user=mentee)
-        mentor = User.objects.get(email="mentor@user.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
         mentor_profile = Profile.objects.get(user=mentor)
-        someone = User.objects.get(email="someone@user.com")
+        someone = User.objects.get(email="someone0@buddy.com")
         assert can_request_as_mentor(mentee, mentor)
 
         mentor.is_active = False
@@ -514,11 +486,11 @@ class SendBuddyRequestTest(TestCase):
         buddy_request.delete()
 
     def test_can_offer_to_mentor(self):
-        mentee = User.objects.get(email="mentee@user.com")
+        mentee = User.objects.get(email="mentee0@buddy.com")
         mentee_profile = Profile.objects.get(user=mentee)
-        mentor = User.objects.get(email="mentor@user.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
         mentor_profile = Profile.objects.get(user=mentor)
-        someone = User.objects.get(email="someone@user.com")
+        someone = User.objects.get(email="someone0@buddy.com")
         assert can_offer_to_mentor(mentor, mentee)
 
         mentee.is_active = False
@@ -544,8 +516,8 @@ class SendBuddyRequestTest(TestCase):
 
     def test_send_request(self):
         c = Client()
-        mentee = User.objects.get(email="mentee@user.com")
-        mentor = User.objects.get(email="mentor@user.com")
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
         mentee_profile = Profile.objects.get(user=mentee)
         assert not BuddyRequest.objects.filter(
             requestor=mentee,
@@ -585,8 +557,8 @@ class SendBuddyRequestTest(TestCase):
 
     def test_accept_request(self):
         c = Client()
-        mentee = User.objects.get(email="mentee@user.com")
-        mentor = User.objects.get(email="mentor@user.com")
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
         mentor_profile = Profile.objects.get(user=mentor)
         buddy_request = BuddyRequest.objects.create(
             requestor=mentee,
@@ -608,19 +580,55 @@ class SendBuddyRequestTest(TestCase):
 
     def test_reject_request(self):
         c = Client()
-        mentee = User.objects.get(email="mentee@user.com")
-        mentor = User.objects.get(email="mentor@user.com")
-        mentor_profile = Profile.objects.get(user=mentor)
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
         buddy_request = BuddyRequest.objects.create(
             requestor=mentee,
             requestee=mentor,
             request_type=BuddyRequest.RequestType.REQUEST,
         )
-        buddy_request.status = 2
+        buddy_request.status = BuddyRequest.Status.REJECTED
         buddy_request.save()
 
-        # right now this doesn't do anything
         assert len(mail.outbox) == 1
+
+    def test_complete_request(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        mentee_profile = Profile.objects.get(user=mentee)
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            request_type=BuddyRequest.RequestType.REQUEST,
+            status=BuddyRequest.Status.ACCEPTED,
+        )
+
+        assert len(mail.outbox) == 1
+
+        buddy_request.status = BuddyRequest.Status.COMPLETED
+        buddy_request.save()
+
+        assert len(mail.outbox) == 3
+
+        email_to_mentor = mail.outbox[1]
+        assert email_to_mentor.subject == "ChiPy Mentorship Completed"
+        mentee_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
+        mentee_name = f"{mentee.first_name} {mentee.last_name}"
+        message_to_mentor = email_to_mentor.alternatives[0][0]
+        assert mentee_profile_link in message_to_mentor
+        assert mentee_name in message_to_mentor
+        assert mentor.email in email_to_mentor.recipients()
+
+        email_to_mentee = mail.outbox[2]
+        assert email_to_mentee.subject == "ChiPy Mentorship Completed"
+        mentor_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
+        mentor_name = f"{mentor.first_name} {mentor.last_name}"
+        message_to_mentee = email_to_mentee.alternatives[0][0]
+        assert mentor_profile_link in message_to_mentee
+        assert mentor_name in message_to_mentee
+        assert mentee.email in email_to_mentee.recipients()
 
 
 class SendBuddyOfferTest(TestCase):
@@ -724,6 +732,44 @@ class SendBuddyOfferTest(TestCase):
 
         # right now this doesn't do anything
         assert len(mail.outbox) == 1
+
+    def test_complete_offer(self):
+        c = Client()
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        mentor_profile = Profile.objects.get(user=mentor)
+        mentee_profile = Profile.objects.get(user=mentee)
+        buddy_request = BuddyRequest.objects.create(
+            requestor=mentor,
+            requestee=mentee,
+            request_type=BuddyRequest.RequestType.OFFER,
+            status=BuddyRequest.Status.ACCEPTED,
+        )
+
+        assert len(mail.outbox) == 1
+
+        buddy_request.status = BuddyRequest.Status.COMPLETED
+        buddy_request.save()
+
+        assert len(mail.outbox) == 3
+
+        email_to_mentee = mail.outbox[1]
+        assert email_to_mentee.subject == "ChiPy Mentorship Completed"
+        mentor_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentor_profile.id])}'>"
+        mentor_name = f"{mentor.first_name} {mentor.last_name}"
+        message_to_mentee = email_to_mentee.alternatives[0][0]
+        assert mentor_profile_link in message_to_mentee
+        assert mentor_name in message_to_mentee
+        assert mentee.email in email_to_mentee.recipients()
+
+        email_to_mentor = mail.outbox[2]
+        assert email_to_mentor.subject == "ChiPy Mentorship Completed"
+        mentee_profile_link = f"<a href='{os.getenv('APP_URL')}{reverse('profile',args=[mentee_profile.id])}'>"
+        mentee_name = f"{mentee.first_name} {mentee.last_name}"
+        message_to_mentor = email_to_mentor.alternatives[0][0]
+        assert mentee_profile_link in message_to_mentor
+        assert mentee_name in message_to_mentor
+        assert mentor.email in email_to_mentor.recipients()
 
 
 class BuddyRequestModelTest(TestCase):
@@ -1292,6 +1338,70 @@ class SkillTest(TestCase):
         )
         exp = Experience.objects.get(skill=new_skill_2, profile=profile)
         assert exp.exp_type == Experience.Type.CAN_HELP and exp.level == 4
+
+
+class CompleteMentorshipViewTest(TestCase):
+    def setUp(self):
+        skill1 = Skill.objects.create(skill="pandas")
+
+        mentor = create_test_users(
+            1,
+            "mentor",
+            [{"skill": skill1, "level": 2, "exp_type": Experience.Type.CAN_HELP}],
+            looking_for_mentees=True,
+            looking_for_mentors=False,
+        )[0]
+
+        mentee = create_test_users(
+            1,
+            "mentee",
+            [{"skill": skill1, "level": 3, "exp_type": Experience.Type.WANT_HELP}],
+            looking_for_mentors=True,
+            looking_for_mentees=False,
+        )[0]
+
+        create_test_users(
+            1, "someone", [],
+        )
+
+        BuddyRequest.objects.create(
+            requestor=mentee,
+            requestee=mentor,
+            message="",
+            request_type=BuddyRequest.RequestType.REQUEST,
+            status=BuddyRequest.Status.ACCEPTED
+        )
+
+    def test_requestor_complete_mentorship(self):
+        mentee = User.objects.get(email="mentee0@buddy.com")
+        request = BuddyRequest.objects.get(requestor=mentee)
+        c = Client()
+        c.force_login(mentee)
+        response = c.post(f"/complete/{request.id}", {"status": "complete",})
+        assert response.status_code == 302
+        request = BuddyRequest.objects.get(requestor=mentee)
+        assert request.status == BuddyRequest.Status.COMPLETED
+
+    def test_requestee_complete_mentorship(self):
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        request = BuddyRequest.objects.get(requestee=mentor)
+        c = Client()
+        c.force_login(mentor)
+        response = c.post(f"/complete/{request.id}", {"status": "complete",})
+        assert response.status_code == 302
+        request = BuddyRequest.objects.get(requestee=mentor)
+        assert request.status == BuddyRequest.Status.COMPLETED
+    
+    def test_unauthorized_complete_mentorship(self):
+        someone = User.objects.get(email="someone0@buddy.com")
+        mentor = User.objects.get(email="mentor0@buddy.com")
+        request = BuddyRequest.objects.get(requestee=mentor)
+        c = Client()
+        c.force_login(someone)
+        response = c.post(f"/complete/{request.id}", {"status": "complete",})
+        assert response.status_code == 403
+        request = BuddyRequest.objects.get(requestee=mentor)
+        assert request.status == BuddyRequest.Status.ACCEPTED
 
 
 def create_test_users(
