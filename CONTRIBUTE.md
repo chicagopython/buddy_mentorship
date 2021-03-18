@@ -96,13 +96,22 @@ Each of these abbreviated workflow steps has additional instructions in sections
 
 1. Create your .env file with your local environment variables by copying `.env.dist` to `.env` and filling in the appropriate settings
 2. Install [docker](https://docs.docker.com/get-docker/)
-3. Run the app with `docker-compose up -d`
+3. Run the app with `make start`
 4. Make sure to configure your [editor to use black](https://github.com/psf/black#editor-integration)
 5. Open `http://127.0.0.1:8000/` in your browser
 6. Optional: Create a local superuser (interactively)
-   ```bash
-   docker-compose exec web python manage.py createsuperuser
    ```
+    make superuser
+   ```
+
+## Running Tests
+
+Before submiting a PR please write any relevant new tests and make sure all tests pass. You can run them
+locally with:
+```bash
+make test
+```
+
 
 ## Create a Feature Branch
 
