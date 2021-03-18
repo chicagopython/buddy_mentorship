@@ -104,6 +104,15 @@ Each of these abbreviated workflow steps has additional instructions in sections
     make superuser
    ```
 
+## Running Tests
+
+Before submiting a PR please write any relevant new tests and make sure all tests pass. You can run them
+locally with:
+```bash
+make test
+```
+
+
 ## Create a Feature Branch
 
 To add a new feature, you will create every feature branch off of the master branch:
