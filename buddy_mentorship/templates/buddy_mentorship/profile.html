@@ -217,7 +217,7 @@
                             <p><button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="collapse" data-target="#requestForm">Request</button></p>
                             <form class="collapse" id="requestForm" action="{% url "send_request" profile.user.uuid %}" method="post">
                                 {% csrf_token %}
-                                <p><textarea class="form-control" id="requestMessage" name="message" rows="3">Hi! Will you be my Python mentor?</textarea></p>
+                                <p><textarea class="form-control" id="requestMessage" name="message" rows="3">Hi [mentor], it looks like you've got experience with [skill], which I'm looking to get better at. My goal is to [complete a project / understand this concept / put together a talk / other goal]. Is that something you'd be interested in helping mentor me through?</textarea></p>
                                 <p><button type="submit" class="btn btn-primary btn-block" form="requestForm">Submit Request</button></p>
                                 <input type="hidden" name="request_type" value={{ request_type.REQUEST }}>
                             </form>
@@ -252,7 +252,7 @@
                         <p><button type="button" class="btn btn-outline-primary btn-lg btn-block" data-toggle="collapse" data-target="#offerForm">Offer</button></p>
                         <form class="collapse" id="offerForm" action="{% url "send_request" profile.user.uuid %}" method="post">
                             {% csrf_token %}
-                            <p><textarea class="form-control" id="requestMessage" name="message" rows="3">Hi! I would like to be your Python mentor.</textarea></p>
+                            <p><textarea class="form-control" id="requestMessage" name="message" rows="3">Hi [mentee], I see you're looking for mentors that can help you with [skill]. I have [kind of experience] with [skill] and think I could help you. Would you be interested in being my mentee?</textarea></p>
                             <p><button type="submit" class="btn btn-primary btn-block" form="offerForm">Submit Offer</button></p>
                             <input type="hidden" name="request_type" value={{ request_type.OFFER }}>
                         </form>
