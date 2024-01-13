@@ -374,7 +374,7 @@ class Search(LoginRequiredMixin, ListView):
             ).exclude(user=self.request.user)
 
         query_text = self.request.GET.get("q", "")
-        if query_text is not "":
+        if query_text != "":
             search_vector = SearchVector(
                 "user__first_name",
                 "user__last_name",

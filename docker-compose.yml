@@ -7,6 +7,7 @@ services:
     command: "python manage.py runserver 0.0.0.0:8000"
     environment:
       DJANGO_LOG_LEVEL: DEBUG
+      DATABASE_URL: db
       PORT: 8000
     env_file: .env
     volumes:
@@ -23,6 +24,9 @@ services:
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; python manage.py migrate'
     volumes:
       - .:/app
+    env_file: .env
+    environment:
+      DATABASE_URL: db
     networks:
       - chipy
     depends_on:
