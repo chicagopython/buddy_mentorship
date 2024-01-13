@@ -1,0 +1,1 @@
+web: gunicorn buddy_mentorship.wsgi --pythonpath buddy_mentorship --log-file -
