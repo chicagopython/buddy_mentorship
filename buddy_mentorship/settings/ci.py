@@ -12,3 +12,6 @@ DATABASES = {
 
 CHROME_HEADLESS = True
 CHROME_SANDBOX = False
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = "secretinci"

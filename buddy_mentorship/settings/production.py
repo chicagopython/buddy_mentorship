@@ -3,8 +3,6 @@ import os
 import django_heroku
 from .base import *
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-
 DEBUG = os.getenv("DEBUG_MODE") == "true"
 
 # Database
